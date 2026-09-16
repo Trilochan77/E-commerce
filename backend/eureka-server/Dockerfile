@@ -4,6 +4,6 @@ COPY . .
 RUN mvn -q -pl eureka-server -am -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/eureka-server/target/*.jar app.jar
-EXPOSE 8761 8080 8081 8082 8083 8084 8085 8086 8087
+COPY --from=build /app/eureka-server/target/eureka-server.jar app.jar
+EXPOSE 8761
 ENTRYPOINT ["java","-jar","app.jar"]
