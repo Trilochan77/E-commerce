@@ -1,0 +1,59 @@
+{
+  "info": {
+    "name": "ECom Phase-0",
+    "_postman_id": "ecom-phase0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway", "value": "http://localhost:8080" },
+    { "key": "jwt", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Infra health",
+      "item": [
+        {
+          "name": "Eureka dashboard",
+          "request": { "method": "GET", "url": "http://localhost:8761" }
+        },
+        {
+          "name": "Gateway actuator health",
+          "request": { "method": "GET", "url": "{{gateway}}/actuator/health" }
+        },
+        {
+          "name": "Elasticsearch health",
+          "request": { "method": "GET", "url": "http://localhost:9200/_cluster/health" }
+        }
+      ]
+    },
+    {
+      "name": "Auth (Phase-1, will 404 until user-service exists)",
+      "item": [
+        {
+          "name": "Register customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/users/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"John Doe\",\"email\":\"john@example.com\",\"password\":\"John@123\"}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/users/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"john@example.com\",\"password\":\"John@123\"}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
