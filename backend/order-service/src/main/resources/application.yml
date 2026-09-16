@@ -1,0 +1,30 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: order-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/ecom}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+product-service:
+  url: ${PRODUCT_SERVICE_URL:http://localhost:8082}
+
+recommendation:
+  url: ${RECOMMENDATION_URL:http://localhost:8084}
+
+reward:
+  point-value-rupees: 1
+  max-redeem-percent: 20
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

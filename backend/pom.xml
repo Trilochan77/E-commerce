@@ -14,6 +14,12 @@
     <module>common-lib</module>
     <module>eureka-server</module>
     <module>api-gateway</module>
+    <module>user-service</module>
+    <module>product-service</module>
+    <module>search-service</module>
+    <module>cart-service</module>
+    <module>order-service</module>
+    <module>recommendation-service</module>
   </modules>
 
   <properties>

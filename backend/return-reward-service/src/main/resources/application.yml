@@ -1,0 +1,31 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: return-reward-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/ecom}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+reward:
+  point-value-rupees: 1
+  point-rate: 1
+  return-window-days: 14
+  multipliers:
+    LIKE_NEW: 0.8
+    GOOD: 0.6
+    FAIR: 0.4
+    POOR: 0.1
+    NOT_ELIGIBLE: 0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

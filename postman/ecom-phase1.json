@@ -1,0 +1,132 @@
+{
+  "info": {
+    "name": "ECom Phase-1 core commerce",
+    "_postman_id": "ecom-phase1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway", "value": "http://localhost:8080" },
+    { "key": "userId", "value": "" },
+    { "key": "jwt", "value": "" },
+    { "key": "productId", "value": "P-1001" },
+    { "key": "orderId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/users/register",
+            "body": { "mode": "raw", "raw": "{\"name\":\"John Doe\",\"email\":\"john@example.com\",\"password\":\"John@123\"}" }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/users/login",
+            "body": { "mode": "raw", "raw": "{\"email\":\"john@example.com\",\"password\":\"John@123\"}" }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{gateway}}/api/users/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 Catalog + Search",
+      "item": [
+        { "name": "List products", "request": { "method": "GET", "url": "{{gateway}}/api/products" } },
+        { "name": "Get product", "request": { "method": "GET", "url": "{{gateway}}/api/products/{{productId}}" } },
+        { "name": "Search headphones", "request": { "method": "GET", "url": "{{gateway}}/api/search?q=headphones" } },
+        { "name": "Search filter+sort", "request": { "method": "GET", "url": "{{gateway}}/api/search?category=C-01&sort=price_asc&page=0&size=10" } },
+        { "name": "Reindex ES", "request": { "method": "POST", "url": "{{gateway}}/api/search/reindex" } }
+      ]
+    },
+    {
+      "name": "3 Cart",
+      "item": [
+        {
+          "name": "Add item",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/cart/{{userId}}/items",
+            "body": { "mode": "raw", "raw": "{\"productId\":\"{{productId}}\",\"quantity\":2}" }
+          }
+        },
+        { "name": "Get cart", "request": { "method": "GET", "url": "{{gateway}}/api/cart/{{userId}}" } },
+        {
+          "name": "Update qty",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/cart/{{userId}}/items/{{productId}}",
+            "body": { "mode": "raw", "raw": "{\"quantity\":1}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 Checkout + Orders",
+      "item": [
+        {
+          "name": "Checkout COD",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/orders/checkout",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"paymentMethod\":\"COD\",\"pointsToUse\":0}" }
+          }
+        },
+        {
+          "name": "Checkout with points",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/orders/checkout",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"paymentMethod\":\"UPI\",\"pointsToUse\":100}" }
+          }
+        },
+        {
+          "name": "Checkout FAIL (expect 402, no order)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/orders/checkout",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"paymentMethod\":\"FAIL\",\"pointsToUse\":0}" }
+          }
+        },
+        { "name": "Order history", "request": { "method": "GET", "url": "{{gateway}}/api/orders/user/{{userId}}" } },
+        { "name": "Order tracking", "request": { "method": "GET", "url": "{{gateway}}/api/orders/{{orderId}}" } }
+      ]
+    },
+    {
+      "name": "5 Admin product",
+      "item": [
+        {
+          "name": "Create product",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Role", "value": "ADMIN" }
+            ],
+            "url": "{{gateway}}/api/products",
+            "body": { "mode": "raw", "raw": "{\"name\":\"Test Keyboard\",\"description\":\"Mechanical\",\"price\":2499,\"categoryId\":\"C-01\",\"images\":[],\"stockQuantity\":20,\"eligibleForReturn\":true}" }
+          }
+        }
+      ]
+    }
+  ]
+}

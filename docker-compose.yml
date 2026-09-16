@@ -39,7 +39,8 @@ services:
 
   eureka-server:
     build:
-      context: ./backend/eureka-server
+      context: ./backend
+      dockerfile: ./eureka-server/Dockerfile
     container_name: ecom-eureka
     ports:
       - "8761:8761"
@@ -52,7 +53,8 @@ services:
 
   api-gateway:
     build:
-      context: ./backend/api-gateway
+      context: ./backend
+      dockerfile: ./api-gateway/Dockerfile
     container_name: ecom-gateway
     ports:
       - "8080:8080"
@@ -64,36 +66,120 @@ services:
       - eureka-server
     restart: unless-stopped
 
-  # ---- Phase 1+ services (uncomment as each is scaffolded) ----
-  # user-service:
-  #   build: { context: ./backend/user-service }
-  #   ports: ["8081:8081"]
-  #   environment:
-  #     - SERVER_PORT=8081
-  #     - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
-  #     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-  #     - JWT_SECRET=${JWT_SECRET:-change-me-dev-secret-min-32-chars-long}
-  #   depends_on: [mongo, eureka-server]
-  # product-service:
-  #   build: { context: ./backend/product-service }
-  #   ports: ["8082:8082"]
-  #   environment:
-  #     - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
-  #     - ELASTICSEARCH_URIS=http://elasticsearch:9200
-  # search-service:
-  #   build: { context: ./backend/search-service }
-  #   ports: ["8083:8083"]
-  # recommendation-service:
-  #   build: { context: ./backend/recommendation-service }
-  #   ports: ["8084:8084"]
-  # cart-service:
-  #   build: { context: ./backend/cart-service }
-  #   ports: ["8085:8085"]
-  # order-service:
-  #   build: { context: ./backend/order-service }
-  #   ports: ["8086:8086"]
+  # ---- Phase 1 services ----
+  user-service:
+    build:
+      context: ./backend
+      dockerfile: ./user-service/Dockerfile
+    container_name: ecom-user
+    ports: ["8081:8081"]
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - JWT_SECRET=${JWT_SECRET:-change-me-dev-secret-min-32-chars-long}
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: unless-stopped
+
+  product-service:
+    build:
+      context: ./backend
+      dockerfile: ./product-service/Dockerfile
+    container_name: ecom-product
+    ports: ["8082:8082"]
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
+      - ELASTICSEARCH_URIS=http://elasticsearch:9200
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: unless-stopped
+
+  search-service:
+    build:
+      context: ./backend
+      dockerfile: ./search-service/Dockerfile
+    container_name: ecom-search
+    ports: ["8083:8083"]
+    environment:
+      - SERVER_PORT=8083
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
+      - ELASTICSEARCH_URIS=http://elasticsearch:9200
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - RECOMMENDATION_URL=http://recommendation-service:8084
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: unless-stopped
+
+  cart-service:
+    build:
+      context: ./backend
+      dockerfile: ./cart-service/Dockerfile
+    container_name: ecom-cart
+    ports: ["8085:8085"]
+    environment:
+      - SERVER_PORT=8085
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - PRODUCT_SERVICE_URL=http://product-service:8082
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: unless-stopped
+
+  order-service:
+    build:
+      context: ./backend
+      dockerfile: ./order-service/Dockerfile
+    container_name: ecom-order
+    ports: ["8086:8086"]
+    environment:
+      - SERVER_PORT=8086
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - PRODUCT_SERVICE_URL=http://product-service:8082
+      - RECOMMENDATION_URL=http://recommendation-service:8084
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: unless-stopped
+
+  # ---- Phase 2 service ----
+  recommendation-service:
+    build:
+      context: ./backend
+      dockerfile: ./recommendation-service/Dockerfile
+    container_name: ecom-recommendation
+    ports: ["8084:8084"]
+    environment:
+      - SERVER_PORT=8084
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: unless-stopped
+
+  # ---- Phase 3+ (uncomment when scaffolded) ----
   # return-reward-service:
-  #   build: { context: ./backend/return-reward-service }
+  #   build: { context: ./backend, dockerfile: ./return-reward-service/Dockerfile }
   #   ports: ["8087:8087"]
 
 volumes:

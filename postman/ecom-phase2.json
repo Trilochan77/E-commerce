@@ -1,0 +1,124 @@
+{
+  "info": {
+    "name": "ECom Phase-2 recommendations",
+    "_postman_id": "ecom-phase2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway", "value": "http://localhost:8080" },
+    { "key": "userId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 Cold start (no activity → popularity fallback)",
+      "item": [
+        {
+          "name": "Recommendations fresh user",
+          "request": { "method": "GET", "url": "{{gateway}}/api/recommendations/{{userId}}?limit=5" }
+        }
+      ]
+    },
+    {
+      "name": "2 Log activity (VIEW + SEARCH)",
+      "item": [
+        {
+          "name": "Log VIEW P-1001",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/activity",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"type\":\"VIEW\",\"productId\":\"P-1001\"}" }
+          }
+        },
+        {
+          "name": "Log VIEW P-1001 again",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/activity",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"type\":\"VIEW\",\"productId\":\"P-1001\"}" }
+          }
+        },
+        {
+          "name": "Log SEARCH headphones",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/activity",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"type\":\"SEARCH\",\"keyword\":\"headphones\"}" }
+          }
+        },
+        {
+          "name": "Invalid type (expect 422)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/activity",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"type\":\"CLICK\",\"productId\":\"P-1001\"}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 Personalized recommendations",
+      "item": [
+        {
+          "name": "Recommendations after activity",
+          "request": { "method": "GET", "url": "{{gateway}}/api/recommendations/{{userId}}?limit=5" }
+        },
+        {
+          "name": "Browsing history",
+          "request": { "method": "GET", "url": "{{gateway}}/api/activity/history/{{userId}}?limit=10" }
+        }
+      ]
+    },
+    {
+      "name": "4 Purchase flow → recommendations update",
+      "item": [
+        {
+          "name": "Add P-1002 to cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/cart/{{userId}}/items",
+            "body": { "mode": "raw", "raw": "{\"productId\":\"P-1002\",\"quantity\":1}" }
+          }
+        },
+        {
+          "name": "Checkout COD",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/orders/checkout",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"paymentMethod\":\"COD\",\"pointsToUse\":0}" }
+          }
+        },
+        {
+          "name": "Recommendations after purchase (P-1002 excluded, C-01 boosted)",
+          "request": { "method": "GET", "url": "{{gateway}}/api/recommendations/{{userId}}?limit=5" }
+        },
+        {
+          "name": "Include purchased",
+          "request": { "method": "GET", "url": "{{gateway}}/api/recommendations/{{userId}}?limit=10&includePurchased=true" }
+        }
+      ]
+    },
+    {
+      "name": "5 Auto-logged SEARCH via search-service",
+      "item": [
+        {
+          "name": "Search with X-User-Id header",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "X-User-Id", "value": "{{userId}}" }],
+            "url": "{{gateway}}/api/search?q=laptop"
+          }
+        },
+        {
+          "name": "Browsing history still VIEW-only",
+          "request": { "method": "GET", "url": "{{gateway}}/api/activity/history/{{userId}}?limit=10" }
+        }
+      ]
+    }
+  ]
+}
