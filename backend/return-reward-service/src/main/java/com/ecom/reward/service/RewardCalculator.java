@@ -49,6 +49,6 @@ public class RewardCalculator {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Verified condition must be LIKE_NEW, GOOD, FAIR, POOR or NOT_ELIGIBLE");
     }
-    return (int) Math.floor(price * qty * multiplier(verifiedCondition) * pointRate);
+    return (int) Math.floor(price * qty * multiplier(verifiedCondition) * props.getPointRate());
   }
 }

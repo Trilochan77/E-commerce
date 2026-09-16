@@ -177,10 +177,23 @@ services:
         condition: service_started
     restart: unless-stopped
 
-  # ---- Phase 3+ (uncomment when scaffolded) ----
-  # return-reward-service:
-  #   build: { context: ./backend, dockerfile: ./return-reward-service/Dockerfile }
-  #   ports: ["8087:8087"]
+  # ---- Phase 3 service ----
+  return-reward-service:
+    build:
+      context: ./backend
+      dockerfile: ./return-reward-service/Dockerfile
+    container_name: ecom-reward
+    ports: ["8087:8087"]
+    environment:
+      - SERVER_PORT=8087
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/ecom
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mongo:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    restart: unless-stopped
 
 volumes:
   mongo-data:

@@ -99,4 +99,12 @@ public class AuthService {
     if (req.address() != null) u.setAddress(req.address());
     return users.save(u);
   }
+
+  /** Admin user list — password hashes never leave the service. */
+  public java.util.List<java.util.Map<String, Object>> allUsers() {
+    return users.findAll().stream()
+        .map(u -> java.util.Map.<String, Object>of("userId", u.getId(), "name",
+            u.getName() == null ? "" : u.getName(), "email", u.getEmail(), "role", u.getRole()))
+        .toList();
+  }
 }

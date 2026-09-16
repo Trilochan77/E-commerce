@@ -1,0 +1,190 @@
+{
+  "info": {
+    "name": "ECom Phase-3 return & reward",
+    "_postman_id": "ecom-phase3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "gateway", "value": "http://localhost:8080" },
+    { "key": "userId", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "productId", "value": "P-1001" },
+    { "key": "returnId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 Setup: buy + deliver (returns need DELIVERED orders)",
+      "item": [
+        {
+          "name": "Add P-1001 to cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/cart/{{userId}}/items",
+            "body": { "mode": "raw", "raw": "{\"productId\":\"{{productId}}\",\"quantity\":1}" }
+          }
+        },
+        {
+          "name": "Checkout COD",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/orders/checkout",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"paymentMethod\":\"COD\",\"pointsToUse\":0}" }
+          }
+        },
+        {
+          "name": "Mark DELIVERED (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/orders/{{orderId}}/status",
+            "body": { "mode": "raw", "raw": "{\"status\":\"DELIVERED\"}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 Estimate preview",
+      "item": [
+        {
+          "name": "Preview LIKE_NEW reward",
+          "request": { "method": "GET", "url": "{{gateway}}/api/rewards/estimate?productId={{productId}}&quantity=1&condition=LIKE_NEW" }
+        }
+      ]
+    },
+    {
+      "name": "3 Submit return",
+      "item": [
+        {
+          "name": "Submit (claim LIKE_NEW)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"orderId\":\"{{orderId}}\",\"productId\":\"{{productId}}\",\"quantity\":1,\"reason\":\"Upgrading to newer model\",\"claimedCondition\":\"LIKE_NEW\"}" }
+          }
+        },
+        {
+          "name": "Duplicate submit (expect 409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"orderId\":\"{{orderId}}\",\"productId\":\"{{productId}}\",\"quantity\":1,\"reason\":\"again\",\"claimedCondition\":\"GOOD\"}" }
+          }
+        },
+        {
+          "name": "Ineligible product P-1005 (expect 422) — needs own DELIVERED order; fails eligibility either way",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"orderId\":\"{{orderId}}\",\"productId\":\"P-1005\",\"quantity\":1,\"reason\":\"test\",\"claimedCondition\":\"GOOD\"}" }
+          }
+        },
+        { "name": "My returns", "request": { "method": "GET", "url": "{{gateway}}/api/returns/user/{{userId}}" } }
+      ]
+    },
+    {
+      "name": "4 Admin pipeline",
+      "item": [
+        {
+          "name": "Approve",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns/{{returnId}}/status",
+            "body": { "mode": "raw", "raw": "{\"status\":\"APPROVED\"}" }
+          }
+        },
+        {
+          "name": "Illegal jump to COMPLETED (expect 422)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns/{{returnId}}/status",
+            "body": { "mode": "raw", "raw": "{\"status\":\"COMPLETED\"}" }
+          }
+        },
+        {
+          "name": "Product received",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns/{{returnId}}/status",
+            "body": { "mode": "raw", "raw": "{\"status\":\"PRODUCT_RECEIVED\"}" }
+          }
+        },
+        {
+          "name": "Under inspection",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns/{{returnId}}/status",
+            "body": { "mode": "raw", "raw": "{\"status\":\"UNDER_INSPECTION\"}" }
+          }
+        },
+        {
+          "name": "Evaluate as GOOD (expect final < estimated)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Role", "value": "ADMIN" }
+            ],
+            "url": "{{gateway}}/api/returns/{{returnId}}/evaluate",
+            "body": { "mode": "raw", "raw": "{\"verifiedCondition\":\"GOOD\",\"adminNote\":\"Light signs of use, fully functional\"}" }
+          }
+        },
+        {
+          "name": "Re-evaluate (expect 409, credited once)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Role", "value": "ADMIN" }
+            ],
+            "url": "{{gateway}}/api/returns/{{returnId}}/evaluate",
+            "body": { "mode": "raw", "raw": "{\"verifiedCondition\":\"LIKE_NEW\"}" }
+          }
+        },
+        {
+          "name": "Evaluate without admin (expect 403) — use a fresh REQUESTED return",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns/{{returnId}}/evaluate",
+            "body": { "mode": "raw", "raw": "{\"verifiedCondition\":\"GOOD\"}" }
+          }
+        },
+        {
+          "name": "Complete",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/returns/{{returnId}}/status",
+            "body": { "mode": "raw", "raw": "{\"status\":\"COMPLETED\"}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 Wallet + redeem",
+      "item": [
+        { "name": "Wallet balance", "request": { "method": "GET", "url": "{{gateway}}/api/wallet/{{userId}}" } },
+        { "name": "Transaction history", "request": { "method": "GET", "url": "{{gateway}}/api/rewards/transactions/{{userId}}" } },
+        {
+          "name": "Checkout using earned points",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{gateway}}/api/orders/checkout",
+            "body": { "mode": "raw", "raw": "{\"userId\":\"{{userId}}\",\"paymentMethod\":\"UPI\",\"pointsToUse\":100}" }
+          }
+        },
+        { "name": "Wallet after redeem", "request": { "method": "GET", "url": "{{gateway}}/api/wallet/{{userId}}" } }
+      ]
+    }
+  ]
+}

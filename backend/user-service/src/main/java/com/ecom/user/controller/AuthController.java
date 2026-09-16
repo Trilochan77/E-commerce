@@ -7,8 +7,11 @@ import com.ecom.user.dto.UpdateProfileRequest;
 import com.ecom.user.entity.User;
 import com.ecom.user.service.AuthService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class AuthController {
@@ -46,5 +49,12 @@ public class AuthController {
       @RequestHeader("Authorization") String authHeader, @RequestBody UpdateProfileRequest req) {
     User u = auth.update(bearer(authHeader), req);
     return Map.of("userId", u.getId(), "name", u.getName(), "email", u.getEmail());
+  }
+
+  @GetMapping("/api/users")
+  public List<Map<String, Object>> list(
+      @RequestHeader(value = "X-Role", required = false) String role) {
+    if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin only");
+    return auth.allUsers();
   }
 }

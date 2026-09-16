@@ -1,9 +1,6 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY pom.xml .
-COPY common-lib ./common-lib
-COPY eureka-server/pom.xml ./eureka-server/pom.xml
-COPY eureka-server/src ./eureka-server/src
+COPY . .
 RUN mvn -q -pl eureka-server -am -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
