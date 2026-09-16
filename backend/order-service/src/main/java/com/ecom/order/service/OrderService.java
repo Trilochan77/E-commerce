@@ -205,6 +205,10 @@ public class OrderService {
     return orders.findByUserIdOrderByOrderDateDesc(userId);
   }
 
+  public List<Order> all() {
+    return orders.findAllByOrderByOrderDateDesc();
+  }
+
   public Order get(String orderId) {
     return orders.findById(orderId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class OrderController {
@@ -22,6 +23,12 @@ public class OrderController {
   @ResponseStatus(HttpStatus.CREATED)
   public Order checkout(@Valid @RequestBody CheckoutRequest req) {
     return svc.checkout(req);
+  }
+
+  @GetMapping("/api/orders")
+  public List<Order> all(@RequestHeader(value = "X-Role", required = false) String role) {
+    if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin only");
+    return svc.all();
   }
 
   @GetMapping("/api/orders/user/{userId}")
