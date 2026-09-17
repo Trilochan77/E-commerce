@@ -22,7 +22,7 @@ import { ToastService } from '../shared/toast.service';
         <div class="form-grid">
           <label>Full name<input [(ngModel)]="name" name="name" placeholder="Aarav Sharma" autocomplete="name"></label>
           <label>Email<input [(ngModel)]="email" name="email" placeholder="you@shop.com" type="email" autocomplete="email"></label>
-          <div class="field-err" *ngIf="email && !/.+@.+\\..+/.test(email)">Enter a valid email.</div>
+          <div class="field-err" *ngIf="email && !validEmail()">Enter a valid email.</div>
           <label>Password<input [(ngModel)]="password" name="password" placeholder="Min 6 characters" type="password" autocomplete="new-password"></label>
           <div class="muted">Strength: <strong>{{ strength() }}</strong></div>
           <div class="progress"><div [style.width.%]="strengthPct()"></div></div>
@@ -51,6 +51,7 @@ export class RegisterComponent {
   strengthPct(): number {
     return Math.min(100, (this.password.length / 12) * 100);
   }
+  validEmail(): boolean { return this.email.indexOf('@') > 0 && this.email.indexOf('.') > 2; }
 
   submit(): void {
     this.error = ''; this.busy = true;
