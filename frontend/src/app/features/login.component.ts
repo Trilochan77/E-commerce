@@ -42,17 +42,14 @@ import { ToastService } from '../shared/toast.service';
           </button>
           <p class="error" *ngIf="error">{{ error }}</p>
           <div class="demo-box">
-            <strong>Demo accounts — tap to fill</strong>
+            <strong>Demo customer — tap to fill</strong>
             <div class="demo-grid">
-              <button type="button" class="demo-card" (click)="fill('admin@shop.com','Admin@123')">
-                <strong>Admin</strong><span>admin&#64;shop.com</span>
-              </button>
               <button type="button" class="demo-card" (click)="fill('user@shop.com','User@123')">
                 <strong>Customer</strong><span>user&#64;shop.com</span>
               </button>
             </div>
           </div>
-          <p class="auth-switch">No account? <a routerLink="/register" [queryParams]="returnUrl ? { returnUrl } : {}">Create one</a></p>
+          <p class="auth-switch">No account? <a routerLink="/register" [queryParams]="returnUrl ? { returnUrl } : {}">Create one</a> · Admin? <a routerLink="/admin/login">Console sign in</a></p>
         </form>
       </div>
     </div>

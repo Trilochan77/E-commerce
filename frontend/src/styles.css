@@ -262,6 +262,12 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
 .admin-top { background: #fff; border-bottom: 1px solid var(--line); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 10; }
 .admin-content { padding: 20px; max-width: 1100px; }
 .admin-grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+/* separate admin login */
+.admin-login-page { min-height: calc(100vh - 40px); display: grid; place-items: center; padding: 24px 12px; background: radial-gradient(800px 300px at 20% 0%, #1e3a8a22, transparent), var(--bg); }
+.admin-login-card { width: min(440px, 100%); background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: grid; gap: 10px; box-shadow: var(--shadow); }
+.admin-login-brand { display: flex; align-items: center; gap: 10px; }
+.admin-login-brand strong { display: block; }
+.admin-login-brand span { color: var(--muted); font-size: 12px; }
 .stat-card.warn { border-color: #fcd34d; }
 .eval-box { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
 

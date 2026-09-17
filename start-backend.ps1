@@ -86,7 +86,7 @@ foreach ($svc in $services) {
 }
 
 Write-Host "`n[3/3] Waiting for services to initialize..." -ForegroundColor Cyan
-$maxWaitSec = 40
+$maxWaitSec = 120
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
 while ($stopwatch.Elapsed.TotalSeconds -lt $maxWaitSec) {
@@ -111,7 +111,7 @@ foreach ($svc in $services) {
     Write-Host ("  {0,-26} : Port {1,-5} : {2}" -f $svc.Name, $svc.Port, $statusText) -ForegroundColor $color
 }
 
-Write-Host "`nFrontend is available at: http://localhost:4200" -ForegroundColor Green
+Write-Host "`nFrontend is available at: http://localhost:3000" -ForegroundColor Green
 Write-Host "Eureka dashboard at:      http://localhost:8761" -ForegroundColor Green
 Write-Host "API Gateway at:           http://localhost:8080" -ForegroundColor Green
 Write-Host "To stop all services:     .\stop-backend.ps1`n" -ForegroundColor Yellow
