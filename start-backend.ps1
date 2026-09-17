@@ -71,11 +71,11 @@ foreach ($svc in $services) {
 
     if ($Mode -eq "jar" -and (Test-Path $jarFull)) {
         Write-Host ("  [STARTING JAR]    {0,-25} (port {1})..." -f $name, $port)
-        $cmdArgs = "/c start /b `"`" java -Xmx256m -jar `"$jarFull`" > `"$logFile`" 2>&1"
+        $cmdArgs = "/c start /b `"`" cmd /c `"set JWT_SECRET=$env:JWT_SECRET&& java -Xmx256m -jar `"$jarFull`" > `"$logFile`" 2>&1`"`""
         Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory (Split-Path $jarFull) -WindowStyle Hidden
     } else {
         Write-Host ("  [STARTING MAVEN]  {0,-25} (port {1})..." -f $name, $port)
-        $cmdArgs = "/c start /b `"`" mvn -q -pl $name spring-boot:run > `"$logFile`" 2>&1"
+        $cmdArgs = "/c start /b `"`" cmd /c `"set JWT_SECRET=$env:JWT_SECRET&& mvn -q -pl $name -am spring-boot:run > `"$logFile`" 2>&1`"`""
         Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory $backendDir -WindowStyle Hidden
     }
 
@@ -110,7 +110,7 @@ foreach ($svc in $services) {
     Write-Host ("  {0,-26} : Port {1,-5} : {2}" -f $svc.Name, $svc.Port, $statusText) -ForegroundColor $color
 }
 
-Write-Host "`nFrontend is available at: http://localhost:3000" -ForegroundColor Green
+Write-Host "`nFrontend is available at: http://localhost:4200" -ForegroundColor Green
 Write-Host "Eureka dashboard at:      http://localhost:8761" -ForegroundColor Green
 Write-Host "API Gateway at:           http://localhost:8080" -ForegroundColor Green
 Write-Host "To stop all services:     .\stop-backend.ps1`n" -ForegroundColor Yellow
