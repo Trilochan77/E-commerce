@@ -18,7 +18,7 @@ import { AuthService } from '../core/auth.service';
       </div>
       <p class="error" *ngIf="error">{{ error }}</p>
       <p>No account? <a routerLink="/register">Register</a></p>
-      <p class="muted">Demo admin: admin@shop.com / Admin@123</p>
+      <p class="muted">Demo admin: admin&#64;shop.com / Admin&#64;123</p>
     </div>
   `
 })

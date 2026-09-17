@@ -13,9 +13,9 @@
 
 **Auto-wiring already live:** search-service logs SEARCH when `X-User-Id` header present; order-service logs PURCHASE on checkout — both fire-and-forget, no-ops until this service runs.
 
-## Run
+## Run (native)
 ```powershell
-docker compose up -d --build recommendation-service
+mvn -q -pl backend/recommendation-service spring-boot:run
 # import postman/ecom-phase2.json → run folders 1→5 in order
 ```
 

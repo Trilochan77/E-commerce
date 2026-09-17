@@ -6,7 +6,6 @@
 [![Java](https://img.shields.io/badge/Java-17%2B-orange.svg?logo=openjdk)](https://www.oracle.com/java/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green.svg?logo=mongodb)](https://www.mongodb.com/)
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.11-005571.svg?logo=elasticsearch)](https://www.elastic.co/)
-[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg?logo=docker)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An enterprise-grade, microservices-driven e-commerce platform featuring **real-time behavioral AI recommendations** and an innovative **condition-based product return and reward wallet ecosystem**.
@@ -228,7 +227,6 @@ flowchart LR
 ├── postman/                              # API Testing Collections
 │   └── ecom-phase0.json                  # Health & service request suite
 │
-├── docker-compose.yml                    # Container definition (Mongo, ES, Eureka, Gateway)
 ├── IMPLEMENTATION.md                     # Detailed Technical Specification & SRS mapping
 └── README.md                             # Comprehensive project documentation
 ```
@@ -306,7 +304,8 @@ Ensure the following tools are installed on your workstation:
 - **Java JDK 17+** (JDK 21 or 25 with `--release 17` supported)
 - **Node.js 20+** and **npm 10+**
 - **Apache Maven 3.9+** (`winget install Apache.Maven` on Windows)
-- **Docker Desktop** (`winget install Docker.DockerDesktop` on Windows)
+- **MongoDB 7+** (local install or MongoDB Atlas) + `mongosh`
+- **Elasticsearch 8.11+** (local install or Elastic Cloud)
 
 ---
 
@@ -331,12 +330,14 @@ $env:JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"
 export JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"
 ```
 
-### 3. Start Infrastructure & Core Services
+### 3. Start Infrastructure
 
-Launch MongoDB, Elasticsearch, Eureka Service Registry, and API Gateway:
+Start MongoDB and Elasticsearch natively (or use Atlas / Elastic Cloud), then Eureka + Gateway via Maven:
 
 ```bash
-docker compose up -d mongo elasticsearch eureka-server api-gateway
+# start local mongod + elasticsearch (or ensure Atlas/Cloud URIs are reachable)
+mongosh --eval "db.adminCommand('ping')"
+curl http://localhost:9200/_cluster/health
 ```
 
 Verify service status:
@@ -362,14 +363,12 @@ Default credentials provisioned:
 Build common libraries and run individual services using Maven:
 
 ```powershell
-# Install common-lib
+# Install common-lib once, then run each service in its own terminal
 mvn -q -pl backend/common-lib install
-
-# Run any microservice directly (e.g., user-service)
-mvn -pl backend/user-service spring-boot:run
+mvn -q -pl backend/eureka-server spring-boot:run
+# then in new terminals: api-gateway, user-service, product-service, etc.
+# e.g. mvn -q -pl backend/user-service spring-boot:run
 ```
-
-*(Alternatively, uncomment the desired microservices in `docker-compose.yml` to run the full cluster in Docker).*
 
 ### 6. Launch Frontend Client
 
@@ -402,7 +401,7 @@ gantt
     title Platform Implementation Timeline
     dateFormat  YYYY-MM-DD
     section Phase 0
-    Docker, Mongo, ES, Eureka, Gateway       :done,    p0, 2026-08-20, 2026-08-22
+    Mongo, ES, Eureka, Gateway       :done,    p0, 2026-08-20, 2026-08-22
     section Phase 1
     Auth, Products, Search & Cart Services  :active,  p1, 2026-08-23, 2026-08-28
     section Phase 2
@@ -413,7 +412,7 @@ gantt
     Admin Dashboard, Polish & Hardening      :         p4, 2026-09-10, 2026-09-15
 ```
 
-- [x] **Phase 0: Foundation**: Multi-module Maven setup, Docker Compose, Eureka Discovery, API Gateway routing, seed fixtures.
+- [x] **Phase 0: Foundation**: Multi-module Maven setup, native Mongo/ES setup, Eureka Discovery, API Gateway routing, seed fixtures.
 - [ ] **Phase 1: Core Commerce**: User registration/auth, product catalog, Elasticsearch sync, shopping cart, and order placement.
 - [ ] **Phase 2: Recommendation Engine**: Real-time activity telemetry (VIEW, SEARCH, PURCHASE) and scoring engine.
 - [ ] **Phase 3: Condition-Based Return & Wallet**: Return lifecycle workflow, admin condition inspection, and wallet ledger.

@@ -24,7 +24,7 @@ Build a web-based e-commerce platform with two differentiators:
 | Search | Elasticsearch 8+ (port 9200) |
 | Auth | JWT (access + refresh), BCrypt |
 | Payment | Mock/Strategy interface (COD + UPI/Card mock, pluggable Razorpay/Stripe later) |
-| DevOps | Docker + Docker Compose, Git/GitHub, Postman |
+| DevOps | Git, Postman, Maven, npm |
 | IDE | VS Code (frontend), IntelliJ IDEA (backend) |
 | Min HW | i3+, 4GB RAM (8GB+ recommended for all microservices), 10GB disk |
 
@@ -53,10 +53,10 @@ Build a web-based e-commerce platform with two differentiators:
 ```
 
 **Deployment (SRS §7.9):**
-- Node 1 — Client Workstation: browser + Angular SPA.
-- Node 2 — Application Server Cluster (JVM, Docker): Gateway + 7-8 Spring Boot services + Eureka.
-- Node 3 — Database Server: MongoDB.
-- Node 4 — Search Server: Elasticsearch cluster.
+- Node 1 — Client Workstation: browser + Angular SPA (`ng serve` on :4200).
+- Node 2 — Application Server Cluster (JVM, Maven): Gateway + 7-8 Spring Boot services (each `mvn spring-boot:run`) + Eureka.
+- Node 3 — Database Server: MongoDB (native install or Atlas).
+- Node 4 — Search Server: Elasticsearch cluster (native install or Elastic Cloud).
 
 ---
 
@@ -65,7 +65,6 @@ Build a web-based e-commerce platform with two differentiators:
 ```
 /
 ├── IMPLEMENTATION.md              # this file
-├── docker-compose.yml             # mongo, elasticsearch, eureka, gateway, all services, frontend
 ├── frontend/                      # Angular app
 │   └── src/app/
 │       ├── core/ (auth.guard, jwt.interceptor, api.service)
@@ -293,7 +292,7 @@ Guards: `AuthGuard` (all except browse/search), `AdminGuard` (`/admin/**`). Inte
 
 ## 9. Build Order (phased, demo-safe)
 
-**Phase 0 — Bootstrap (0.5 day):** git repo, `docker-compose.yml` (mongo, elasticsearch, eureka), gateway routes, JWT in `common-lib`, Postman collection skeleton, seed data (5 categories, 20+ products, 1 admin + 2 customers).
+**Phase 0 — Bootstrap (0.5 day):** git repo, native Mongo + Elasticsearch setup, eureka, gateway routes, JWT in `common-lib`, Postman collection skeleton, seed data (5 categories, 20+ products, 1 admin + 2 customers).
 **Phase 1 — Core commerce:** user-service (auth+wallet auto-create) → product-service (+ ES index job) → search-service → cart-service → order-service (mock payment + stock + wallet deduct).
 **Phase 2 — Intelligence:** activity logging (view/search/purchase) → recommendation-service scoring + cold-start + UI rails.
 **Phase 3 — Return & Reward:** return-reward-service (eligibility, estimate, evaluate, final, wallet credit, tx history) + customer + admin UI + status tracker.
@@ -305,12 +304,13 @@ Guards: `AuthGuard` (all except browse/search), `AdminGuard` (`/admin/**`). Inte
 
 ## 10. Config & Dev Commands
 
-`docker-compose.yml` essentials: `mongo:7`, `elasticsearch:8.11` (`discovery.type=single-node`, `xpack.security.enabled=false` for dev), `eureka`, `gateway`, each `*-service` with `SPRING_DATA_MONGODB_URI`, `ELASTICSEARCH_URIS`, `JWT_SECRET`, `REWARD_*` props.
+Native service config essentials: MongoDB 7, Elasticsearch 8.11 (`discovery.type=single-node`, `xpack.security.enabled=false` for dev), eureka, gateway, each `*-service` with `SPRING_DATA_MONGODB_URI`, `ELASTICSEARCH_URIS`, `JWT_SECRET`, `REWARD_*` props.
 
 ```bash
-# infra
-docker compose up -d mongo elasticsearch eureka-server
-# backend (per service)
+# infra (native mongod + elasticsearch running locally)
+mongosh --eval "db.adminCommand('ping')"
+curl http://localhost:9200/_cluster/health
+# backend (per service, one terminal each)
 ./mvnw spring-boot:run   # or: mvn spring-boot:run -pl user-service
 # frontend
 cd frontend; npm install; ng serve   # http://localhost:4200

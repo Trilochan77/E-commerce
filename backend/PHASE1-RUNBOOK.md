@@ -15,11 +15,16 @@ MVP simplifications (documented, split in later phases):
 - `1 point = ₹1`, max 20% of subtotal redeemable (`reward.max-redeem-percent`).
 - ES calls are best-effort with Mongo fallback — search works even with ES down.
 
-## Run
+## Run (native, one terminal per service)
 ```powershell
-# needs: Docker Desktop + Maven (winget install Docker.DockerDesktop Apache.Maven)
-docker compose up -d --build mongo elasticsearch eureka-server api-gateway `
-  user-service product-service search-service cart-service order-service
+# needs: Maven + running MongoDB + Elasticsearch (winget install Apache.Maven)
+mvn -q -pl backend/common-lib install
+# then in separate terminals:
+# mvn -q -pl backend/eureka-server spring-boot:run
+# mvn -q -pl backend/api-gateway spring-boot:run
+# mvn -q -pl backend/user-service spring-boot:run
+# mvn -q -pl backend/product-service spring-boot:run
+# ... repeat for search-service, cart-service, order-service
 mongosh --file seed/mongo_seed.js
 curl -X POST http://localhost:8083/api/search/reindex
 # import postman/ecom-phase1.json → run folders 1→4 in order

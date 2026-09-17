@@ -19,9 +19,9 @@
 
 **States:** `REQUESTED → APPROVED → PRODUCT_RECEIVED → UNDER_INSPECTION → APPROVED_FOR_REWARD|REJECTED → COMPLETED`. Direct jump to APPROVED_FOR_REWARD via status endpoint is blocked (must evaluate); re-evaluate after finalization → 409.
 
-## Run
+## Run (native)
 ```powershell
-docker compose up -d --build return-reward-service
+mvn -q -pl backend/return-reward-service spring-boot:run
 # import postman/ecom-phase3.json → run folders 1→5 in order
 ```
 

@@ -44,10 +44,8 @@ Desktop.ini
 application-local.yml
 application-secret.yml
 
-# Docker volumes
+# Local data dirs
 data/
-mongo-data/
-es-data/
 
 # Misc
 *.tmp
