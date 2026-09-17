@@ -13,25 +13,32 @@ spring:
           routes:
             - id: user-service
               uri: lb://user-service
-              predicates: [ Path=/api/users/**, Path=/api/auth/** ]
+              predicates:
+                - Path=/api/users, /api/users/**, /api/auth, /api/auth/**
             - id: product-service
               uri: lb://product-service
-              predicates: [ Path=/api/products/**, Path=/api/categories/** ]
+              predicates:
+                - Path=/api/products, /api/products/**, /api/categories, /api/categories/**
             - id: search-service
               uri: lb://search-service
-              predicates: [ Path=/api/search/** ]
+              predicates:
+                - Path=/api/search, /api/search/**
             - id: recommendation-service
               uri: lb://recommendation-service
-              predicates: [ Path=/api/recommendations/**, Path=/api/activity/** ]
+              predicates:
+                - Path=/api/recommendations, /api/recommendations/**, /api/activity, /api/activity/**
             - id: cart-service
               uri: lb://cart-service
-              predicates: [ Path=/api/cart/** ]
+              predicates:
+                - Path=/api/cart, /api/cart/**
             - id: order-service
               uri: lb://order-service
-              predicates: [ Path=/api/orders/** ]
+              predicates:
+                - Path=/api/orders, /api/orders/**
             - id: return-reward-service
               uri: lb://return-reward-service
-              predicates: [ Path=/api/returns/**, Path=/api/wallet/**, Path=/api/rewards/** ]
+              predicates:
+                - Path=/api/returns, /api/returns/**, /api/wallet, /api/wallet/**, /api/rewards, /api/rewards/**
       globalcors:
         cors-configurations:
           '[/**]':

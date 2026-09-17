@@ -25,6 +25,14 @@ Defaults already point to localhost, so no config files need editing:
 
 > The service **must be started from an Administrator PowerShell**.
 > A normal terminal fails with `Cannot open MongoDB service` (verified).
+> Confirm elevation first — this must print `admin=True`:
+>
+> ```powershell
+> ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+> ```
+>
+> If `False`: Win+X → **Terminal (Admin)** (title bar shows `Administrator:`),
+> then:
 
 ```powershell
 # Run PowerShell AS ADMINISTRATOR:
@@ -34,12 +42,45 @@ Get-Service MongoDB   # should say Running
 mongosh --eval "db.adminCommand('ping')"
 ```
 
-No admin rights? Run `mongod` manually instead:
+No admin rights? Or the service won't start? Run `mongod` manually instead
+(no admin needed, `D:\mongo-data` already created — **verified working**):
 
 ```powershell
-mkdir C:\data\db -Force   # first time only
-& "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" --dbpath C:\data\db
+Start-Process -FilePath "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" -ArgumentList "--dbpath","D:\mongo-data","--port","27017","--bind_ip","127.0.0.1","--logpath","D:\mongo-data\mongod.log"
+# verify:
+mongosh --eval "db.adminCommand('ping')"   # → { ok: 1 }
+# logs: D:\mongo-data\mongod.log. Stop it via Task Manager (mongod.exe) when done.
 ```
+
+> If `mongod` fails with `Address already in use` on 27017, a leftover
+> `docker-desktop` WSL distro is holding the port — stop it once with
+> `wsl --terminate docker-desktop` and retry. (`wslrelay` listeners on
+> 27017 with no `mongod` behind them are this symptom.)
+
+### mongosh: winget says installed but `mongosh` not found
+
+A stale `MongoDB.Shell` registration with no binary on disk or PATH.
+Reinstall it:
+
+```powershell
+winget uninstall MongoDB.Shell
+winget install MongoDB.Shell
+# close + reopen the terminal, then:
+mongosh --version
+```
+
+> This installs per-user to `%LOCALAPPDATA%\Programs\mongosh\`
+> (e.g. `C:\Users\<you>\AppData\Local\Programs\mongosh\mongosh.exe`)
+> and does **not** add itself to PATH. Either reopen the terminal
+> (installer updates PATH on login) or add it permanently:
+>
+> ```powershell
+> setx PATH "$env:PATH;$env:LOCALAPPDATA\Programs\mongosh"
+> # reopen terminal → mongosh --version → 2.x.x
+> ```
+
+Alternative: MongoDB Compass GUI, or the `.msi` from
+https://www.mongodb.com/try/download/shell.
 
 ## 3. Start Elasticsearch (optional)
 
@@ -141,8 +182,8 @@ Stop: `Ctrl+C` in each terminal.
 
 | Symptom | Fix |
 |---|---|
-| `mongosh: command not found` | `winget install MongoDB.Shell`, reopen terminal |
-| `Cannot open MongoDB service` | Terminal is not admin — right-click PowerShell → Run as administrator, then `Start-Service MongoDB` |
+| `mongosh: command not found` | `winget install MongoDB.Shell`, reopen terminal — if winget claims it's already installed but the command still missing, `winget uninstall` + reinstall (stale registration) |
+| `Cannot open MongoDB service` | Terminal is not admin — check the one-liner in §2; right-click PowerShell → Run as administrator, then `Start-Service MongoDB` |
 | Mongo ping fails | Service not running (see §2), or `mongod --dbpath` terminal was closed |
 | `Could not resolve common-lib` | From `backend/`, run `mvn -q -pl common-lib install` first |
 | `401` everywhere | JWT secret missing or different between terminals |
@@ -155,5 +196,7 @@ Stop: `Ctrl+C` in each terminal.
 - ✅ `mvn -DskipTests compile` in `backend/` — all 10 modules compile.
 - ✅ `ng serve` in `frontend/` — app serves on http://localhost:4200 (Angular `app-root` confirmed).
 - ✅ No Docker files or references left in the repo.
-- ⬜ Gateway/Eureka/microservices not started yet (need MongoDB up first).
-- ⬜ Seed not run yet (blocked on missing `mongosh` + stopped MongoDB).
+- ✅ MongoDB 8.3 running manually (`--dbpath D:\mongo-data`), ping `{ ok: 1 }`.
+- ✅ `mongosh --file seed/mongo_seed.js` — Seeded categories: 5, products: 20.
+- ✅ `mongosh` 2.11.1 installed per-user + added to user PATH (reopen terminal to use bare `mongosh`).
+- ⬜ Gateway/Eureka/microservices not started yet — next step is §5 (JWT secret + `mvn spring-boot:run`, eureka first).
