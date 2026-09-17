@@ -114,21 +114,29 @@ export class ShopService {
     return this.http.post(`${GATEWAY}/api/categories`, body, { headers: this.adminHeaders() });
   }
 
+  categoryUpdate(id: string, body: any): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/categories/${id}`, body, { headers: this.adminHeaders() });
+  }
+
+  categoryDelete(id: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/categories/${id}`, { headers: this.adminHeaders() });
+  }
+
   allOrders(): Observable<any> {
     return this.http.get(`${GATEWAY}/api/orders`, { headers: this.adminHeaders() });
   }
 
   orderStatus(id: string, status: string): Observable<any> {
-    return this.http.put(`${GATEWAY}/api/orders/${id}/status`, { status });
+    return this.http.put(`${GATEWAY}/api/orders/${id}/status`, { status }, { headers: this.adminHeaders() });
   }
 
   allReturns(status = ''): Observable<any> {
     const url = status ? `${GATEWAY}/api/returns?status=${status}` : `${GATEWAY}/api/returns`;
-    return this.http.get(url);
+    return this.http.get(url, { headers: this.adminHeaders() });
   }
 
   returnStatus(id: string, status: string): Observable<any> {
-    return this.http.put(`${GATEWAY}/api/returns/${id}/status`, { status });
+    return this.http.put(`${GATEWAY}/api/returns/${id}/status`, { status }, { headers: this.adminHeaders() });
   }
 
   evaluate(id: string, verifiedCondition: string, adminNote: string): Observable<any> {

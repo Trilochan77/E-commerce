@@ -21,7 +21,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <div class="row" style="padding:10px 14px">
           <span class="badge ok" *ngIf="inStock()">● In stock ({{ product.stockQuantity }})</span>
           <span class="badge bad" *ngIf="!inStock()">● Out of stock</span>
-          <span class="badge violet" *ngIf="product.eligibleForReturn">↩ Eligible for reward returns</span>
+          <span class="badge violet" *ngIf="product.eligibleForReturn"> Eligible for reward returns</span>
           <span class="badge">{{ product.category || product.categoryId }}</span>
         </div>
       </div>
@@ -31,7 +31,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <div class="price-row" style="margin:8px 0"><span class="price" style="font-size:28px">₹{{ product.price | number }}</span><span class="price-note">inclusive of taxes</span></div>
         <p class="muted">{{ product.description }}</p>
         <div class="reward-box" *ngIf="product.eligibleForReturn">
-          <strong>↩ Return & earn back</strong>
+          <strong> Return & earn back</strong>
           <div class="muted">LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet points (1 pt = ₹1)</div>
           <div class="muted">Est. on LIKE_NEW: <strong style="color:#15803d">₹{{ estLikeNew() | number }} pts</strong></div>
         </div>
@@ -42,12 +42,12 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
             <a routerLink="/cart"><button class="btn-ghost">Go to cart</button></a>
           </div>
           <p class="error" *ngIf="error">{{ error }}</p>
-          <p class="success" *ngIf="added">✅ Added — continue shopping or checkout.</p>
+          <p class="success" *ngIf="added"> Added — continue shopping or checkout.</p>
         </div>
         <ng-template #loginCta><p><a routerLink="/login"><button class="primary">Login to buy</button></a></p></ng-template>
         <div class="trust">
           <div>🚚 <strong>Fast delivery</strong><br>2–4 days · free over ₹999</div>
-          <div>↩️ <strong>14-day returns</strong><br>eligible items earn wallet pts</div>
+          <div> <strong>14-day returns</strong><br>eligible items earn wallet pts</div>
           <div>🔒 <strong>Secure pay</strong><br>COD · UPI · Card (mock)</div>
         </div>
       </div>

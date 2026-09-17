@@ -15,7 +15,7 @@ import { ToastService } from '../shared/toast.service';
     <div class="steps-checkout"><span class="step now">1 · Cart</span><span>→</span><span class="step">2 · Checkout</span><span>→</span><span class="step">3 · Done</span></div>
     <div class="cart-layout" *ngIf="cart?.items?.length; else emptyCart">
       <div class="card" style="margin:0">
-        <div class="section-title"><h2>🛒 Your Cart ({{ count() }})</h2><button class="btn-ghost btn-sm" (click)="clear()">Clear all</button></div>
+        <div class="section-title"><h2> Your Cart ({{ count() }})</h2><button class="btn-ghost btn-sm" (click)="clear()">Clear all</button></div>
         <div class="line-item" *ngFor="let i of cart.items">
           <img [src]="'https://picsum.photos/seed/'+i.productId+'/200/160'" [alt]="i.productId">
           <div>
@@ -45,7 +45,7 @@ import { ToastService } from '../shared/toast.service';
       </aside>
     </div>
     <ng-template #emptyCart>
-      <app-empty-state icon="🛒" title="Your cart is empty" hint="Add something you love — rewards apply at checkout." ctaLink="/products"></app-empty-state>
+      <app-empty-state icon="" title="Your cart is empty" hint="Add something you love — rewards apply at checkout." ctaLink="/products"></app-empty-state>
     </ng-template>
   `
 })
@@ -76,7 +76,7 @@ export class CartComponent implements OnInit {
   shipPct(): number { return Math.min(100, ((this.cart?.totalAmount || 0) / 999) * 100); }
   shipMsg(): string {
     const t = this.cart?.totalAmount || 0;
-    return t >= 999 ? '🎉 You unlocked FREE delivery' : 'Add ₹' + (999 - t) + ' more for free delivery';
+    return t >= 999 ? ' You unlocked FREE delivery' : 'Add ₹' + (999 - t) + ' more for free delivery';
   }
 
   update(productId: string, qty: any): void {

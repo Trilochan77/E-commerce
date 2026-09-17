@@ -14,10 +14,10 @@ import { ToastService } from '../shared/toast.service';
       <button class="btn-ghost btn-sm" (click)="loadAll()">↻ Refresh all</button></div>
 
     <div class="admin-stats">
-      <div class="stat-card"><div class="k">👥 Users</div><div class="v">{{ users.length }}</div><div class="bar"><div [style.width.%]="pct(users.length, 50)"></div></div></div>
-      <div class="stat-card"><div class="k">📦 Products</div><div class="v">{{ products.length }}</div><div class="bar"><div [style.width.%]="pct(products.length, 60)"></div></div></div>
-      <div class="stat-card"><div class="k">🧾 Orders</div><div class="v">{{ orders.length }}</div><div class="bar"><div [style.width.%]="pct(orders.length, 60)"></div></div></div>
-      <div class="stat-card" style="border-color:#fcd34d"><div class="k">↩ Pending returns</div><div class="v">{{ pendingReturns() }}</div><div class="bar"><div [style.width.%]="pct(pendingReturns(), 20)"></div></div></div>
+      <div class="stat-card"><div class="k"> Users</div><div class="v">{{ users.length }}</div><div class="bar"><div [style.width.%]="pct(users.length, 50)"></div></div></div>
+      <div class="stat-card"><div class="k"> Products</div><div class="v">{{ products.length }}</div><div class="bar"><div [style.width.%]="pct(products.length, 60)"></div></div></div>
+      <div class="stat-card"><div class="k"> Orders</div><div class="v">{{ orders.length }}</div><div class="bar"><div [style.width.%]="pct(orders.length, 60)"></div></div></div>
+      <div class="stat-card" style="border-color:#fcd34d"><div class="k"> Pending returns</div><div class="v">{{ pendingReturns() }}</div><div class="bar"><div [style.width.%]="pct(pendingReturns(), 20)"></div></div></div>
     </div>
 
     <div class="tabs">
@@ -30,18 +30,20 @@ import { ToastService } from '../shared/toast.service';
         <label>Name<input [(ngModel)]="form.name" placeholder="Bluetooth Headphones X"></label>
         <label>Category ID<input [(ngModel)]="form.categoryId" placeholder="C-01"></label>
         <label style="grid-column:1/-1">Description<textarea [(ngModel)]="form.description" rows="2" placeholder="Key features, warranty…"></textarea></label>
-        <label>Price (₹)<input [(ngModel)]="form.price" type="number"></label>
+        <label>Price (Rs.)<input [(ngModel)]="form.price" type="number"></label>
         <label>Stock<input [(ngModel)]="form.stockQuantity" type="number"></label>
-        <label style="grid-column:1/-1"><span><input type="checkbox" [(ngModel)]="form.eligibleForReturn" style="width:auto"> Eligible for reward returns (↩ up to 80% back)</span></label>
+        <label style="grid-column:1/-1">Image URL<input [(ngModel)]="form.imageUrl" placeholder="https://... (leave empty for placeholder)"></label>
+        <label style="grid-column:1/-1"><span><input type="checkbox" [(ngModel)]="form.eligibleForReturn" style="width:auto"> Eligible for reward returns ( up to 80% back)</span></label>
       </div>
       <div class="row"><button class="primary btn-sm" (click)="saveProduct()">Save product</button><button class="btn-ghost btn-sm" *ngIf="editId" (click)="resetForm()">Cancel</button></div>
       <p class="error" *ngIf="error">{{ error }}</p>
       <div class="table-wrap" style="margin-top:12px"><table>
-        <tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Return?</th><th></th></tr>
+        <tr><th></th><th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Return?</th><th></th></tr>
         <tr *ngFor="let p of products">
+          <td><img [src]="(p.images && p.images[0]) || ('https://picsum.photos/seed/'+(p.id||p._id)+'/100/80')" [alt]="p.name" style="width:48px;height:36px;object-fit:cover;border-radius:6px"></td>
           <td class="muted">{{ p.id || p._id }}</td><td><strong>{{ p.name }}</strong></td><td>₹{{ p.price }}</td>
           <td><span class="badge" [ngClass]="(p.stockQuantity??0)>5 ? 'ok' : 'warn'">{{ p.stockQuantity }}</span></td>
-          <td>{{ p.eligibleForReturn ? '↩ yes' : '—' }}</td>
+          <td>{{ p.eligibleForReturn ? ' yes' : '—' }}</td>
           <td><button class="btn-ghost btn-sm" (click)="edit(p)">Edit</button> <button class="danger btn-sm" (click)="del(p)">Delete</button></td>
         </tr>
       </table></div>
@@ -111,11 +113,11 @@ import { ToastService } from '../shared/toast.service';
 })
 export class AdminComponent implements OnInit {
   tabs = [
-    { id: 'products', label: 'Products', icon: '📦' },
-    { id: 'categories', label: 'Categories', icon: '🏷️' },
-    { id: 'orders', label: 'Orders', icon: '🧾' },
-    { id: 'returns', label: 'Returns', icon: '↩️' },
-    { id: 'users', label: 'Users', icon: '👥' }
+    { id: 'products', label: 'Products', icon: '' },
+    { id: 'categories', label: 'Categories', icon: '' },
+    { id: 'orders', label: 'Orders', icon: '' },
+    { id: 'returns', label: 'Returns', icon: '' },
+    { id: 'users', label: 'Users', icon: '' }
   ];
   tab = 'products';
   products: any[] = [];
@@ -127,7 +129,7 @@ export class AdminComponent implements OnInit {
   editId = '';
   error = '';
   catName = '';
-  form: any = { name: '', description: '', price: 0, categoryId: 'C-01', stockQuantity: 10, images: [], eligibleForReturn: true };
+  form: any = { name: '', description: '', price: 0, categoryId: 'C-01', stockQuantity: 10, images: [], imageUrl: '', eligibleForReturn: true };
 
   constructor(private shop: ShopService, private toast: ToastService) {}
 
@@ -155,18 +157,20 @@ export class AdminComponent implements OnInit {
 
   resetForm(): void {
     this.editId = '';
-    this.form = { name: '', description: '', price: 0, categoryId: 'C-01', stockQuantity: 10, images: [], eligibleForReturn: true };
+    this.form = { name: '', description: '', price: 0, categoryId: 'C-01', stockQuantity: 10, images: [], imageUrl: '', eligibleForReturn: true };
   }
 
   edit(p: any): void {
     this.editId = p.id || p._id;
-    this.form = { name: p.name, description: p.description, price: p.price, categoryId: p.categoryId, stockQuantity: p.stockQuantity, images: p.images || [], eligibleForReturn: p.eligibleForReturn };
+    this.form = { name: p.name, description: p.description, price: p.price, categoryId: p.categoryId, stockQuantity: p.stockQuantity, images: p.images || [], imageUrl: (p.images && p.images[0]) || '', eligibleForReturn: p.eligibleForReturn };
   }
 
   saveProduct(): void {
     this.error = '';
     if (!this.form.name?.trim()) { this.error = 'Name is required.'; return; }
-    const body = { ...this.form, price: +this.form.price || 0, stockQuantity: +this.form.stockQuantity || 0 };
+    const images = this.form.imageUrl?.trim() ? [this.form.imageUrl.trim()] : (this.form.images || []);
+    const body = { ...this.form, images, price: +this.form.price || 0, stockQuantity: +this.form.stockQuantity || 0 };
+    delete body.imageUrl;
     const call = this.editId ? this.shop.productUpdate(this.editId, body) : this.shop.productCreate(body);
     call.subscribe({
       next: () => { this.toast.ok('Product saved'); this.resetForm(); this.shop.products().subscribe((r: any) => (this.products = r)); },

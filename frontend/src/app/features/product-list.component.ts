@@ -21,7 +21,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
     </div>
     <div class="shop-layout">
       <aside class="card filters">
-        <h3>🔍 Search</h3>
+        <h3> Search</h3>
         <input [(ngModel)]="q" name="q" placeholder="Search…" (keyup.enter)="load()" aria-label="Search">
         <div class="divider"></div>
         <h3>Categories</h3>
@@ -73,7 +73,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
           </div>
         </div>
         <div class="grid" *ngIf="loading"><div class="skeleton" style="height:230px" *ngFor="let s of [1,2,3,4,5,6]"></div></div>
-        <app-empty-state *ngIf="!loading && !items.length" icon="🔍" title="No matches" hint="Try fewer filters or a broader keyword." ctaLink="/products" ctaLabel="Reset catalog"></app-empty-state>
+        <app-empty-state *ngIf="!loading && !items.length" icon="" title="No matches" hint="Try fewer filters or a broader keyword." ctaLink="/products" ctaLabel="Reset catalog"></app-empty-state>
       </section>
     </div>
   `

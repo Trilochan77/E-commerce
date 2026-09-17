@@ -35,7 +35,7 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
         <p class="muted" *ngIf="r.adminNote">📝 Inspector: {{ r.adminNote }}</p>
       </div>
     </div>
-    <ng-template #none><app-empty-state icon="↩️" title="No returns yet" hint="Delivered items can be returned for wallet points." ctaLink="/orders" ctaLabel="Go to orders"></app-empty-state></ng-template>
+    <ng-template #none><app-empty-state icon="" title="No returns yet" hint="Delivered items can be returned for wallet points." ctaLink="/orders" ctaLabel="Go to orders"></app-empty-state></ng-template>
   `
 })
 export class ReturnStatusComponent implements OnInit {

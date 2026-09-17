@@ -21,7 +21,7 @@ const INFO: Record<string, { pct: number; tip: string }> = {
     <div class="breadcrumb"><a routerLink="/orders">Orders</a> / Return request</div>
     <div class="cart-layout">
       <div class="card" style="margin:0">
-        <h2>↩️ Request a Return</h2>
+        <h2> Request a Return</h2>
         <p class="muted">Order <strong>{{ orderId }}</strong> · Product <strong>{{ productId }}</strong> · within 14-day window · platform purchase only</p>
         <label>Reason for return
           <textarea [(ngModel)]="reason" name="reason" rows="3" placeholder="e.g. Size didn’t fit, changed mind, minor defect…"></textarea>

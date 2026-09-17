@@ -13,7 +13,13 @@ import { ReturnRequestComponent } from './features/return-request.component';
 import { ReturnStatusComponent } from './features/return-status.component';
 import { WalletComponent } from './features/wallet.component';
 import { ProfileComponent } from './features/profile.component';
-import { AdminComponent } from './features/admin.component';
+import { AdminLayoutComponent } from './admin/admin-layout.component';
+import { AdminDashboardComponent } from './admin/admin-dashboard.component';
+import { AdminProductsComponent } from './admin/admin-products.component';
+import { AdminCategoriesComponent } from './admin/admin-categories.component';
+import { AdminOrdersComponent } from './admin/admin-orders.component';
+import { AdminReturnsComponent } from './admin/admin-returns.component';
+import { AdminUsersComponent } from './admin/admin-users.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -28,6 +34,19 @@ export const routes: Routes = [
   { path: 'returns', component: ReturnStatusComponent, canActivate: [authGuard] },
   { path: 'wallet', component: WalletComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
-  { path: 'admin', component: AdminComponent, canActivate: [adminGuard] },
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [adminGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: AdminDashboardComponent },
+      { path: 'products', component: AdminProductsComponent },
+      { path: 'categories', component: AdminCategoriesComponent },
+      { path: 'orders', component: AdminOrdersComponent },
+      { path: 'returns', component: AdminReturnsComponent },
+      { path: 'users', component: AdminUsersComponent }
+    ]
+  },
   { path: '**', redirectTo: '' }
 ];

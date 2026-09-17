@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { ToastService } from '../shared/toast.service';
 
@@ -10,55 +10,102 @@ import { ToastService } from '../shared/toast.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
-    <div class="card auth-split">
-      <div class="auth-panel">
-        <span class="hero-eyebrow">NEXTGEN SHOP</span>
-        <h1 style="font-size:30px">Welcome back 👋</h1>
-        <p style="color:#e0e7ff">AI rails + wallet rewards pick up where you left off.</p>
-        <ul><li>🧠 Personalized “Recommended for You”</li><li>↩️ Track condition-based returns</li><li>⭐ Spend wallet points (20% cap)</li></ul>
-      </div>
-      <div class="auth-form">
-        <h2>Login</h2>
-        <p class="muted">Use your account or one-tap demo credentials.</p>
-        <div class="form-grid">
-          <label>Email<input [(ngModel)]="email" name="email" placeholder="you@shop.com" type="email" autocomplete="email"></label>
+    <div class="auth-page">
+      <div class="auth-card">
+        <div class="auth-side">
+          <span class="hero-eyebrow">NEXTGEN SHOP</span>
+          <h1>Welcome back</h1>
+          <p class="auth-sub">AI rails and wallet rewards pick up where you left off.</p>
+          <ul class="auth-points">
+            <li><strong>Recommended for You</strong><span>personalized from views, searches, purchases</span></li>
+            <li><strong>Condition-based returns</strong><span>transparent estimate vs final reward</span></li>
+            <li><strong>Reward wallet</strong><span>1 pt = Rs.1, up to 20% off checkout</span></li>
+          </ul>
+        </div>
+        <form class="auth-form" (ngSubmit)="submit()" #f="ngForm" novalidate>
+          <h2>Login</h2>
+          <p class="muted">Use your account or one-tap demo credentials.</p>
+          <label>Email
+            <input [(ngModel)]="email" name="email" type="email" autocomplete="email"
+              placeholder="you@shop.com" required autofocus>
+          </label>
           <div class="field-err" *ngIf="email && !validEmail()">Enter a valid email address.</div>
           <label>Password
-            <span style="display:flex;gap:6px"><input [(ngModel)]="password" name="password" [type]="show ? 'text' : 'password'" placeholder="••••••••" autocomplete="current-password" style="flex:1">
-            <button class="btn-ghost btn-sm" type="button" (click)="show=!show">{{ show ? 'Hide' : 'Show' }}</button></span>
+            <span class="pwd-wrap">
+              <input [(ngModel)]="password" name="password" [type]="show ? 'text' : 'password'"
+                placeholder="••••••••" autocomplete="current-password" required style="flex:1">
+              <button class="btn-ghost btn-sm" type="button" (click)="show=!show" [attr.aria-label]="show ? 'Hide password' : 'Show password'">{{ show ? 'Hide' : 'Show' }}</button>
+            </span>
           </label>
-          <button class="primary" (click)="submit()" [disabled]="!email || !password || !validEmail() || busy">{{ busy ? 'Logging in…' : 'Login →' }}</button>
-        </div>
-        <p class="error" *ngIf="error">{{ error }}</p>
-        <div class="demo-box" style="margin-top:12px">
-          <strong>Demo accounts</strong>
-          <div class="row">
-            <button class="btn-ghost btn-sm" (click)="fill('admin@shop.com','Admin@123')">Admin</button>
-            <button class="btn-ghost btn-sm" (click)="fill('user@shop.com','User@123')">Customer</button>
+          <button class="primary auth-submit" type="submit" [disabled]="!email || !password || !validEmail() || busy">
+            <span class="spinner" *ngIf="busy"></span> {{ busy ? 'Logging in…' : 'Login' }}
+          </button>
+          <p class="error" *ngIf="error">{{ error }}</p>
+          <div class="demo-box">
+            <strong>Demo accounts — tap to fill</strong>
+            <div class="demo-grid">
+              <button type="button" class="demo-card" (click)="fill('admin@shop.com','Admin@123')">
+                <strong>Admin</strong><span>admin&#64;shop.com</span>
+              </button>
+              <button type="button" class="demo-card" (click)="fill('user@shop.com','User@123')">
+                <strong>Customer</strong><span>user&#64;shop.com</span>
+              </button>
+            </div>
           </div>
-        </div>
-        <p>No account? <a routerLink="/register">Create one</a></p>
+          <p class="auth-switch">No account? <a routerLink="/register" [queryParams]="returnUrl ? { returnUrl } : {}">Create one</a></p>
+        </form>
       </div>
     </div>
   `
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   email = '';
   password = '';
   error = '';
   busy = false;
   show = false;
+  returnUrl = '';
 
-  constructor(private auth: AuthService, private router: Router, private toast: ToastService) {}
+  constructor(
+    private auth: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private toast: ToastService
+  ) {}
+
+  ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '';
+    if (this.auth.isLoggedIn()) {
+      this.router.navigate([this.auth.isAdmin() ? '/admin' : (this.returnUrl || '/')]);
+    }
+  }
 
   validEmail(): boolean { return /.+@.+\..+/.test(this.email); }
-  fill(e: string, p: string): void { this.email = e; this.password = p; }
+  fill(e: string, p: string): void { this.email = e; this.password = p; this.error = ''; }
+
+  private target(): string {
+    if (this.returnUrl && !this.returnUrl.startsWith('/login') && !this.returnUrl.startsWith('/register')) {
+      return this.returnUrl;
+    }
+    return this.auth.isAdmin() ? '/admin' : '/';
+  }
 
   submit(): void {
-    this.error = ''; this.busy = true;
-    this.auth.login(this.email, this.password).subscribe({
-      next: () => { this.toast.ok('Welcome back!'); this.router.navigate([this.auth.isAdmin() ? '/admin' : '/']); },
-      error: (e) => { this.error = e.error?.message || 'Login failed — check email / password'; this.busy = false; }
+    if (!this.email || !this.password || !this.validEmail() || this.busy) return;
+    this.error = '';
+    this.busy = true;
+    this.auth.login(this.email.trim(), this.password).subscribe({
+      next: () => {
+        this.toast.ok('Welcome back!');
+        this.router.navigateByUrl(this.target());
+      },
+      error: (e) => {
+        this.busy = false;
+        const status = e?.status;
+        this.error = status === 401
+          ? 'Invalid email or password. Try a demo account below.'
+          : (e.error?.message || 'Login failed — check email / password');
+      }
     });
   }
 }

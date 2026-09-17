@@ -16,7 +16,7 @@ import { ToastService } from '../shared/toast.service';
     <div class="cart-layout">
       <div class="stack">
         <div class="card" style="margin:0">
-          <h2>⭐ Reward Wallet</h2>
+          <h2> Reward Wallet</h2>
           <p class="muted" *ngIf="wallet">Balance <strong>{{ wallet.balance ?? wallet.pointBalance ?? 0 }} pts</strong> · 1 pt = ₹1 · max 20% of subtotal (₹{{ maxUsable() | number }})</p>
           <div class="row">
             <input [(ngModel)]="points" name="points" type="number" min="0" [max]="wallet?.balance || 0" style="max-width:160px" placeholder="0" aria-label="Points to use">
@@ -27,11 +27,11 @@ import { ToastService } from '../shared/toast.service';
           <div class="progress"><div [style.width.%]="walletPct()"></div></div>
         </div>
         <div class="card" style="margin:0">
-          <h2>💳 Payment Method</h2>
+          <h2> Payment Method</h2>
           <div class="pay-grid">
-            <div class="pay-card" [class.on]="method==='COD'" (click)="method='COD'"><strong>💵 COD</strong><span class="muted">Pay on delivery</span></div>
-            <div class="pay-card" [class.on]="method==='UPI'" (click)="method='UPI'"><strong>📱 UPI</strong><span class="muted">Instant mock pay</span></div>
-            <div class="pay-card" [class.on]="method==='CARD'" (click)="method='CARD'"><strong>💳 Card</strong><span class="muted">Mock gateway</span></div>
+            <div class="pay-card" [class.on]="method==='COD'" (click)="method='COD'"><strong> COD</strong><span class="muted">Pay on delivery</span></div>
+            <div class="pay-card" [class.on]="method==='UPI'" (click)="method='UPI'"><strong> UPI</strong><span class="muted">Instant mock pay</span></div>
+            <div class="pay-card" [class.on]="method==='CARD'" (click)="method='CARD'"><strong> Card</strong><span class="muted">Mock gateway</span></div>
           </div>
           <p class="muted">Mock payment: always succeeds in demo. Failure path surfaces “order not created”.</p>
         </div>

@@ -9,8 +9,8 @@ Run everything natively on your machine. No Docker needed.
 | Java JDK 17+ | ✅ Java 25 (works, compiles `--release 17`) | — |
 | Maven 3.9+ | ✅ 3.9.16 | `winget install Apache.Maven` |
 | Node.js 20+ + npm | ✅ Node 24 + npm 11 | — |
-| MongoDB | ✅ Server 8.3 installed, service `MongoDB` present but **Stopped** | Start it, **as Administrator** (see §2) |
-| mongosh | ❌ **Missing** | `winget install MongoDB.Shell` (reopen terminal after) |
+| MongoDB | ✅ Server 8.3 installed, service `MongoDB` present but **Stopped** | Start it, **as Administrator** (see §2) or manual `mongod` |
+| mongosh | ✅ Installed (`v2.11.1` in `%LOCALAPPDATA%\Programs\mongosh`, added to User PATH) | `mongosh --version` |
 | Elasticsearch | ⚠️ 9.5.4 zip at `D:\elasticsearch-9.5.4`, no Windows service | Start manually (see §3), or skip — search falls back to MongoDB |
 
 Defaults already point to localhost, so no config files need editing:
@@ -118,16 +118,40 @@ $env:JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"
 
 Must be identical everywhere, minimum 32 characters.
 
-## 6. Start backend (one terminal per service, in order)
+## 6. Start backend
+
+### Method A: Single Command Orchestrator (Recommended)
+
+Run the automated orchestrator from the project root. It checks MongoDB, starts Eureka and API Gateway, launches all 7 core services with optimal memory flags (`-Xmx256m`), and logs to `backend/logs/`:
+
+```powershell
+cd D:\Project
+.\start-backend.ps1
+```
+
+Options:
+- `.\start-backend.ps1 -Mode jar` (Default, starts fast compiled JARs in ~10 seconds)
+- `.\start-backend.ps1 -Mode maven` (Starts via `mvn spring-boot:run`)
+- `.\start-backend.ps1 -KeepAlive` (Keeps terminal running as a daemon process)
+
+To stop all backend services cleanly at any time:
+```powershell
+.\stop-backend.ps1                 # stops ports 8080-8087
+.\stop-backend.ps1 -IncludeEureka  # stops ports 8080-8087 AND 8761
+```
+
+---
+
+### Method B: Manual (One Terminal per Service)
+
+If debugging a specific service in the foreground:
 
 ```powershell
 cd D:\Project\backend
-# full install once (parent pom + common-lib into local repo — required,
-# otherwise gateway/other services fail with "Could not resolve common-lib")
 mvn -q install -DskipTests
 ```
 
-Then one terminal each (keep the JWT line in every terminal):
+Then one terminal each (with `$env:JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"`):
 
 ```powershell
 cd D:\Project\backend
@@ -142,68 +166,63 @@ mvn -q -pl order-service spring-boot:run            # :8086
 mvn -q -pl return-reward-service spring-boot:run    # :8087
 ```
 
-First build takes 2–5 minutes.
-
 Optional — rebuild search index (only if Elasticsearch is running):
-
 ```powershell
 curl -X POST http://localhost:8083/api/search/reindex
 ```
 
-## 7. Start frontend (last terminal)
+## 7. Start frontend
 
 ```powershell
 cd D:\Project\frontend
 npm install   # first time only
-npm start
-# open http://localhost:4200
+npm start     # serves on http://localhost:4200
 ```
 
 ## 8. Verify
 
-1. Eureka: http://localhost:8761 — all services UP.
+1. Eureka: http://localhost:8761 — all 8 services registered (`UP`).
 2. Gateway: http://localhost:8080/actuator/health — `{"status":"UP"}`.
-3. Login as admin: `admin@shop.com` / `Admin@123`.
-4. Search "headphones" → open a product → Home recommendations update.
-5. Add to cart → checkout (COD) → order appears in Orders.
+3. Products via Gateway: http://localhost:8080/api/products — returns 20 seeded products.
+4. Categories via Gateway: http://localhost:8080/api/categories — returns 5 categories.
+5. Login as admin: `admin@shop.com` / `Admin@123` via frontend or `POST /api/users/login`.
+6. Search "headphones" → open product → recommendations update.
+7. Add to cart → checkout (COD) → order placed.
 
-Postman collections in `postman/` cover the same flows
-(Phase 1 → commerce, Phase 2 → recommendations, Phase 3 → returns).
-
-## 9. Daily use
+## 9. Daily Use (1-Minute Launch)
 
 ```powershell
-Start-Service MongoDB
-$env:JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"
-# start: eureka → gateway → other services → npm start
+# In terminal 1 (Backend):
+cd D:\Project
+.\start-backend.ps1
+
+# In terminal 2 (Frontend):
+cd D:\Project\frontend
+npm start
 ```
 
-Stop: `Ctrl+C` in each terminal.
+When finished:
+```powershell
+.\stop-backend.ps1
+```
 
-## 10. Troubleshooting
+## 10. Troubleshooting & Architectural Fixes Applied
 
-| Symptom | Fix |
+| Symptom | Cause / Fix |
 |---|---|
-| `mongosh: command not found` | `winget install MongoDB.Shell`, reopen terminal — if winget claims it's already installed but the command still missing, `winget uninstall` + reinstall (stale registration) |
-| `Cannot open MongoDB service` | Terminal is not admin — check the one-liner in §2; right-click PowerShell → Run as administrator, then `Start-Service MongoDB` |
-| Mongo ping fails | Service not running (see §2), or `mongod --dbpath` terminal was closed |
-| `Could not resolve common-lib` | From `backend/`, run `mvn -q -pl common-lib install` first |
-| `401` everywhere | JWT secret missing or different between terminals |
-| Search shows `mongodb-fallback` | Normal — Elasticsearch is down, search still works |
-| Port already in use | Old `java.exe` / `ng serve` still running — stop it or kill in Task Manager |
-| ES 9.x errors on search | Version mismatch (project targets 8.11) — stop ES, use MongoDB fallback |
+| `Gateway 500: UnknownHostException: Failed to resolve <hostname>` | Fixed. On Windows, Eureka services registered machine hostname (`TRILOCHAN.mshome.net`). Added `eureka.instance.prefer-ip-address: true` across all services so Gateway resolves directly via IP. |
+| `Gateway 404 for /api/products` | Fixed. Routes in `api-gateway/src/main/resources/application.yml` were improperly nested under `server.webflux` and used ANDed predicates. Fixed to standard `spring.cloud.gateway.routes` with comma-separated patterns. |
+| `mongosh: command not found` | WinGet installed mongosh to `%LOCALAPPDATA%\Programs\mongosh`. Added permanently to User PATH. |
+| `Cannot open MongoDB service` | Terminal is not admin. Start service via Admin PowerShell or run native `mongod` manually: `& "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" --config "C:\Program Files\MongoDB\Server\8.3\bin\mongod.cfg"`. |
+| Port conflicts with old Docker | If Docker was previously running, its WSL relay may hold ports. Run `wsl --terminate docker-desktop` or quit Docker Desktop. |
+| `Could not resolve common-lib` | Run `mvn clean install -DskipTests` from `backend/`. |
 
-## 11. Verified on this machine (2026-09-17)
+## 11. Verified on this machine
 
-- ✅ `mvn -DskipTests compile` in `backend/` — all 10 modules compile.
-- ✅ `ng serve` in `frontend/` — app serves on http://localhost:4200 (Angular `app-root` confirmed).
-- ✅ No Docker files or references left in the repo.
-- ✅ MongoDB 8.3 running manually (`--dbpath D:\mongo-data`), ping `{ ok: 1 }`.
-- ✅ `mongosh --file seed/mongo_seed.js` — Seeded categories: 5, products: 20.
-- ✅ `mongosh` 2.11.1 installed per-user + added to user PATH (reopen terminal to use bare `mongosh`).
-- ✅ Gateway/Eureka/microservices started and healthy (all `/actuator/health` UP).
-- ✅ End-to-end via gateway verified: register → search (mongodb-fallback, 1 hit) → cart (total 2499) → recommendations (coldStart=True for new user).
-- ✅ `GET /api/products` returns seeded catalog (20 products).
-
-> If a gateway call returns 500 right after startup, wait 30–60s and retry —
-> services need that time to register in Eureka before routing works.
+- ✅ Docker Desktop stopped and all backend ports cleanly released.
+- ✅ Native MongoDB running on port `27017` (ping `{ ok: 1 }`).
+- ✅ `mongosh` 2.11.1 in User PATH; database seeded with 5 categories & 20 products.
+- ✅ All 8 Spring Boot microservices compiled into production JARs and registered in Eureka.
+- ✅ `api-gateway` routes verified: `/api/products` (20 items), `/api/categories` (5 items), `/api/users/login` (JWT token issued).
+- ✅ Angular 17 frontend serving on `http://localhost:4200` (HTTP 200 OK).
+- ✅ Single-command orchestrator `start-backend.ps1` and shutdown script `stop-backend.ps1` operational.

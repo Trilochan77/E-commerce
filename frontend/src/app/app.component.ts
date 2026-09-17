@@ -12,7 +12,7 @@ import { filter } from 'rxjs';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
-    <header class="topbar">
+    <header class="topbar" *ngIf="!isAdminPage">
       <div class="topbar-inner">
         <a routerLink="/" class="brand" aria-label="NextGen Shop home">
           <span class="brand-mark">N</span>
@@ -40,10 +40,10 @@ import { filter } from 'rxjs';
         </nav>
       </div>
     </header>
-    <main class="container">
+    <main [class.admin-page]="isAdminPage" [class.container]="!isAdminPage">
       <router-outlet></router-outlet>
     </main>
-    <footer class="footer">
+    <footer class="footer" *ngIf="!isAdminPage">
       <div class="footer-inner">
         <div>
           <div class="brand" style="margin-bottom:8px"><span class="brand-mark">N</span><span>NextGen Shop</span></div>
@@ -78,13 +78,16 @@ export class AppComponent {
   cartCount = 0;
   walletBal: number | null = null;
   toasts: any[] = [];
+  isAdminPage = false;
 
   constructor(public auth: AuthService, private shop: ShopService, private router: Router, private toast: ToastService) {
     this.toast.toasts$.subscribe((t) => (this.toasts = t));
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e: any) => {
       this.menuOpen = false;
+      this.isAdminPage = (e.url || this.router.url).split('?')[0].startsWith('/admin');
       this.refreshBadges();
     });
+    this.isAdminPage = this.router.url.split('?')[0].startsWith('/admin');
   }
 
   ngOnInit(): void {
@@ -108,6 +111,10 @@ export class AppComponent {
 
   goSearch(): void {
     this.router.navigate(['/products'], { queryParams: { q: this.q } });
+  }
+
+  isAdminRoute(): boolean {
+    return this.isAdminPage;
   }
 
   logout(): void {

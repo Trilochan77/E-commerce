@@ -32,12 +32,12 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
         <tr><th>Date</th><th>Type</th><th>Points</th><th>Order</th><th>Return</th></tr>
         <tr *ngFor="let t of txs">
           <td class="muted">{{ t.createdAt }}</td>
-          <td><span class="badge" [ngClass]="t.type === 'EARNED' ? 'ok' : 'warn'">{{ t.type === 'EARNED' ? '↩ EARNED' : '🛒 USED' }}</span></td>
+          <td><span class="badge" [ngClass]="t.type === 'EARNED' ? 'ok' : 'warn'">{{ t.type === 'EARNED' ? ' EARNED' : ' USED' }}</span></td>
           <td><strong [style.color]="t.type==='EARNED' ? '#15803d' : '#92400e'">{{ t.type==='EARNED' ? '+' : '−' }}{{ t.points }}</strong></td>
           <td>{{ t.relatedOrderId || '—' }}</td><td>{{ t.relatedReturnId || '—' }}</td>
         </tr>
       </table></div>
-      <ng-template #emptyTx><app-empty-state icon="⭐" title="No points yet" hint="Return an eligible item to earn your first points." ctaLink="/orders" ctaLabel="View orders"></app-empty-state></ng-template>
+      <ng-template #emptyTx><app-empty-state icon="" title="No points yet" hint="Return an eligible item to earn your first points." ctaLink="/orders" ctaLabel="View orders"></app-empty-state></ng-template>
     </div>
   `
 })

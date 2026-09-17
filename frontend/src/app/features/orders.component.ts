@@ -35,7 +35,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
           <tr *ngFor="let i of o.items">
             <td><a [routerLink]="['/products', i.productId]">{{ i.productId }}</a></td>
             <td>{{ i.quantity }}</td><td>₹{{ i.price | number }}</td>
-            <td><a *ngIf="o.orderStatus === 'DELIVERED'" [routerLink]="['/returns/new']" [queryParams]="{orderId: o.id || o._id, productId: i.productId}"><button class="btn-ghost btn-sm">↩ Return & earn</button></a></td>
+            <td><a *ngIf="o.orderStatus === 'DELIVERED'" [routerLink]="['/returns/new']" [queryParams]="{orderId: o.id || o._id, productId: i.productId}"><button class="btn-ghost btn-sm"> Return & earn</button></a></td>
           </tr>
         </table></div>
         <div class="row" style="justify-content:space-between;margin-top:8px">
@@ -44,7 +44,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
         </div>
       </div>
     </div>
-    <ng-template #noOrders><app-empty-state icon="📦" title="No orders yet" hint="Your placed orders, tracking and return buttons will live here." ctaLink="/products"></app-empty-state></ng-template>
+    <ng-template #noOrders><app-empty-state icon="" title="No orders yet" hint="Your placed orders, tracking and return buttons will live here." ctaLink="/products"></app-empty-state></ng-template>
   `
 })
 export class OrdersComponent implements OnInit {

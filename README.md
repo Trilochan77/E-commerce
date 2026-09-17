@@ -224,9 +224,9 @@ flowchart LR
 ├── seed/                                 # Database Initialization
 │   └── mongo_seed.js                     # Seed collections (users, categories, products)
 │
-├── postman/                              # API Testing Collections
-│   └── ecom-phase0.json                  # Health & service request suite
-│
+├── start-backend.ps1                     # 1-click backend orchestrator (Native / No-Docker)
+├── stop-backend.ps1                      # Graceful shutdown script for all backend ports
+├── SETUP.md                              # Comprehensive native setup and troubleshooting guide
 ├── IMPLEMENTATION.md                     # Detailed Technical Specification & SRS mapping
 └── README.md                             # Comprehensive project documentation
 ```
@@ -364,15 +364,28 @@ Default credentials provisioned:
 
 ### 5. Run Backend Microservices
 
-Build common libraries and run individual services using Maven:
+#### Option A: 1-Click Orchestrator (Recommended)
+Run all 8 microservices, Eureka, and Gateway in the background with a single command:
 
 ```powershell
-# Install common-lib once, then run each service in its own terminal
+# From the project root:
+.\start-backend.ps1
+```
+
+To stop all backend services:
+```powershell
+.\stop-backend.ps1
+```
+
+#### Option B: Manual (Individual Terminals)
+```powershell
 cd backend
-mvn -q -pl common-lib install
-mvn -q -pl eureka-server spring-boot:run
-# then in new terminals: api-gateway, user-service, product-service, etc.
-# e.g. mvn -q -pl user-service spring-boot:run
+mvn -q install -DskipTests
+# Run each service in separate terminals:
+mvn -q -pl eureka-server spring-boot:run            # :8761
+mvn -q -pl api-gateway spring-boot:run              # :8080
+mvn -q -pl user-service spring-boot:run             # :8081
+# ... followed by product-service, search-service, cart-service, etc.
 ```
 
 ### 6. Launch Frontend Client
