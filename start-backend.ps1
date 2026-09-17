@@ -71,20 +71,12 @@ foreach ($svc in $services) {
 
     if ($Mode -eq "jar" -and (Test-Path $jarFull)) {
         Write-Host ("  [STARTING JAR]    {0,-25} (port {1})..." -f $name, $port)
-        Start-Process -FilePath "java" `
-            -ArgumentList "-Xmx256m", "-jar", "`"$jarFull`"" `
-            -WorkingDirectory (Split-Path $jarFull) `
-            -RedirectStandardOutput $logFile `
-            -RedirectStandardError $logErr `
-            -WindowStyle Hidden
+        $cmdArgs = "/c start /b `"`" java -Xmx256m -jar `"$jarFull`" > `"$logFile`" 2>&1"
+        Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory (Split-Path $jarFull) -WindowStyle Hidden
     } else {
         Write-Host ("  [STARTING MAVEN]  {0,-25} (port {1})..." -f $name, $port)
-        Start-Process -FilePath "mvn" `
-            -ArgumentList "-q", "-pl", $name, "spring-boot:run" `
-            -WorkingDirectory $backendDir `
-            -RedirectStandardOutput $logFile `
-            -RedirectStandardError $logErr `
-            -WindowStyle Hidden
+        $cmdArgs = "/c start /b `"`" mvn -q -pl $name spring-boot:run > `"$logFile`" 2>&1"
+        Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory $backendDir -WindowStyle Hidden
     }
 
     # Small pause between starting gateway/core to let discovery register smoothly
