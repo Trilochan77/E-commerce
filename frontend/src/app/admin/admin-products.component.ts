@@ -28,7 +28,6 @@ import { ToastService } from '../shared/toast.service';
             </select>
           </label>
           <label>Description<textarea [(ngModel)]="form.description" rows="2"></textarea></label>
-          <label>Image URL<input [(ngModel)]="form.imageUrl" placeholder="https://…"></label>
           <label>Price (Rs.)<input [(ngModel)]="form.price" type="number" min="0"></label>
           <label>Stock<input [(ngModel)]="form.stockQuantity" type="number" min="0"></label>
           <label><span><input type="checkbox" [(ngModel)]="form.eligibleForReturn" style="width:auto"> Eligible for returns (up to 80% back)</span></label>
@@ -64,7 +63,7 @@ export class AdminProductsComponent implements OnInit {
   error = '';
   loading = true;
   saving = false;
-  form: any = { name: '', description: '', price: 0, categoryId: '', stockQuantity: 10, imageUrl: '', eligibleForReturn: true };
+  form: any = { name: '', description: '', price: 0, categoryId: '', stockQuantity: 10, eligibleForReturn: true };
 
   constructor(private shop: ShopService, private toast: ToastService) {}
 
@@ -94,16 +93,15 @@ export class AdminProductsComponent implements OnInit {
   resetForm(): void {
     this.editId = '';
     const firstCat = this.categories.length ? (this.categories[0].id || this.categories[0]._id) : '';
-    this.form = { name: '', description: '', price: 0, categoryId: firstCat, stockQuantity: 10, imageUrl: '', eligibleForReturn: true };
+    this.form = { name: '', description: '', price: 0, categoryId: firstCat, stockQuantity: 10, eligibleForReturn: true };
   }
 
   edit(p: any): void {
     this.editId = p.id || p._id;
-    const imgs = p.images || [];
     this.form = {
       name: p.name, description: p.description, price: p.price,
       categoryId: p.categoryId, stockQuantity: p.stockQuantity,
-      imageUrl: p.imageUrl || imgs[0] || '', eligibleForReturn: !!p.eligibleForReturn
+      eligibleForReturn: !!p.eligibleForReturn
     };
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -118,7 +116,7 @@ export class AdminProductsComponent implements OnInit {
       ...this.form,
       price: +this.form.price || 0,
       stockQuantity: +this.form.stockQuantity || 0,
-      images: this.form.imageUrl ? [this.form.imageUrl] : []
+      images: []
     };
     const call = this.editId ? this.shop.productUpdate(this.editId, body) : this.shop.productCreate(body);
     call.subscribe({

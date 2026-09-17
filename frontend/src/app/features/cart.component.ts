@@ -4,12 +4,13 @@ import { RouterModule } from '@angular/router';
 import { ShopService } from '../core/shop.service';
 import { AuthService } from '../core/auth.service';
 import { EmptyStateComponent } from '../shared/empty-state.component';
+import { ProductVisualComponent } from '../shared/product-visual.component';
 import { ToastService } from '../shared/toast.service';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, RouterModule, EmptyStateComponent],
+  imports: [CommonModule, RouterModule, EmptyStateComponent, ProductVisualComponent],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Cart</div>
     <div class="steps-checkout"><span class="step now">1 · Cart</span><span>→</span><span class="step">2 · Checkout</span><span>→</span><span class="step">3 · Done</span></div>
@@ -17,7 +18,7 @@ import { ToastService } from '../shared/toast.service';
       <div class="card" style="margin:0">
         <div class="section-title"><h2> Your Cart ({{ count() }})</h2><button class="btn-ghost btn-sm" (click)="clear()">Clear all</button></div>
         <div class="line-item" *ngFor="let i of cart.items">
-          <img [src]="'https://picsum.photos/seed/'+i.productId+'/200/160'" [alt]="i.productId">
+          <app-product-visual [product]="{ productId: i.productId, name: names[i.productId] || i.productId }" size="sm"></app-product-visual>
           <div>
             <strong><a [routerLink]="['/products', i.productId]">{{ names[i.productId] || i.productId }}</a></strong>
             <div class="muted">₹{{ i.unitPrice | number }} each · <span style="color:#15803d">in stock</span></div>

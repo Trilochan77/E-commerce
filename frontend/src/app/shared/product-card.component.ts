@@ -4,15 +4,16 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/auth.service';
 import { ShopService } from '../core/shop.service';
 import { ToastService } from './toast.service';
+import { ProductVisualComponent } from './product-visual.component';
 
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ProductVisualComponent],
   template: `
     <article class="product">
       <div class="product-media">
-        <img [src]="img()" [alt]="product?.name" loading="lazy">
+        <app-product-visual [product]="product" size="md"></app-product-visual>
         <div class="tag-row">
           <span class="flag green" *ngIf="inStock()">In stock</span>
           <span class="flag amber" *ngIf="!inStock()">Out of stock</span>
@@ -52,11 +53,6 @@ export class ProductCardComponent {
   inStock(): boolean {
     if (typeof this.product?.availability === 'boolean') return this.product.availability;
     return (this.product?.stockQuantity ?? 1) > 0;
-  }
-  img(): string {
-    if (this.product?.image) return this.product.image;
-    if (this.product?.images && this.product.images.length) return this.product.images[0];
-    return 'https://picsum.photos/seed/' + (this.id() || 'shop') + '/400/300';
   }
   quickAdd(): void {
     this.shop.cartAdd(this.auth.userId(), this.id(), 1).subscribe({

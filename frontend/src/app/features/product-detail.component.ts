@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ShopService } from '../core/shop.service';
 import { AuthService } from '../core/auth.service';
 import { ProductCardComponent } from '../shared/product-card.component';
+import { ProductVisualComponent } from '../shared/product-visual.component';
 import { ToastService } from '../shared/toast.service';
 
 const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR: 0.1 };
@@ -12,12 +13,12 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ProductCardComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ProductCardComponent, ProductVisualComponent],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / <a routerLink="/products">Shop</a> / {{ product?.name || '…' }}</div>
     <div class="detail-layout" *ngIf="product">
       <div class="gallery">
-        <img class="main" [src]="img()" [alt]="product.name">
+        <app-product-visual [product]="product" size="lg"></app-product-visual>
         <div class="row" style="padding:10px 14px">
           <span class="badge ok" *ngIf="inStock()">● In stock ({{ product.stockQuantity }})</span>
           <span class="badge bad" *ngIf="!inStock()">● Out of stock</span>
@@ -103,10 +104,6 @@ export class ProductDetailComponent implements OnInit {
     });
   }
 
-  img(): string {
-    if (this.product?.images?.length) return this.product.images[0];
-    return 'https://picsum.photos/seed/' + (this.product?.id || 'x') + '/800/600';
-  }
   inStock(): boolean {
     return this.product ? (this.product.stockQuantity ?? 1) > 0 : false;
   }

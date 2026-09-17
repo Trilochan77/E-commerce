@@ -4,12 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ShopService } from '../core/shop.service';
 import { ProductCardComponent } from '../shared/product-card.component';
+import { ProductVisualComponent } from '../shared/product-visual.component';
 import { EmptyStateComponent } from '../shared/empty-state.component';
 
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ProductCardComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ProductCardComponent, ProductVisualComponent, EmptyStateComponent],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Shop</div>
     <div class="page-head">
@@ -64,7 +65,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
         </div>
         <div class="stack" *ngIf="view==='list' && items.length">
           <div class="list-row" *ngFor="let p of items">
-            <img [src]="(p.images && p.images[0]) || ('https://picsum.photos/seed/'+(p.id||p._id)+'/300/200')" [alt]="p.name">
+            <app-product-visual [product]="p" size="sm"></app-product-visual>
             <div><strong><a [routerLink]="['/products', p.id || p._id]">{{ p.name }}</a></strong>
               <div class="muted">{{ p.description?.slice(0,90) }}</div>
               <div class="row"><span class="price">₹{{ p.price }}</span><span class="badge ok" *ngIf="(p.stockQuantity??1)>0">In stock</span><span class="badge bad" *ngIf="(p.stockQuantity??1)<=0">Out</span></div>

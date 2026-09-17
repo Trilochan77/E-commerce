@@ -17,9 +17,9 @@ const cats = [
 ];
 db.categories.insertMany(cats);
 
-const P = (id, name, desc, price, cat, stock, eligible, img) => ({
+const P = (id, name, desc, price, cat, stock, eligible) => ({
   _id: id, name, description: desc, price, categoryId: cat,
-  images: [img || ("https://picsum.photos/seed/" + id + "/600/600")],
+  images: [],
   stockQuantity: stock, availability: stock > 0,
   isEligibleForReturn: eligible, createdAt: new Date(), updatedAt: new Date()
 });
