@@ -3,7 +3,8 @@
 # ==============================================================================
 param(
     [ValidateSet("jar", "maven")]
-    [string]$Mode = "jar"
+    [string]$Mode = "jar",
+    [switch]$KeepAlive = $false
 )
 
 $ErrorActionPreference = "Continue"
@@ -114,3 +115,8 @@ Write-Host "`nFrontend is available at: http://localhost:4200" -ForegroundColor 
 Write-Host "Eureka dashboard at:      http://localhost:8761" -ForegroundColor Green
 Write-Host "API Gateway at:           http://localhost:8080" -ForegroundColor Green
 Write-Host "To stop all services:     .\stop-backend.ps1`n" -ForegroundColor Yellow
+
+if ($KeepAlive) {
+    Write-Host "Services running as daemon. Press Ctrl+C to terminate." -ForegroundColor Cyan
+    while ($true) { Start-Sleep -Seconds 60 }
+}
