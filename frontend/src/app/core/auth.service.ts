@@ -19,26 +19,39 @@ export class AuthService {
   }
 
   private store(r: any): void {
+    if (!r || !r.token) return;
     localStorage.setItem('ecom_token', r.token);
-    localStorage.setItem('ecom_userId', r.userId);
-    localStorage.setItem('ecom_role', r.role);
-    localStorage.setItem('ecom_email', r.email);
+    localStorage.setItem('ecom_userId', r.userId || '');
+    localStorage.setItem('ecom_role', r.role || 'CUSTOMER');
+    localStorage.setItem('ecom_email', r.email || '');
   }
 
   logout(): void {
     localStorage.clear();
   }
 
+  /** Logged in = token present AND not expired (JWT exp, 24h ttl). */
   isLoggedIn(): boolean {
-    return !!localStorage.getItem('ecom_token');
+    const t = localStorage.getItem('ecom_token');
+    return !!t && !this.tokenExpired(t);
   }
 
   isAdmin(): boolean {
-    return localStorage.getItem('ecom_role') === 'ADMIN';
+    return this.isLoggedIn() && localStorage.getItem('ecom_role') === 'ADMIN';
   }
 
   userId(): string {
     return localStorage.getItem('ecom_userId') || '';
+  }
+
+  private tokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (!payload.exp) return false;
+      return Date.now() / 1000 > payload.exp;
+    } catch {
+      return true;
+    }
   }
 
   me(): Observable<any> {

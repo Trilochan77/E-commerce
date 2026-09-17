@@ -38,9 +38,10 @@ import { ToastService } from '../shared/toast.service';
           <strong>Demo admin — tap to fill</strong>
           <div class="demo-grid">
             <button type="button" class="demo-card" (click)="fill()">
-              <strong>Admin</strong><span>admin&#64;shop.com</span>
+              <strong>Admin</strong><span>admin&#64;shop.com</span><code>Admin&#64;123</code>
             </button>
           </div>
+          <p class="muted" style="margin:6px 0 0">Password shown for demo only.</p>
         </div>
         <p class="auth-switch"><a routerLink="/">Back to shop</a> · <a routerLink="/login">Customer login</a></p>
       </form>
