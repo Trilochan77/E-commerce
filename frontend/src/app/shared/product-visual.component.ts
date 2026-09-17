@@ -10,25 +10,51 @@ const CATEGORY_STYLE: Record<string, { label: string; short: string; hue: number
 };
 
 /**
- * Photo-free product visual: category initial + type label on a tinted
- * tile. No external images, no emoji — colour + letter per product type.
+ * Product visual: shows the product photo when the admin attached one
+ * (images[0] as URL or uploaded data-URL), otherwise falls back to a
+ * category initial + type label on a tinted tile. No stock photos.
  */
 @Component({
   selector: 'app-product-visual',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="pvisual" [ngClass]="size" [style.background]="bg()" [style.border-color]="border()" [attr.aria-label]="label()">
-      <span class="pv-letter" [style.color]="ink()">{{ short() }}</span>
-      <span class="pv-type">{{ label() }}</span>
+    <div class="pvisual pvisual-photo" [ngClass]="size" *ngIf="photo(); else tile">
+      <img [src]="photo()" [alt]="alt()">
     </div>
+    <ng-template #tile>
+      <div class="pvisual" [ngClass]="size" [style.background]="bg()" [style.border-color]="border()" [attr.aria-label]="label()">
+        <span class="pv-letter" [style.color]="ink()">{{ short() }}</span>
+        <span class="pv-type">{{ label() }}</span>
+      </div>
+    </ng-template>
   `
 })
 export class ProductVisualComponent {
   @Input() product: any = null;
   @Input() categoryId = '';
   @Input() categoryName = '';
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
+  @Input() size: 'xs' | 'sm' | 'md' | 'lg' = 'md';
+
+  /** First admin-attached photo (URL or uploaded data-URL), else null. */
+  photo(): string | null {
+    const cands = [
+      this.product?.images?.[0],
+      this.product?.image,
+      this.product?.imageUrl
+    ];
+    for (const c of cands) {
+      if (typeof c === 'string' && c.trim() &&
+        (/^https?:\/\//i.test(c.trim()) || /^data:image\//i.test(c.trim()))) {
+        return c.trim();
+      }
+    }
+    return null;
+  }
+
+  alt(): string {
+    return this.product?.name || this.label();
+  }
 
   private catId(): string {
     return (this.product?.categoryId || this.product?.category || this.categoryId || '').toString().toUpperCase();

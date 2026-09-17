@@ -123,6 +123,11 @@ a:hover { text-decoration: underline; }
 /* photo-free product visuals: category tile, no external images */
 .pvisual { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid var(--line); border-radius: 8px; aspect-ratio: 4/3; width: 100%; }
 .pvisual.sm { aspect-ratio: 11/7; width: 110px; flex: none; }
+.pvisual.xs { aspect-ratio: 4/3; width: 56px; flex: none; }
+.pvisual.xs .pv-letter { font-size: 20px; }
+.pvisual.xs .pv-type { display: none; }
+.pvisual-photo { padding: 0; overflow: hidden; }
+.pvisual-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pvisual.lg { aspect-ratio: 4/3; min-height: 280px; border-radius: var(--radius); }
 .pv-letter { font-size: 44px; font-weight: 800; line-height: 1; }
 .pvisual.sm .pv-letter { font-size: 28px; }
