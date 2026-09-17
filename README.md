@@ -364,10 +364,11 @@ Build common libraries and run individual services using Maven:
 
 ```powershell
 # Install common-lib once, then run each service in its own terminal
-mvn -q -pl backend/common-lib install
-mvn -q -pl backend/eureka-server spring-boot:run
+cd backend
+mvn -q -pl common-lib install
+mvn -q -pl eureka-server spring-boot:run
 # then in new terminals: api-gateway, user-service, product-service, etc.
-# e.g. mvn -q -pl backend/user-service spring-boot:run
+# e.g. mvn -q -pl user-service spring-boot:run
 ```
 
 ### 6. Launch Frontend Client

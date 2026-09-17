@@ -22,9 +22,10 @@ mongosh --file seed/mongo_seed.js
 curl http://localhost:9200/_cluster/health
 
 # 2. discovery + gateway (one terminal each, needs Maven)
-mvn -q -pl backend/common-lib install
-mvn -q -pl backend/eureka-server spring-boot:run
-mvn -q -pl backend/api-gateway spring-boot:run
+cd backend
+mvn -q -pl common-lib install
+mvn -q -pl eureka-server spring-boot:run
+mvn -q -pl api-gateway spring-boot:run
 # Eureka UI: http://localhost:8761 | Gateway: http://localhost:8080/actuator/health
 
 # 3. verify

@@ -15,7 +15,8 @@
 
 ## Run (native)
 ```powershell
-mvn -q -pl backend/recommendation-service spring-boot:run
+cd backend
+mvn -q -pl recommendation-service spring-boot:run
 # import postman/ecom-phase2.json → run folders 1→5 in order
 ```
 

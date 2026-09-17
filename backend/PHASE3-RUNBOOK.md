@@ -21,7 +21,8 @@
 
 ## Run (native)
 ```powershell
-mvn -q -pl backend/return-reward-service spring-boot:run
+cd backend
+mvn -q -pl return-reward-service spring-boot:run
 # import postman/ecom-phase3.json → run folders 1→5 in order
 ```
 

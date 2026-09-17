@@ -18,14 +18,15 @@ MVP simplifications (documented, split in later phases):
 ## Run (native, one terminal per service)
 ```powershell
 # needs: Maven + running MongoDB + Elasticsearch (winget install Apache.Maven)
-mvn -q -pl backend/common-lib install
+cd backend
+mvn -q -pl common-lib install
 # then in separate terminals:
-# mvn -q -pl backend/eureka-server spring-boot:run
-# mvn -q -pl backend/api-gateway spring-boot:run
-# mvn -q -pl backend/user-service spring-boot:run
-# mvn -q -pl backend/product-service spring-boot:run
+# mvn -q -pl eureka-server spring-boot:run
+# mvn -q -pl api-gateway spring-boot:run
+# mvn -q -pl user-service spring-boot:run
+# mvn -q -pl product-service spring-boot:run
 # ... repeat for search-service, cart-service, order-service
-mongosh --file seed/mongo_seed.js
+mongosh --file ../seed/mongo_seed.js
 curl -X POST http://localhost:8083/api/search/reindex
 # import postman/ecom-phase1.json → run folders 1→4 in order
 ```

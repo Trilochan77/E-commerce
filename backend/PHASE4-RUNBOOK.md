@@ -23,7 +23,7 @@ cd frontend
 npm install
 npm start   # http://localhost:4200 — gateway must run on :8080
 ```
-Full stack (native): start MongoDB + Elasticsearch, then run each backend service with `mvn -q -pl backend/<svc> spring-boot:run` (eureka first, gateway last), then frontend below on :4200.
+Full stack (native): start MongoDB + Elasticsearch, then from `backend/` run each service with `mvn -q -pl <svc> spring-boot:run` (eureka first, gateway last), then frontend below on :4200.
 
 ## Manual E2E (mirrors the 5-min acceptance demo + SRS §6)
 1. Register customer → search "headphones" → open product → recommendations update on Home.
