@@ -4,6 +4,6 @@ COPY . .
 RUN mvn -q -pl order-service -am -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/order-service/target/*.jar app.jar
+COPY --from=build /app/order-service/target/order-service.jar app.jar
 EXPOSE 8086
 ENTRYPOINT ["java","-jar","app.jar"]

@@ -16,6 +16,17 @@
     <dependency>
       <groupId>com.ecom</groupId>
       <artifactId>common-lib</artifactId>
+      <exclusions>
+        <!-- Gateway is reactive (WebFlux); spring-webmvc from starter-validation conflicts -->
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-webmvc</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-web</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>

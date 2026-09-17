@@ -4,6 +4,6 @@ COPY . .
 RUN mvn -q -pl cart-service -am -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/cart-service/target/*.jar app.jar
+COPY --from=build /app/cart-service/target/cart-service.jar app.jar
 EXPOSE 8085
 ENTRYPOINT ["java","-jar","app.jar"]

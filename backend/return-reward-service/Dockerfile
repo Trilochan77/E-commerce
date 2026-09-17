@@ -4,6 +4,6 @@ COPY . .
 RUN mvn -q -pl return-reward-service -am -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/return-reward-service/target/*.jar app.jar
+COPY --from=build /app/return-reward-service/target/return-reward-service.jar app.jar
 EXPOSE 8087
 ENTRYPOINT ["java","-jar","app.jar"]

@@ -195,6 +195,16 @@ services:
         condition: service_started
     restart: unless-stopped
 
+  # ---- Phase 4 frontend (served on :4200 so gateway CORS matches) ----
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ecom-frontend
+    ports: ["4200:80"]
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
 volumes:
   mongo-data:
   es-data:
