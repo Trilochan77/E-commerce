@@ -58,7 +58,6 @@ foreach ($svc in $services) {
     $port = $svc.Port
     $name = $svc.Name
     $logFile = Join-Path $logsDir "$name.log"
-    $logErr = Join-Path $logsDir "$name.err.log"
 
     # Check if already listening
     $active = Test-NetConnection -ComputerName 127.0.0.1 -Port $port -WarningAction SilentlyContinue
