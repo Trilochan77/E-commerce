@@ -14,6 +14,7 @@ import { ReturnStatusComponent } from './features/return-status.component';
 import { WalletComponent } from './features/wallet.component';
 import { ProfileComponent } from './features/profile.component';
 import { AdminLayoutComponent } from './admin/admin-layout.component';
+import { AdminLoginComponent } from './admin/admin-login.component';
 import { AdminDashboardComponent } from './admin/admin-dashboard.component';
 import { AdminProductsComponent } from './admin/admin-products.component';
 import { AdminCategoriesComponent } from './admin/admin-categories.component';
@@ -34,6 +35,7 @@ export const routes: Routes = [
   { path: 'returns', component: ReturnStatusComponent, canActivate: [authGuard] },
   { path: 'wallet', component: WalletComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: 'admin/login', component: AdminLoginComponent },
   {
     path: 'admin',
     component: AdminLayoutComponent,
