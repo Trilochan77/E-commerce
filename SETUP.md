@@ -122,7 +122,9 @@ Must be identical everywhere, minimum 32 characters.
 
 ```powershell
 cd D:\Project\backend
-mvn -q -pl common-lib install
+# full install once (parent pom + common-lib into local repo — required,
+# otherwise gateway/other services fail with "Could not resolve common-lib")
+mvn -q install -DskipTests
 ```
 
 Then one terminal each (keep the JWT line in every terminal):
@@ -199,4 +201,9 @@ Stop: `Ctrl+C` in each terminal.
 - ✅ MongoDB 8.3 running manually (`--dbpath D:\mongo-data`), ping `{ ok: 1 }`.
 - ✅ `mongosh --file seed/mongo_seed.js` — Seeded categories: 5, products: 20.
 - ✅ `mongosh` 2.11.1 installed per-user + added to user PATH (reopen terminal to use bare `mongosh`).
-- ⬜ Gateway/Eureka/microservices not started yet — next step is §5 (JWT secret + `mvn spring-boot:run`, eureka first).
+- ✅ Gateway/Eureka/microservices started and healthy (all `/actuator/health` UP).
+- ✅ End-to-end via gateway verified: register → search (mongodb-fallback, 1 hit) → cart (total 2499) → recommendations (coldStart=True for new user).
+- ✅ `GET /api/products` returns seeded catalog (20 products).
+
+> If a gateway call returns 500 right after startup, wait 30–60s and retry —
+> services need that time to register in Eureka before routing works.
