@@ -15,23 +15,21 @@ import { ToastService } from './toast.service';
         <img [src]="img()" [alt]="product?.name" loading="lazy">
         <div class="tag-row">
           <span class="flag green" *ngIf="inStock()">In stock</span>
-          <span class="flag amber" *ngIf="!inStock()">Low / Out</span>
-          <span class="flag violet" *ngIf="product?.eligibleForReturn || product?.isEligibleForReturn">↩ Rewards</span>
+          <span class="flag amber" *ngIf="!inStock()">Out of stock</span>
+          <span class="flag violet" *ngIf="product?.eligibleForReturn || product?.isEligibleForReturn">Return eligible</span>
         </div>
       </div>
       <div class="product-body">
         <h4><a [routerLink]="['/products', id()]">{{ product?.name }}</a></h4>
         <div class="product-meta">
-          <span class="stars" aria-label="Rated 4 out of 5">★★★★☆</span>
           <span class="muted">{{ product?.category || categoryName() }}</span>
         </div>
         <div class="price-row">
-          <span class="price">₹{{ price() | number }}</span>
-          <span class="price-note" *ngIf="product?.eligibleForReturn">earn up to 80% back</span>
+          <span class="price">Rs.{{ price() | number }}</span>
         </div>
         <div class="quick-add">
           <a [routerLink]="['/products', id()]"><button class="btn-ghost btn-sm">View</button></a>
-          <button class="primary btn-sm" style="padding:7px 12px" *ngIf="auth.isLoggedIn() && inStock()" (click)="quickAdd()">+ Add</button>
+          <button class="primary btn-sm" style="padding:7px 12px" *ngIf="auth.isLoggedIn() && inStock()" (click)="quickAdd()">Add</button>
         </div>
       </div>
     </article>

@@ -16,7 +16,7 @@ import { filter } from 'rxjs';
       <div class="topbar-inner">
         <a routerLink="/" class="brand" aria-label="NextGen Shop home">
           <span class="brand-mark">N</span>
-          <span>NextGen Shop<small>AI picks · Rewards wallet</small></span>
+          <span>NextGen Shop<small>E-Commerce Platform</small></span>
         </a>
         <button class="icon-btn" (click)="menuOpen = !menuOpen" aria-label="Toggle menu">☰</button>
         <form class="nav-search" [class.open]="menuOpen" (ngSubmit)="goSearch()">
@@ -31,7 +31,7 @@ import { filter } from 'rxjs';
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" (click)="menuOpen=false">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" (click)="menuOpen=false">Returns</a>
           <a routerLink="/admin" *ngIf="auth.isAdmin()" routerLinkActive="active" (click)="menuOpen=false">Admin</a>
-          <span class="pill" *ngIf="auth.isLoggedIn() && walletBal!==null" title="Reward wallet balance">⭐ {{ walletBal }} pts</span>
+          <span class="pill" *ngIf="auth.isLoggedIn() && walletBal!==null" title="Reward wallet balance">{{ walletBal }} pts</span>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" routerLinkActive="active" (click)="menuOpen=false">Wallet</a>
           <a routerLink="/profile" *ngIf="auth.isLoggedIn()" routerLinkActive="active" (click)="menuOpen=false">Profile</a>
           <a routerLink="/login" *ngIf="!auth.isLoggedIn()">Login</a>
@@ -47,7 +47,7 @@ import { filter } from 'rxjs';
       <div class="footer-inner">
         <div>
           <div class="brand" style="margin-bottom:8px"><span class="brand-mark">N</span><span>NextGen Shop</span></div>
-          <p class="muted">Hyper-personalized catalog, transparent condition-based returns, and a wallet that actually pays you back (1 pt = ₹1, up to 20% off).</p>
+          <p class="muted">Personalized catalog, transparent condition-based returns, and a reward wallet (1 pt = Rs.1, up to 20% off).</p>
         </div>
         <div>
           <h4>Shop</h4>
@@ -67,7 +67,6 @@ import { filter } from 'rxjs';
     </footer>
     <div class="toast-wrap" aria-live="polite">
       <div class="toast" *ngFor="let t of toasts" [ngClass]="t.kind">
-        <span>{{ t.kind === 'ok' ? '✅' : t.kind === 'err' ? '⚠️' : 'ℹ️' }}</span>
         <span>{{ t.msg }}</span>
       </div>
     </div>
