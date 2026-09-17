@@ -334,11 +334,15 @@ export JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"
 
 Start MongoDB and Elasticsearch natively (or use Atlas / Elastic Cloud), then Eureka + Gateway via Maven:
 
-```bash
-# start local mongod + elasticsearch (or ensure Atlas/Cloud URIs are reachable)
+```powershell
+# Administrator PowerShell (normal terminals can't start the service):
+Start-Service MongoDB
+# verify:
 mongosh --eval "db.adminCommand('ping')"
-curl http://localhost:9200/_cluster/health
+curl http://localhost:9200   # optional — search falls back to MongoDB if ES is down
 ```
+
+See `SETUP.md` for the full step-by-step (incl. manual `mongod` fallback and verified environment notes).
 
 Verify service status:
 - **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)

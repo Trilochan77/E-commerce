@@ -4,14 +4,14 @@ Run everything natively on your machine. No Docker needed.
 
 ## 1. Prerequisites
 
-| Tool | Check | Install if missing |
+| Tool | This machine | Install / fix if missing |
 |---|---|---|
-| Java JDK 17+ | `java -version` | Already OK (Java 25 works with `--release 17`) |
-| Maven 3.9+ | `mvn -version` | `winget install Apache.Maven` |
-| Node.js 20+ + npm | `node --version`, `npm --version` | Already OK (Node 24 works) |
-| MongoDB 7+ | Windows Service `MongoDB` | Install MongoDB Community Server |
-| mongosh | `mongosh --version` | `winget install MongoDB.Shell` |
-| Elasticsearch 8.11+ | `curl http://localhost:9200` | Optional — search falls back to MongoDB |
+| Java JDK 17+ | ✅ Java 25 (works, compiles `--release 17`) | — |
+| Maven 3.9+ | ✅ 3.9.16 | `winget install Apache.Maven` |
+| Node.js 20+ + npm | ✅ Node 24 + npm 11 | — |
+| MongoDB | ✅ Server 8.3 installed, service `MongoDB` present but **Stopped** | Start it, **as Administrator** (see §2) |
+| mongosh | ❌ **Missing** | `winget install MongoDB.Shell` (reopen terminal after) |
+| Elasticsearch | ⚠️ 9.5.4 zip at `D:\elasticsearch-9.5.4`, no Windows service | Start manually (see §3), or skip — search falls back to MongoDB |
 
 Defaults already point to localhost, so no config files need editing:
 
@@ -23,10 +23,22 @@ Defaults already point to localhost, so no config files need editing:
 
 ## 2. Start MongoDB
 
+> The service **must be started from an Administrator PowerShell**.
+> A normal terminal fails with `Cannot open MongoDB service` (verified).
+
 ```powershell
+# Run PowerShell AS ADMINISTRATOR:
 Start-Service MongoDB
 Get-Service MongoDB   # should say Running
+# back in your normal terminal:
 mongosh --eval "db.adminCommand('ping')"
+```
+
+No admin rights? Run `mongod` manually instead:
+
+```powershell
+mkdir C:\data\db -Force   # first time only
+& "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" --dbpath C:\data\db
 ```
 
 ## 3. Start Elasticsearch (optional)
@@ -34,10 +46,18 @@ mongosh --eval "db.adminCommand('ping')"
 Skip this if you want — search still works via MongoDB fallback
 (`source: mongodb-fallback` in search results).
 
-If you want full search:
+This machine already has Elasticsearch **9.5.4** at `D:\elasticsearch-9.5.4`
+(no Windows service — start it manually):
 
-1. Download Elasticsearch 8.11, unzip, run `bin\elasticsearch.bat`.
-2. Verify: `curl http://localhost:9200/_cluster/health`
+```powershell
+D:\elasticsearch-9.5.4\bin\elasticsearch.bat
+# verify in another terminal:
+curl http://localhost:9200
+```
+
+> Note: the project targets Elasticsearch 8.11. Version 9.x may log
+> warnings with Spring Data Elasticsearch — if search misbehaves,
+> stop ES and rely on the MongoDB fallback.
 
 ## 4. Seed the database
 
@@ -122,8 +142,18 @@ Stop: `Ctrl+C` in each terminal.
 | Symptom | Fix |
 |---|---|
 | `mongosh: command not found` | `winget install MongoDB.Shell`, reopen terminal |
-| Mongo ping fails | `Start-Service MongoDB` |
-| `Could not resolve common-lib` | Run `mvn -q -pl backend/common-lib install` first |
+| `Cannot open MongoDB service` | Terminal is not admin — right-click PowerShell → Run as administrator, then `Start-Service MongoDB` |
+| Mongo ping fails | Service not running (see §2), or `mongod --dbpath` terminal was closed |
+| `Could not resolve common-lib` | From `backend/`, run `mvn -q -pl common-lib install` first |
 | `401` everywhere | JWT secret missing or different between terminals |
 | Search shows `mongodb-fallback` | Normal — Elasticsearch is down, search still works |
-| Port already in use | Old `java.exe` still running — stop it in Task Manager |
+| Port already in use | Old `java.exe` / `ng serve` still running — stop it or kill in Task Manager |
+| ES 9.x errors on search | Version mismatch (project targets 8.11) — stop ES, use MongoDB fallback |
+
+## 11. Verified on this machine (2026-09-17)
+
+- ✅ `mvn -DskipTests compile` in `backend/` — all 10 modules compile.
+- ✅ `ng serve` in `frontend/` — app serves on http://localhost:4200 (Angular `app-root` confirmed).
+- ✅ No Docker files or references left in the repo.
+- ⬜ Gateway/Eureka/microservices not started yet (need MongoDB up first).
+- ⬜ Seed not run yet (blocked on missing `mongosh` + stopped MongoDB).
