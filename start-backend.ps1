@@ -22,16 +22,30 @@ Write-Host "`n========================================================" -Foregro
 Write-Host "  Starting E-Commerce Microservices (Native / No-Docker)" -ForegroundColor Cyan
 Write-Host "========================================================`n" -ForegroundColor Cyan
 
-# 1. MongoDB Check
+# 1. MongoDB Check — self-start without Admin (service control needs
+# elevation, so fall back to manual mongod on D:\mongo-data like SETUP.md §2)
 Write-Host "[1/3] Checking native MongoDB (port 27017)..." -NoNewline
 $mongoConn = Test-NetConnection -ComputerName 127.0.0.1 -Port 27017 -WarningAction SilentlyContinue
 if (-not $mongoConn.TcpTestSucceeded) {
-    Write-Host " NOT RUNNING. Starting mongod..." -ForegroundColor Yellow
+    Write-Host " NOT RUNNING. Starting manual mongod (no Admin needed)..." -ForegroundColor Yellow
     $mongodPath = "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe"
-    $mongodCfg = "C:\Program Files\MongoDB\Server\8.3\bin\mongod.cfg"
+    $dbPath = "D:\mongo-data"
+    if (-not (Test-Path $dbPath)) {
+        New-Item -ItemType Directory -Path $dbPath -Force | Out-Null
+    }
     if (Test-Path $mongodPath) {
-        Start-Process -FilePath $mongodPath -ArgumentList "--config `"$mongodCfg`"" -WindowStyle Hidden
-        Start-Sleep -Seconds 2
+        Start-Process -FilePath $mongodPath -ArgumentList "--dbpath", $dbPath, "--port", "27017", "--bind_ip", "127.0.0.1", "--logpath", (Join-Path $dbPath "mongod.log")
+        $mongoUp = $false
+        for ($i = 0; $i -lt 10; $i++) {
+            Start-Sleep -Seconds 2
+            $c = Test-NetConnection -ComputerName 127.0.0.1 -Port 27017 -WarningAction SilentlyContinue
+            if ($c.TcpTestSucceeded) { $mongoUp = $true; break }
+        }
+        if ($mongoUp) {
+            Write-Host " MongoDB is UP" -ForegroundColor Green
+        } else {
+            Write-Warning "mongod did not open port 27017 (log: $dbPath\mongod.log). Start it manually, then re-run this script."
+        }
     } else {
         Write-Warning "Could not find mongod at standard path. Please start MongoDB manually."
     }

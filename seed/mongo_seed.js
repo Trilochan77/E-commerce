@@ -21,7 +21,7 @@ const P = (id, name, desc, price, cat, stock, eligible) => ({
   _id: id, name, description: desc, price, categoryId: cat,
   images: [],
   stockQuantity: stock, availability: stock > 0,
-  isEligibleForReturn: eligible, createdAt: new Date(), updatedAt: new Date()
+  eligibleForReturn: eligible, createdAt: new Date(), updatedAt: new Date()
 });
 
 db.products.insertMany([
