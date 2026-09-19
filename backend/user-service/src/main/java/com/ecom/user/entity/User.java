@@ -14,6 +14,7 @@ public class User {
   private String phone;
   private String address;
   private String role; // CUSTOMER | ADMIN
+  private Boolean active; // null = active (pre-flag docs stay usable)
   private Instant createdAt = Instant.now();
 
   public String getId() { return id; }
@@ -30,6 +31,10 @@ public class User {
   public void setAddress(String address) { this.address = address; }
   public String getRole() { return role; }
   public void setRole(String role) { this.role = role; }
+  public Boolean getActive() { return active; }
+  public void setActive(Boolean active) { this.active = active; }
+  /** Missing flag on old docs means active. */
+  public boolean isActive() { return active == null || active; }
   public Instant getCreatedAt() { return createdAt; }
   public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

@@ -98,6 +98,14 @@ export class ShopService {
     return this.http.get(`${GATEWAY}/api/users`, { headers: this.adminHeaders() });
   }
 
+  userBlock(id: string, blocked: boolean): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/users/${id}/block`, { blocked }, { headers: this.adminHeaders() });
+  }
+
+  userDelete(id: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/users/${id}`, { headers: this.adminHeaders() });
+  }
+
   productCreate(body: any): Observable<any> {
     return this.http.post(`${GATEWAY}/api/products`, body, { headers: this.adminHeaders() });
   }

@@ -57,4 +57,24 @@ public class AuthController {
     if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin only");
     return auth.allUsers();
   }
+
+  @PutMapping("/api/users/{id}/block")
+  public Map<String, Object> block(
+      @RequestHeader("Authorization") String authHeader,
+      @RequestHeader(value = "X-Role", required = false) String role,
+      @PathVariable String id, @RequestBody Map<String, Boolean> body) {
+    if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin only");
+    boolean active = !Boolean.TRUE.equals(body.get("blocked"));
+    if (body.containsKey("active")) active = Boolean.TRUE.equals(body.get("active"));
+    return auth.setActive(auth.adminId(bearer(authHeader)), id, active);
+  }
+
+  @DeleteMapping("/api/users/{id}")
+  public Map<String, Object> delete(
+      @RequestHeader("Authorization") String authHeader,
+      @RequestHeader(value = "X-Role", required = false) String role,
+      @PathVariable String id) {
+    if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin only");
+    return auth.deleteUser(auth.adminId(bearer(authHeader)), id);
+  }
 }

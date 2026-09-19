@@ -91,6 +91,9 @@ public class AuthService {
     if (u == null || !encoder.matches(req.password(), u.getPasswordHash())) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
     }
+    if (!u.isActive()) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Account blocked by admin");
+    }
     ensureWallet(u.getId());
     String token = JwtUtil.generateToken(u.getId(), u.getEmail(), u.getRole(), jwtSecret, jwtTtl);
     return new AuthResponse(token, u.getId(), u.getEmail(), u.getRole());
@@ -130,7 +133,45 @@ public class AuthService {
   public java.util.List<java.util.Map<String, Object>> allUsers() {
     return users.findAll().stream()
         .map(u -> java.util.Map.<String, Object>of("userId", u.getId(), "name",
-            u.getName() == null ? "" : u.getName(), "email", u.getEmail(), "role", u.getRole()))
+            u.getName() == null ? "" : u.getName(), "email", u.getEmail(), "role", u.getRole(),
+            "active", u.isActive()))
         .toList();
+  }
+
+  /** Admin block/unblock. Self-block and last-admin-block are rejected. */
+  public java.util.Map<String, Object> setActive(String adminId, String targetId, boolean active) {
+    User target = users.findById(targetId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    if (target.getId().equals(adminId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot block yourself");
+    }
+    if (!active && "ADMIN".equals(target.getRole())
+        && users.findAll().stream().filter(x -> "ADMIN".equals(x.getRole()) && x.isActive()).count() <= 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot block the last active admin");
+    }
+    target.setActive(active);
+    users.save(target);
+    return java.util.Map.of("userId", target.getId(), "active", target.isActive());
+  }
+
+  /** Admin delete. Self-delete and last-admin-delete are rejected. */
+  public java.util.Map<String, Object> deleteUser(String adminId, String targetId) {
+    User target = users.findById(targetId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    if (target.getId().equals(adminId)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot delete yourself");
+    }
+    if ("ADMIN".equals(target.getRole())
+        && users.findAll().stream().filter(x -> "ADMIN".equals(x.getRole())).count() <= 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot delete the last admin");
+    }
+    users.deleteById(targetId);
+    wallets.findByUserId(targetId).ifPresent(wallets::delete);
+    return java.util.Map.of("deleted", targetId);
+  }
+
+  /** Caller admin id from the JWT subject. */
+  public String adminId(String token) {
+    return me(token).getId();
   }
 }
