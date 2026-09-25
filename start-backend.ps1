@@ -4,7 +4,8 @@
 param(
     [ValidateSet("jar", "maven")]
     [string]$Mode = "jar",
-    [switch]$KeepAlive = $false
+    [switch]$KeepAlive = $false,
+    [switch]$AllowManualMongo = $false
 )
 
 $ErrorActionPreference = "Continue"
@@ -22,12 +23,18 @@ Write-Host "`n========================================================" -Foregro
 Write-Host "  Starting E-Commerce Microservices (Native / No-Docker)" -ForegroundColor Cyan
 Write-Host "========================================================`n" -ForegroundColor Cyan
 
-# 1. MongoDB Check — self-start without Admin (service control needs
-# elevation, so fall back to manual mongod on D:\mongo-data like SETUP.md §2)
+# 1. MongoDB Check — service-only (like MySQL: DB must already be running,
+# backend just connects). No auto-creation of D:\mongo-data. Use
+# -AllowManualMongo only if you explicitly want the manual mongod fallback.
 Write-Host "[1/3] Checking native MongoDB (port 27017)..." -NoNewline
 $mongoConn = Test-NetConnection -ComputerName 127.0.0.1 -Port 27017 -WarningAction SilentlyContinue
 if (-not $mongoConn.TcpTestSucceeded) {
-    Write-Host " NOT RUNNING. Starting manual mongod (no Admin needed)..." -ForegroundColor Yellow
+    if (-not $AllowManualMongo) {
+        Write-Host " NOT RUNNING." -ForegroundColor Red
+        Write-Error "MongoDB is down on 127.0.0.1:27017. Start the Windows service, then re-run:`n  # Admin PowerShell:`n  Start-Service MongoDB`n  # then:`n  .\start-backend.ps1`nOpt-in manual fallback (recreates D:\mongo-data): .\start-backend.ps1 -AllowManualMongo"
+        exit 1
+    }
+    Write-Host " NOT RUNNING. Starting manual mongod (-AllowManualMongo)..." -ForegroundColor Yellow
     $mongodPath = "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe"
     $dbPath = "D:\mongo-data"
     if (-not (Test-Path $dbPath)) {

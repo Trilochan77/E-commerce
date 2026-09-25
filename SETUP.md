@@ -21,10 +21,13 @@ Defaults already point to localhost, so no config files need editing:
 - Gateway: `http://localhost:8080`
 - Frontend: `http://localhost:4200`
 
-## 2. Start MongoDB
+## 2. Start MongoDB (service-only, like MySQL)
 
+> MongoDB must already be running before the backend — the backend only
+> connects (`mongodb://localhost:27017/ecom`). `start-backend.ps1` no longer
+> creates `D:\mongo-data`; it fails fast with the command below.
+>
 > The service **must be started from an Administrator PowerShell**.
-> A normal terminal fails with `Cannot open MongoDB service` (verified).
 > Confirm elevation first — this must print `admin=True`:
 >
 > ```powershell
@@ -35,22 +38,16 @@ Defaults already point to localhost, so no config files need editing:
 > then:
 
 ```powershell
-# Run PowerShell AS ADMINISTRATOR:
+# Run PowerShell AS ADMINISTRATOR (one time; then it stays Automatic):
+Set-Service MongoDB -StartupType Automatic
 Start-Service MongoDB
 Get-Service MongoDB   # should say Running
 # back in your normal terminal:
 mongosh --eval "db.adminCommand('ping')"
 ```
 
-No admin rights? Or the service won't start? Run `mongod` manually instead
-(no admin needed, `D:\mongo-data` already created — **verified working**):
-
-```powershell
-Start-Process -FilePath "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" -ArgumentList "--dbpath","D:\mongo-data","--port","27017","--bind_ip","127.0.0.1","--logpath","D:\mongo-data\mongod.log"
-# verify:
-mongosh --eval "db.adminCommand('ping')"   # → { ok: 1 }
-# logs: D:\mongo-data\mongod.log. Stop it via Task Manager (mongod.exe) when done.
-```
+> Opt-in manual fallback (recreates `D:\mongo-data`, empty DB — not recommended):
+> `.\start-backend.ps1 -AllowManualMongo`. Prefer the service above.
 
 > If `mongod` fails with `Address already in use` on 27017, a leftover
 > `docker-desktop` WSL distro is holding the port — stop it once with

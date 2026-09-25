@@ -72,15 +72,11 @@ cd D:\Project
 
 ## ⚠️ Prerequisites (first time only)
 
-1. **MongoDB** must be running on port `27017`
+1. **MongoDB** must be running on port `27017` (service-only — backend just connects)
    ```powershell
-   # Admin PowerShell:
+   # Admin PowerShell (one time; stays Automatic after):
+   Set-Service MongoDB -StartupType Automatic
    Start-Service MongoDB
-   ```
-   No admin? Run `mongod` manually:
-   ```powershell
-   Start-Process -FilePath "C:\Program Files\MongoDB\Server\8.3\bin\mongod.exe" `
-     -ArgumentList "--dbpath","D:\mongo-data","--port","27017","--bind_ip","127.0.0.1"
    ```
 
 2. **Seed the database** (once):
