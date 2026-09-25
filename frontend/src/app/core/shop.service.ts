@@ -93,8 +93,9 @@ export class ShopService {
     return this.http.get(`${GATEWAY}/api/orders/user/${userId}`);
   }
 
-  estimate(productId: string, condition: string): Observable<any> {
-    const params = new HttpParams().set('productId', productId).set('quantity', 1).set('condition', condition);
+  estimate(productId: string, condition: string, orderId = ''): Observable<any> {
+    let params = new HttpParams().set('productId', productId).set('quantity', 1).set('condition', condition);
+    if (orderId) params = params.set('orderId', orderId);
     return this.http.get(`${GATEWAY}/api/rewards/estimate`, { params });
   }
 
@@ -156,6 +157,10 @@ export class ShopService {
 
   orderStatus(id: string, status: string): Observable<any> {
     return this.http.put(`${GATEWAY}/api/orders/${id}/status`, { status }, { headers: this.adminHeaders() });
+  }
+
+  orderPayment(id: string, paymentStatus: string): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/orders/${id}/payment`, { paymentStatus }, { headers: this.adminHeaders() });
   }
 
   allReturns(status = ''): Observable<any> {

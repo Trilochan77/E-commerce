@@ -27,7 +27,8 @@ import { ToastService } from '../shared/toast.service';
           <td class="muted" style="max-width:220px">{{ o.shippingAddress ? (o.shippingAddress.fullName + ', ' + o.shippingAddress.addressLine + ', ' + o.shippingAddress.city + ' — ' + o.shippingAddress.pincode) : '—' }}</td>
           <td class="muted">{{ itemCount(o) }} items</td>
           <td><strong>Rs.{{ o.payableAmount ?? o.totalAmount }}</strong></td>
-          <td><span class="badge" [ngClass]="o.paymentStatus==='PAID' ? 'ok' : 'warn'">{{ o.paymentStatus }}</span></td>
+          <td><span class="badge" [ngClass]="o.paymentStatus==='PAID' ? 'ok' : (o.paymentStatus==='PENDING' ? 'info' : 'warn')">{{ o.paymentMethod || '' }} · {{ o.paymentStatus }}</span>
+            <div><button class="btn-ghost btn-sm" *ngIf="o.paymentMethod==='COD' && o.paymentStatus==='PENDING'" (click)="collect(o)">Mark cash collected</button></div></td>
           <td><span class="badge info">{{ o.orderStatus }}</span></td>
           <td><select [ngModel]="o.orderStatus" (ngModelChange)="setStatus(o, $event)" style="max-width:150px">
             <option>PLACED</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELLED</option>
@@ -71,7 +72,15 @@ export class AdminOrdersComponent implements OnInit {
     if (o.orderStatus === status) return;
     if (!confirm('Move order ' + (o.id || o._id) + ' to ' + status + '?')) return;
     this.shop.orderStatus(o.id || o._id, status).subscribe({
-      next: (u: any) => { o.orderStatus = u.orderStatus || status; this.toast.ok('Order → ' + o.orderStatus); },
+      next: (u: any) => { o.orderStatus = u.orderStatus || status; if (u.paymentStatus) o.paymentStatus = u.paymentStatus; this.toast.ok('Order → ' + o.orderStatus); },
+      error: (e) => this.toast.err(e.error?.message || 'Update failed')
+    });
+  }
+
+  collect(o: any): void {
+    if (!confirm('Confirm cash collected for ' + (o.id || o._id) + '?')) return;
+    this.shop.orderPayment(o.id || o._id, 'PAID').subscribe({
+      next: (u: any) => { o.paymentStatus = u.paymentStatus || 'PAID'; this.toast.ok('Cash collected → PAID'); },
       error: (e) => this.toast.err(e.error?.message || 'Update failed')
     });
   }

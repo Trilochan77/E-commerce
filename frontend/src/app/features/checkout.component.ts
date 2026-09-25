@@ -70,11 +70,12 @@ import { ToastService } from '../shared/toast.service';
         <div class="card" style="margin:0">
           <h2> Payment Method</h2>
           <div class="pay-grid">
-            <div class="pay-card" [class.on]="method==='COD'" (click)="method='COD'"><strong> COD</strong><span class="muted">Pay on delivery</span></div>
-            <div class="pay-card" [class.on]="method==='UPI'" (click)="method='UPI'"><strong> UPI</strong><span class="muted">Instant mock pay</span></div>
-            <div class="pay-card" [class.on]="method==='CARD'" (click)="method='CARD'"><strong> Card</strong><span class="muted">Mock gateway</span></div>
+            <div class="pay-card" [class.on]="method==='COD'" (click)="method='COD'"><strong> COD</strong><span class="muted">Cash on delivery · pay later</span></div>
+            <div class="pay-card" [class.on]="method==='UPI'" (click)="method='UPI'"><strong> UPI</strong><span class="muted">Pay now · mock success</span></div>
+            <div class="pay-card" [class.on]="method==='CARD'" (click)="method='CARD'"><strong> Card</strong><span class="muted">Pay now · mock gateway</span></div>
           </div>
-          <p class="muted">Mock payment: always succeeds in demo. Failure path surfaces “order not created”.</p>
+          <p class="muted" *ngIf="method==='COD'">COD: order stays <strong>PENDING</strong> until cash is collected (auto-PAID on delivery).</p>
+          <p class="muted" *ngIf="method!=='COD'">UPI/Card: charged now in mock gateway → order becomes <strong>PAID</strong>.</p>
         </div>
       </div>
       <aside class="card summary">
@@ -85,7 +86,7 @@ import { ToastService } from '../shared/toast.service';
         <div class="divider"></div>
         <p class="muted" *ngIf="selected">Deliver to: <strong>{{ selected.fullName }}</strong>, {{ selected.addressLine }}, {{ selected.city }} — {{ selected.pincode }}</p>
         <div class="row" style="justify-content:space-between"><span>To pay</span><span class="total">₹{{ payable() | number }}</span></div>
-        <button class="primary" style="width:100%;margin-top:10px" (click)="pay()" [disabled]="!cart?.items?.length || paying || !selected">{{ paying ? 'Processing…' : (selected ? 'Pay & Place Order' : 'Select address first') }}</button>
+        <button class="primary" style="width:100%;margin-top:10px" (click)="pay()" [disabled]="!cart?.items?.length || paying || !selected">{{ paying ? 'Processing…' : (selected ? (method==='COD' ? 'Place Order (Pay on Delivery)' : 'Pay & Place Order') : 'Select address first') }}</button>
         <p class="error" *ngIf="error">{{ error }}</p>
         <p class="muted" style="text-align:center">Stock re-validated · wallet deducted atomically</p>
       </aside>
@@ -193,7 +194,11 @@ export class CheckoutComponent implements OnInit {
       landmark: this.selected.landmark || '', addressType: this.selected.addressType || 'HOME'
     };
     this.shop.checkout(this.auth.userId(), this.method, +this.points || 0, this.selectedId, snap).subscribe({
-      next: () => { this.toast.ok('Order placed!'); this.router.navigate(['/orders']); },
+      next: (o: any) => {
+        const paid = (o?.paymentStatus || (this.method === 'COD' ? 'PENDING' : 'PAID')).toUpperCase();
+        this.toast.ok(paid === 'PENDING' ? 'Order placed! Pay cash on delivery.' : 'Payment successful! Order placed.');
+        this.router.navigate(['/orders']);
+      },
       error: (e) => { this.error = e.error?.message || 'Payment failed — order not created'; this.paying = false; this.toast.err(this.error); }
     });
   }

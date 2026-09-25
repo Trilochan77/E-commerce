@@ -32,8 +32,8 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <div class="price-row" style="margin:8px 0"><span class="price" style="font-size:28px">₹{{ product.price | number }}</span><span class="price-note">inclusive of taxes</span></div>
         <p class="muted">{{ product.description }}</p>
         <div class="reward-box" *ngIf="product.eligibleForReturn">
-          <strong> Return & earn back</strong>
-          <div class="muted">LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet points (1 pt = ₹1)</div>
+          <strong> Easy returns</strong>
+          <div class="muted">≤14 days: 100% money back · after 14d (to 90d): LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet pts</div>
           <div class="muted">Est. on LIKE_NEW: <strong style="color:#15803d">₹{{ estLikeNew() | number }} pts</strong></div>
         </div>
         <div class="buy-box" style="margin-top:12px" *ngIf="auth.isLoggedIn(); else loginCta">
@@ -48,7 +48,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <ng-template #loginCta><p><a routerLink="/login"><button class="primary">Login to buy</button></a></p></ng-template>
         <div class="trust">
           <div>🚚 <strong>Fast delivery</strong><br>2–4 days · free over ₹999</div>
-          <div> <strong>14-day returns</strong><br>eligible items earn wallet pts</div>
+          <div> <strong>14-day refunds</strong><br>full money back · pts to 90d</div>
           <div>🔒 <strong>Secure pay</strong><br>COD · UPI · Card (mock)</div>
         </div>
       </div>
@@ -61,10 +61,11 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
       </div>
       <p *ngIf="tab==='desc'" class="muted">{{ product?.description || 'Quality-assured product synced to search index. Stock validated at cart, checkout and order time.' }}</p>
       <div *ngIf="tab==='returns'">
+        <p class="muted"><strong>≤14 days:</strong> 100% money back after inspection (condition gates pass/fail).</p>
         <div class="reward-compare">
           <div class="reward-box" *ngFor="let c of ['LIKE_NEW','GOOD','FAIR','POOR']"><strong>{{ c }}</strong><div class="muted">{{ (MULT[c]*100) }}% of price</div><div class="price">₹{{ floor(product.price * MULT[c]) | number }} pts</div></div>
         </div>
-        <p class="muted">Estimated at claim time, final after warehouse inspection. NOT_ELIGIBLE = 0 pts.</p>
+        <p class="muted">Points track (after 14d, to 90d): estimated at claim, final after inspection. NOT_ELIGIBLE = 0.</p>
       </div>
       <p *ngIf="tab==='reco'" class="muted">Scored as 3× purchase-category + 2× views + 2× search-match + 1× popularity. Viewing this item logged a VIEW event to improve your rail.</p>
     </div>

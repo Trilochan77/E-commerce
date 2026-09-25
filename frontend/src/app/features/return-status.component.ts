@@ -13,13 +13,14 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
   imports: [CommonModule, RouterModule, EmptyStateComponent],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Returns</div>
-    <div class="page-head"><div><h1 style="font-size:28px">Returns & Rewards</h1><p>Estimated upfront → verified after inspection → wallet credited.</p></div>
+    <div class="page-head"><div><h1 style="font-size:28px">Returns & Refunds</h1><p>≤14 days: full money back · after 14 days (to 90): wallet points.</p></div>
       <a routerLink="/orders"><button class="btn-ghost btn-sm">+ New return from orders</button></a></div>
     <div class="stack" *ngIf="returns.length; else none">
       <div class="card" style="margin:0" *ngFor="let r of returns">
         <div class="row" style="justify-content:space-between">
           <div class="row"><strong>{{ r.id || r._id }}</strong>
             <span class="badge" [ngClass]="r.status === 'REJECTED' ? 'bad' : (r.status === 'COMPLETED' || r.status === 'APPROVED_FOR_REWARD' ? 'ok' : 'info')">{{ r.status.replaceAll('_',' ') }}</span>
+            <span class="badge violet" *ngIf="r.returnType">{{ (r.returnType || '').replaceAll('_',' ') }}</span>
           </div>
           <span class="muted">{{ r.createdAt }}</span>
         </div>
@@ -28,14 +29,18 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
           <span *ngFor="let s of flow" class="t" [ngClass]="stepClass(r.status, s)">{{ s === r.status ? '● ' : s === 'REJECTED' ? '' : '○ ' }}{{ s.replaceAll('_',' ') }}</span>
           <span *ngIf="r.status==='REJECTED'" class="t bad">● REJECTED</span>
         </div>
-        <div class="reward-compare">
+        <div class="reward-compare" *ngIf="(r.returnType || 'REWARD_POINTS') === 'REWARD_POINTS'">
           <div class="reward-box"><div class="muted">Estimated (claimed {{ r.claimedCondition }})</div><div style="font-size:22px;font-weight:800">{{ r.estimatedReward }} pts</div></div>
           <div class="reward-box final"><div class="muted">Final {{ r.verifiedCondition ? '(verified '+r.verifiedCondition+')' : '· pending inspection' }}</div><div style="font-size:22px;font-weight:800">{{ r.finalReward != null ? r.finalReward + ' pts' : '—' }}</div></div>
+        </div>
+        <div class="reward-compare" *ngIf="r.returnType === 'FULL_REFUND'">
+          <div class="reward-box"><div class="muted">Refund due (100%)</div><div style="font-size:22px;font-weight:800">₹{{ r.finalRefund ?? r.estimatedRefund ?? '—' }}</div></div>
+          <div class="reward-box final"><div class="muted">{{ r.refundStatus || 'PENDING' }}{{ r.refundMethod && r.refundMethod !== 'NONE' ? ' · ' + r.refundMethod : '' }}</div><div style="font-size:22px;font-weight:800">{{ r.verifiedCondition ? r.verifiedCondition : 'pending inspection' }}</div></div>
         </div>
         <p class="muted" *ngIf="r.adminNote">📝 Inspector: {{ r.adminNote }}</p>
       </div>
     </div>
-    <ng-template #none><app-empty-state icon="" title="No returns yet" hint="Delivered items can be returned for wallet points." ctaLink="/orders" ctaLabel="Go to orders"></app-empty-state></ng-template>
+    <ng-template #none><app-empty-state icon="" title="No returns yet" hint="Delivered items: full refund within 14 days, points to 90 days." ctaLink="/orders" ctaLabel="Go to orders"></app-empty-state></ng-template>
   `
 })
 export class ReturnStatusComponent implements OnInit {

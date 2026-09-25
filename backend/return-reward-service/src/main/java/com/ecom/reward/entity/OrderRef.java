@@ -11,6 +11,7 @@ public class OrderRef {
   @Id private String id;
   private String userId;
   private List<Item> items;
+  private String paymentMethod;
   private String paymentStatus;
   private String orderStatus;
   private Instant orderDate;
@@ -21,6 +22,8 @@ public class OrderRef {
   public void setUserId(String userId) { this.userId = userId; }
   public List<Item> getItems() { return items; }
   public void setItems(List<Item> items) { this.items = items; }
+  public String getPaymentMethod() { return paymentMethod; }
+  public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
   public String getPaymentStatus() { return paymentStatus; }
   public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
   public String getOrderStatus() { return orderStatus; }

@@ -45,4 +45,9 @@ public class OrderController {
   public Order status(@PathVariable String orderId, @RequestBody Map<String, String> body) {
     return svc.updateStatus(orderId, body.getOrDefault("status", "PLACED"));
   }
+
+  @PutMapping("/api/orders/{orderId}/payment")
+  public Order payment(@PathVariable String orderId, @RequestBody Map<String, String> body) {
+    return svc.updatePayment(orderId, body.getOrDefault("paymentStatus", "PAID"));
+  }
 }

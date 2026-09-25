@@ -24,8 +24,9 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
     <p class="error" *ngIf="error">{{ error }}</p>
     <div class="card tight" *ngFor="let r of returns">
       <div class="row" style="justify-content:space-between">
-        <div class="row" style="margin:0"><strong>{{ r.id || r._id }}</strong><span class="badge info">{{ label(r.status) }}</span></div>
-        <span class="badge violet">Est {{ r.estimatedReward ?? '—' }} → Final {{ r.finalReward ?? '—' }}</span>
+        <div class="row" style="margin:0"><strong>{{ r.id || r._id }}</strong><span class="badge info">{{ label(r.status) }}</span><span class="badge violet">{{ label(r.returnType || 'REWARD_POINTS') }}</span></div>
+        <span class="badge violet" *ngIf="(r.returnType || 'REWARD_POINTS') === 'REWARD_POINTS'">Est {{ r.estimatedReward ?? '—' }} → Final {{ r.finalReward ?? '—' }}</span>
+        <span class="badge ok" *ngIf="r.returnType === 'FULL_REFUND'">Refund ₹{{ r.finalRefund ?? r.estimatedRefund ?? '—' }} · {{ r.refundStatus || 'PENDING' }}</span>
       </div>
       <p class="muted">User {{ r.userId }} · Order {{ r.orderId }} · Product {{ r.productId }} × {{ r.quantity }} · Claimed <strong>{{ r.claimedCondition }}</strong> · Verified {{ r.verifiedCondition || '—' }}</p>
       <p class="muted" *ngIf="r.reason">Reason: {{ r.reason }}</p>
@@ -45,9 +46,10 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
           <option>LIKE_NEW</option><option>GOOD</option><option>FAIR</option><option>POOR</option><option>NOT_ELIGIBLE</option>
         </select>
         <input [(ngModel)]="r._evalNote" placeholder="Inspection note" style="flex:1;min-width:200px">
-        <button class="primary btn-sm" (click)="evaluate(r)">Evaluate & credit</button>
+        <button class="primary btn-sm" (click)="evaluate(r)">{{ r.returnType === 'FULL_REFUND' ? 'Approve refund' : 'Evaluate & credit' }}</button>
       </div>
-      <p class="muted">Multipliers: LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% · NOT_ELIGIBLE 0%</p>
+      <p class="muted" *ngIf="(r.returnType || 'REWARD_POINTS') === 'REWARD_POINTS'">Multipliers: LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% · NOT_ELIGIBLE 0%</p>
+      <p class="muted" *ngIf="r.returnType === 'FULL_REFUND'">Full refund: any pass condition refunds 100% · NOT_ELIGIBLE rejects with ₹0</p>
     </div>
     <p class="muted" *ngIf="!returns.length && !loading">No returns for this filter.</p>
     <p class="muted" *ngIf="loading"><span class="spinner"></span> Loading…</p>
@@ -94,8 +96,11 @@ export class AdminReturnsComponent implements OnInit {
       next: (u: any) => {
         r.status = u.status || r.status;
         r.finalReward = u.finalReward;
+        r.finalRefund = u.finalRefund;
+        r.refundStatus = u.refundStatus;
+        r.refundMethod = u.refundMethod;
         r.verifiedCondition = u.verifiedCondition;
-        this.toast.ok('Credited ' + (u.finalReward || 0) + ' pts');
+        this.toast.ok(u.returnType === 'FULL_REFUND' ? 'Refunded ₹' + (u.finalRefund || 0) : 'Credited ' + (u.finalReward || 0) + ' pts');
       },
       error: (e) => this.toast.err(e.error?.message || 'Evaluation failed')
     });

@@ -13,7 +13,7 @@ import { filter } from 'rxjs';
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <header class="topbar" *ngIf="!isAdminPage">
-      <div class="announce">Free delivery over Rs.999 &nbsp;·&nbsp; 14-day easy returns &nbsp;·&nbsp; <strong>Wallet points on every eligible return</strong></div>
+      <div class="announce">Free delivery over Rs.999 &nbsp;·&nbsp; 14-day full refunds &nbsp;·&nbsp; <strong>Reward points to 90 days</strong></div>
       <div class="topbar-inner">
         <a routerLink="/" class="brand" aria-label="NextGen Shop home">
           <span class="brand-mark">N</span>

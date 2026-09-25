@@ -11,6 +11,7 @@ spring:
 eureka:
   instance:
     prefer-ip-address: true
+    ip-address: 127.0.0.1
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
@@ -19,6 +20,8 @@ reward:
   point-value-rupees: 1
   point-rate: 1
   return-window-days: 14
+  full-refund-window-days: 14
+  reward-window-days: 90
   multipliers:
     LIKE_NEW: 0.8
     GOOD: 0.6

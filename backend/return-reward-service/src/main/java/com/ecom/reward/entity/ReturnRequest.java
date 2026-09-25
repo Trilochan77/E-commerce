@@ -21,7 +21,12 @@ public class ReturnRequest {
   private String claimedCondition;   // LIKE_NEW | GOOD | FAIR | POOR
   private int estimatedReward;
   private String verifiedCondition;  // + NOT_ELIGIBLE (admin only), null until evaluated
-  private Integer finalReward;       // null until evaluated
+  private Integer finalReward;       // null until evaluated (REWARD_POINTS track only)
+  private String returnType;         // FULL_REFUND | REWARD_POINTS
+  private Integer estimatedRefund;   // FULL_REFUND track: full price x qty (money back)
+  private Integer finalRefund;       // set on approval (null until evaluated)
+  private String refundStatus;       // PENDING | REFUNDED | NONE
+  private String refundMethod;       // SOURCE | BANK_TRANSFER | NONE
   private String status;
   private String adminNote;
   private Instant createdAt = Instant.now();
@@ -47,6 +52,16 @@ public class ReturnRequest {
   public void setVerifiedCondition(String verifiedCondition) { this.verifiedCondition = verifiedCondition; }
   public Integer getFinalReward() { return finalReward; }
   public void setFinalReward(Integer finalReward) { this.finalReward = finalReward; }
+  public String getReturnType() { return returnType; }
+  public void setReturnType(String returnType) { this.returnType = returnType; }
+  public Integer getEstimatedRefund() { return estimatedRefund; }
+  public void setEstimatedRefund(Integer estimatedRefund) { this.estimatedRefund = estimatedRefund; }
+  public Integer getFinalRefund() { return finalRefund; }
+  public void setFinalRefund(Integer finalRefund) { this.finalRefund = finalRefund; }
+  public String getRefundStatus() { return refundStatus; }
+  public void setRefundStatus(String refundStatus) { this.refundStatus = refundStatus; }
+  public String getRefundMethod() { return refundMethod; }
+  public void setRefundMethod(String refundMethod) { this.refundMethod = refundMethod; }
   public String getStatus() { return status; }
   public void setStatus(String status) { this.status = status; }
   public String getAdminNote() { return adminNote; }

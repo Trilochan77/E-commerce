@@ -75,7 +75,8 @@ public class RecommendationService {
     int n = (limit == null || limit < 1) ? defaultLimit : Math.min(limit, 50);
 
     List<UserActivity> history = activities.findTop200ByUserIdOrderByTimestampDesc(userId);
-    List<OrderRef> paidOrders = orders.findByUserIdAndPaymentStatus(userId, "PAID");
+    // COD orders stay PENDING until delivery — count them as purchases too.
+    List<OrderRef> paidOrders = orders.findByUserIdAndPaymentStatusIn(userId, java.util.List.of("PAID", "PENDING"));
 
     // Purchased categories + product ids (from orders = ground truth, plus PURCHASE events).
     Map<String, Integer> purchaseCatCount = new HashMap<>();
@@ -104,9 +105,9 @@ public class RecommendationService {
       }
     }
 
-    // Popularity = # PAID orders containing the product (global, all users).
+    // Popularity = # PAID + COD-PENDING orders containing the product (global, all users).
     Map<String, Integer> popularity = new HashMap<>();
-    for (OrderRef o : orders.findByPaymentStatus("PAID")) {
+    for (OrderRef o : orders.findByPaymentStatusIn(java.util.List.of("PAID", "PENDING"))) {
       if (o.getItems() == null) continue;
       for (OrderRef.Item item : o.getItems()) popularity.merge(item.getProductId(), 1, Integer::sum);
     }

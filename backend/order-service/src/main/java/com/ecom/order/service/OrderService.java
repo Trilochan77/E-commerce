@@ -137,7 +137,11 @@ public class OrderService {
       Order failed = new Order();
       failed.setId("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
       failed.setUserId(req.userId());
-      failed.setPaymentMethod(req.paymentMethod());
+      try {
+        failed.setPaymentMethod(PaymentService.normalize(req.paymentMethod()));
+      } catch (PaymentService.PaymentFailedException ex) {
+        failed.setPaymentMethod(req.paymentMethod());
+      }
       failed.setPaymentStatus("FAILED");
       failed.setOrderStatus("CANCELLED");
       failed.setSubTotal(subTotal);
@@ -166,8 +170,8 @@ public class OrderService {
     order.setPointsUsed(pointsToUse);
     order.setDiscountValue(discount);
     order.setPayableAmount(payable);
-    order.setPaymentMethod(req.paymentMethod());
-    order.setPaymentStatus("PAID");
+    order.setPaymentMethod(PaymentService.normalize(req.paymentMethod()));
+    order.setPaymentStatus(payments.paymentStatusFor(req.paymentMethod()));
     order.setOrderStatus("PLACED");
     order.setAddressId(req.addressId());
     order.setShippingAddress(snapshot(req));
@@ -238,7 +242,36 @@ public class OrderService {
 
   public Order updateStatus(String orderId, String status) {
     Order o = get(orderId);
-    o.setOrderStatus(status);
+    String next = status == null ? "" : status.trim().toUpperCase();
+    if (!java.util.Set.of("PLACED", "SHIPPED", "DELIVERED", "CANCELLED").contains(next)) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid order status: " + status);
+    }
+    o.setOrderStatus(next);
+    // Cash collected on delivery: COD order becomes PAID once delivered.
+    if (next.equals("DELIVERED") && "COD".equals(o.getPaymentMethod()) && "PENDING".equals(o.getPaymentStatus())) {
+      o.setPaymentStatus("PAID");
+    }
+    return orders.save(o);
+  }
+
+  /**
+   * Admin collects cash for a COD order (PENDING → PAID). Online orders are
+   * already PAID; FAILED stays FAILED.
+   */
+  public Order updatePayment(String orderId, String paymentStatus) {
+    Order o = get(orderId);
+    String next = paymentStatus == null ? "" : paymentStatus.trim().toUpperCase();
+    if (!java.util.Set.of("PENDING", "PAID").contains(next)) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid payment status: " + paymentStatus);
+    }
+    if ("PAID".equals(o.getPaymentStatus()) && "PAID".equals(next)) return o;
+    if (!"COD".equals(o.getPaymentMethod()) && "PENDING".equals(next)) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Only COD orders can be PENDING");
+    }
+    if ("FAILED".equals(o.getPaymentStatus())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Failed payments cannot be marked paid");
+    }
+    o.setPaymentStatus(next);
     return orders.save(o);
   }
 }

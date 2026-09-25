@@ -23,7 +23,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
         <div class="row" style="justify-content:space-between">
           <div class="row"><strong>{{ o.id || o._id }}</strong>
             <span class="badge info">{{ o.orderStatus }}</span>
-            <span class="badge" [ngClass]="o.paymentStatus === 'PAID' ? 'ok' : 'warn'">{{ o.paymentStatus }}</span>
+            <span class="badge" [ngClass]="payClass(o.paymentStatus)">{{ o.paymentMethod || '' }} · {{ o.paymentStatus }}</span>
           </div>
           <span class="muted">{{ o.orderDate }}</span>
         </div>
@@ -35,7 +35,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
           <tr *ngFor="let i of o.items">
             <td><a [routerLink]="['/products', i.productId]">{{ i.productId }}</a></td>
             <td>{{ i.quantity }}</td><td>₹{{ i.price | number }}</td>
-            <td><a *ngIf="o.orderStatus === 'DELIVERED'" [routerLink]="['/returns/new']" [queryParams]="{orderId: o.id || o._id, productId: i.productId}"><button class="btn-ghost btn-sm"> Return & earn</button></a></td>
+            <td><a *ngIf="o.orderStatus === 'DELIVERED'" [routerLink]="['/returns/new']" [queryParams]="{orderId: o.id || o._id, productId: i.productId}"><button class="btn-ghost btn-sm">{{ ageDays(o.orderDate) <= 14 ? 'Return · full refund' : 'Return · earn points' }}</button></a></td>
           </tr>
         </table></div>
         <div class="row" style="justify-content:space-between;margin-top:8px">
@@ -43,6 +43,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
           <span>Payable <strong style="font-size:18px">₹{{ o.payableAmount | number }}</strong></span>
         </div>
         <p class="muted" *ngIf="o.shippingAddress" style="margin-top:6px">Deliver to: <strong>{{ o.shippingAddress.fullName }}</strong> · {{ o.shippingAddress.addressLine }}, {{ o.shippingAddress.city }}, {{ o.shippingAddress.state }} — {{ o.shippingAddress.pincode }} · {{ o.shippingAddress.phone }}</p>
+        <p class="muted" *ngIf="o.paymentMethod==='COD' && o.paymentStatus==='PENDING'" style="margin-top:4px">Cash on delivery — please keep ₹{{ o.payableAmount | number }} ready.</p>
       </div>
     </div>
     <ng-template #noOrders><app-empty-state icon="" title="No orders yet" hint="Your placed orders, tracking and return buttons will live here." ctaLink="/products"></app-empty-state></ng-template>
@@ -59,6 +60,16 @@ export class OrdersComponent implements OnInit {
   }
   filtered(): any[] {
     return this.filter ? this.orders.filter((o) => o.orderStatus === this.filter) : this.orders;
+  }
+  payClass(s: string): string {
+    if (s === 'PAID') return 'ok';
+    if (s === 'PENDING') return 'info';
+    return 'warn';
+  }
+  ageDays(d: any): number {
+    const t = d ? new Date(d).getTime() : NaN;
+    if (isNaN(t)) return 0;
+    return Math.floor((Date.now() - t) / 86400000);
   }
   tlClass(cur: string, s: string): string {
     const order = ['PLACED', 'SHIPPED', 'DELIVERED'];

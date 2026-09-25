@@ -28,7 +28,9 @@ public class WalletController {
   @GetMapping("/api/rewards/estimate")
   public Map<String, Object> estimate(@RequestParam String productId,
       @RequestParam(defaultValue = "1") int quantity,
-      @RequestParam String condition) {
+      @RequestParam String condition,
+      @RequestParam(required = false) String orderId) {
+    if (orderId != null && !orderId.isBlank()) return svc.estimateForOrder(orderId, productId, quantity, condition);
     return svc.estimate(productId, quantity, condition);
   }
 }

@@ -42,10 +42,12 @@ public class ReturnService {
   private final RewardTransactionRepository transactions;
   private final RewardCalculator calc;
   private final RewardProperties props;
+  private final RefundService refunds;
 
   public ReturnService(ReturnRequestRepository returns, OrderRefRepository orders,
       ProductRefRepository products, RewardWalletRepository wallets,
-      RewardTransactionRepository transactions, RewardCalculator calc, RewardProperties props) {
+      RewardTransactionRepository transactions, RewardCalculator calc, RewardProperties props,
+      RefundService refunds) {
     this.returns = returns;
     this.orders = orders;
     this.products = products;
@@ -53,6 +55,7 @@ public class ReturnService {
     this.transactions = transactions;
     this.calc = calc;
     this.props = props;
+    this.refunds = refunds;
   }
 
   public static final String ESTIMATE_DISCLAIMER =
@@ -65,17 +68,19 @@ public class ReturnService {
     if (!order.getUserId().equals(req.userId())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Order does not belong to user");
     }
-    if (!"PAID".equals(order.getPaymentStatus())) {
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Only paid orders are eligible");
+    if (!"PAID".equals(order.getPaymentStatus()) && !"PENDING".equals(order.getPaymentStatus())) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Only paid or COD-pending orders are eligible");
     }
     if (!"DELIVERED".equals(order.getOrderStatus())) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Only DELIVERED orders are eligible (current: " + order.getOrderStatus() + ")");
     }
-    if (order.getOrderDate() != null && Duration.between(order.getOrderDate(), Instant.now()).toDays()
-        > props.getReturnWindowDays()) {
+    long ageDays = order.getOrderDate() == null ? 0
+        : Duration.between(order.getOrderDate(), Instant.now()).toDays();
+    String track = ageDays <= props.getFullRefundWindowDays() ? "FULL_REFUND" : "REWARD_POINTS";
+    if (ageDays > props.getRewardWindowDays()) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "Return window expired (" + props.getReturnWindowDays() + " days)");
+          "Return window expired (" + props.getRewardWindowDays() + " days)");
     }
     OrderRef.Item line = order.getItems() == null ? null : order.getItems().stream()
         .filter(i -> i.getProductId().equals(req.productId())).findFirst().orElse(null);
@@ -107,12 +112,28 @@ public class ReturnService {
     r.setQuantity(req.quantity());
     r.setReason(req.reason());
     r.setClaimedCondition(req.claimedCondition().trim().toUpperCase());
-    r.setEstimatedReward(estimated);
+    r.setReturnType(track);
+    if (track.equals("FULL_REFUND")) {
+      int full = (int) Math.floor(line.getPrice() * req.quantity());
+      r.setEstimatedReward(0);
+      r.setEstimatedRefund(full);
+      r.setRefundStatus("PENDING");
+      r.setRefundMethod("NONE");
+    } else {
+      r.setEstimatedReward(estimated);
+      r.setEstimatedRefund(null);
+      r.setRefundStatus("NONE");
+      r.setRefundMethod("NONE");
+    }
     r.setStatus("REQUESTED");
     r.setCreatedAt(Instant.now());
     r.setUpdatedAt(Instant.now());
     returns.save(r);
-    return Map.of("returnId", r.getId(), "status", r.getStatus(),
+    if (track.equals("FULL_REFUND")) {
+      return Map.of("returnId", r.getId(), "status", r.getStatus(), "returnType", track,
+          "estimatedRefund", r.getEstimatedRefund(), "disclaimer", ESTIMATE_DISCLAIMER);
+    }
+    return Map.of("returnId", r.getId(), "status", r.getStatus(), "returnType", track,
         "estimatedReward", estimated, "disclaimer", ESTIMATE_DISCLAIMER);
   }
 
@@ -168,16 +189,33 @@ public class ReturnService {
         .filter(i -> i.getProductId().equals(r.getProductId())).findFirst()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order line not found"))
         .getPrice();
-    int finalReward = calc.finalReward(unitPrice, r.getQuantity(), verified);
-    r.setVerifiedCondition(verified);
-    r.setFinalReward(finalReward);
+    String track = r.getReturnType() == null ? "REWARD_POINTS" : r.getReturnType();
     if (req.adminNote() != null) r.setAdminNote(req.adminNote());
+    r.setVerifiedCondition(verified);
     r.setUpdatedAt(Instant.now());
     if (verified.equals("NOT_ELIGIBLE")) {
       r.setStatus("REJECTED");
+      r.setFinalReward(0);
+      r.setFinalRefund(null);
+      r.setRefundStatus("NONE");
       returns.save(r);
       return r;
     }
+    if (track.equals("FULL_REFUND")) {
+      // Full money back — condition gates pass/fail, amount is always 100%.
+      int full = (int) Math.floor(unitPrice * r.getQuantity());
+      String method = refunds.refundMethodFor(order.getPaymentMethod());
+      refunds.refund(order.getPaymentMethod(), full);
+      r.setFinalRefund(full);
+      r.setFinalReward(0);
+      r.setRefundMethod(method);
+      r.setRefundStatus("REFUNDED");
+      r.setStatus("APPROVED_FOR_REWARD");
+      returns.save(r);
+      return r;
+    }
+    int finalReward = calc.finalReward(unitPrice, r.getQuantity(), verified);
+    r.setFinalReward(finalReward);
     r.setStatus("APPROVED_FOR_REWARD");
     returns.save(r);
     creditWallet(r.getUserId(), finalReward, r.getOrderId(), r.getId());
@@ -223,5 +261,31 @@ public class ReturnService {
     return Map.of("productId", productId, "unitPrice", p.getPrice(), "quantity", quantity,
         "condition", condition.trim().toUpperCase(), "estimatedReward", pts,
         "disclaimer", ESTIMATE_DISCLAIMER);
+  }
+
+  /** Order-aware preview: FULL_REFUND (full ₹) within 14d, else REWARD_POINTS. */
+  public Map<String, Object> estimateForOrder(String orderId, String productId, int quantity, String condition) {
+    ProductRef p = products.findById(productId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+    if (orderId != null && !orderId.isBlank()) {
+      var order = orders.findById(orderId).orElse(null);
+      if (order != null) {
+        long ageDays = order.getOrderDate() == null ? 0
+            : Duration.between(order.getOrderDate(), Instant.now()).toDays();
+        if (ageDays <= props.getFullRefundWindowDays()) {
+          var line = order.getItems() == null ? null : order.getItems().stream()
+              .filter(i -> i.getProductId().equals(productId)).findFirst().orElse(null);
+          double unit = line == null ? p.getPrice() : line.getPrice();
+          int full = (int) Math.floor(unit * quantity);
+          return Map.of("productId", productId, "unitPrice", unit, "quantity", quantity,
+              "condition", condition.trim().toUpperCase(), "returnType", "FULL_REFUND",
+              "estimatedRefund", full, "disclaimer", ESTIMATE_DISCLAIMER);
+        }
+      }
+    }
+    int pts = calc.estimate(p.getPrice(), quantity, condition.trim().toUpperCase());
+    return Map.of("productId", productId, "unitPrice", p.getPrice(), "quantity", quantity,
+        "condition", condition.trim().toUpperCase(), "returnType", "REWARD_POINTS",
+        "estimatedReward", pts, "disclaimer", ESTIMATE_DISCLAIMER);
   }
 }
