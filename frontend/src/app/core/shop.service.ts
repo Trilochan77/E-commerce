@@ -65,8 +65,28 @@ export class ShopService {
     return this.http.delete(`${GATEWAY}/api/cart/${userId}/items/${productId}`);
   }
 
-  checkout(userId: string, paymentMethod: string, pointsToUse: number): Observable<any> {
-    return this.http.post(`${GATEWAY}/api/orders/checkout`, { userId, paymentMethod, pointsToUse });
+  checkout(userId: string, paymentMethod: string, pointsToUse: number, addressId = '', shippingAddress: any = null): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/orders/checkout`, { userId, paymentMethod, pointsToUse, addressId, shippingAddress });
+  }
+
+  addresses(userId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/addresses/user/${userId}`);
+  }
+
+  addressCreate(body: any): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/addresses`, body);
+  }
+
+  addressUpdate(id: string, body: any): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/addresses/${id}`, body);
+  }
+
+  addressDelete(id: string, userId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/addresses/${id}?userId=${userId}`);
+  }
+
+  addressDefault(id: string, userId: string): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/addresses/${id}/default`, { userId });
   }
 
   orderHistory(userId: string): Observable<any> {

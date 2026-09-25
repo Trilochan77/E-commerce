@@ -18,6 +18,8 @@ public class Order {
   private String paymentMethod;
   private String paymentStatus; // PENDING | PAID | FAILED
   private String orderStatus;   // PLACED | SHIPPED | DELIVERED | CANCELLED
+  private String addressId;     // reference to address book entry (optional)
+  private ShippingAddress shippingAddress; // snapshot at checkout — never auto-updated
   private Instant orderDate = Instant.now();
 
   public String getId() { return id; }
@@ -42,6 +44,10 @@ public class Order {
   public void setOrderStatus(String orderStatus) { this.orderStatus = orderStatus; }
   public Instant getOrderDate() { return orderDate; }
   public void setOrderDate(Instant orderDate) { this.orderDate = orderDate; }
+  public String getAddressId() { return addressId; }
+  public void setAddressId(String addressId) { this.addressId = addressId; }
+  public ShippingAddress getShippingAddress() { return shippingAddress; }
+  public void setShippingAddress(ShippingAddress shippingAddress) { this.shippingAddress = shippingAddress; }
 
   public static class OrderItem {
     private String productId;
@@ -54,5 +60,33 @@ public class Order {
     public void setQuantity(int quantity) { this.quantity = quantity; }
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
+  }
+
+  public static class ShippingAddress {
+    private String fullName;
+    private String phone;
+    private String pincode;
+    private String addressLine;
+    private String city;
+    private String state;
+    private String landmark;
+    private String addressType;
+
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getPincode() { return pincode; }
+    public void setPincode(String pincode) { this.pincode = pincode; }
+    public String getAddressLine() { return addressLine; }
+    public void setAddressLine(String addressLine) { this.addressLine = addressLine; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
+    public String getLandmark() { return landmark; }
+    public void setLandmark(String landmark) { this.landmark = landmark; }
+    public String getAddressType() { return addressType; }
+    public void setAddressType(String addressType) { this.addressType = addressType; }
   }
 }

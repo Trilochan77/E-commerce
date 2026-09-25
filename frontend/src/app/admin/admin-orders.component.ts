@@ -21,9 +21,10 @@ import { ToastService } from '../shared/toast.service';
     <p class="error" *ngIf="error">{{ error }}</p>
     <div class="card">
       <div class="table-wrap"><table>
-        <tr><th>Order</th><th>Items</th><th>Payable</th><th>Payment</th><th>Status</th><th>Advance</th></tr>
+        <tr><th>Order</th><th>Deliver to</th><th>Items</th><th>Payable</th><th>Payment</th><th>Status</th><th>Advance</th></tr>
         <tr *ngFor="let o of filtered()">
           <td><strong>{{ o.id || o._id }}</strong><div class="muted">{{ o.userId }} · {{ o.orderDate || o.createdAt || '' }}</div></td>
+          <td class="muted" style="max-width:220px">{{ o.shippingAddress ? (o.shippingAddress.fullName + ', ' + o.shippingAddress.addressLine + ', ' + o.shippingAddress.city + ' — ' + o.shippingAddress.pincode) : '—' }}</td>
           <td class="muted">{{ itemCount(o) }} items</td>
           <td><strong>Rs.{{ o.payableAmount ?? o.totalAmount }}</strong></td>
           <td><span class="badge" [ngClass]="o.paymentStatus==='PAID' ? 'ok' : 'warn'">{{ o.paymentStatus }}</span></td>

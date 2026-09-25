@@ -71,7 +71,25 @@ public class OrderService {
     }
   }
 
+  private Order.ShippingAddress snapshot(CheckoutRequest req) {
+    CheckoutRequest.ShippingAddressRequest s = req.shippingAddress();
+    Order.ShippingAddress snap = new Order.ShippingAddress();
+    snap.setFullName(s.fullName().trim());
+    snap.setPhone(s.phone().trim());
+    snap.setPincode(s.pincode().trim());
+    snap.setAddressLine(s.addressLine().trim());
+    snap.setCity(s.city().trim());
+    snap.setState(s.state().trim());
+    snap.setLandmark(s.landmark() == null ? "" : s.landmark().trim());
+    String t = s.addressType() == null ? "HOME" : s.addressType().trim().toUpperCase();
+    snap.setAddressType(t.equals("HOME") || t.equals("WORK") || t.equals("OTHER") ? t : "HOME");
+    return snap;
+  }
+
   public Order checkout(CheckoutRequest req) {
+    if (req.shippingAddress() == null) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Delivery address is required");
+    }
     CartRef cart = carts.findByUserId(req.userId())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cart not found"));
     if (cart.getItems() == null || cart.getItems().isEmpty()) {
@@ -124,6 +142,8 @@ public class OrderService {
       failed.setOrderStatus("CANCELLED");
       failed.setSubTotal(subTotal);
       failed.setPayableAmount(payable);
+      failed.setAddressId(req.addressId());
+      failed.setShippingAddress(snapshot(req));
       failed.setOrderDate(Instant.now());
       orders.save(failed);
       throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, e.getMessage());
@@ -149,6 +169,8 @@ public class OrderService {
     order.setPaymentMethod(req.paymentMethod());
     order.setPaymentStatus("PAID");
     order.setOrderStatus("PLACED");
+    order.setAddressId(req.addressId());
+    order.setShippingAddress(snapshot(req));
     order.setOrderDate(Instant.now());
     orders.save(order);
 

@@ -42,6 +42,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
           <span class="muted">Subtotal ₹{{ o.subTotal }} · Points −{{ o.pointsUsed || 0 }}</span>
           <span>Payable <strong style="font-size:18px">₹{{ o.payableAmount | number }}</strong></span>
         </div>
+        <p class="muted" *ngIf="o.shippingAddress" style="margin-top:6px">Deliver to: <strong>{{ o.shippingAddress.fullName }}</strong> · {{ o.shippingAddress.addressLine }}, {{ o.shippingAddress.city }}, {{ o.shippingAddress.state }} — {{ o.shippingAddress.pincode }} · {{ o.shippingAddress.phone }}</p>
       </div>
     </div>
     <ng-template #noOrders><app-empty-state icon="" title="No orders yet" hint="Your placed orders, tracking and return buttons will live here." ctaLink="/products"></app-empty-state></ng-template>

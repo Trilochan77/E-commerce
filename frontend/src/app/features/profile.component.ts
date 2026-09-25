@@ -53,6 +53,45 @@ import { ToastService } from '../shared/toast.service';
         </form>
 
         <div class="card" style="margin:0">
+          <div class="section-title"><h2>Delivery addresses</h2><span class="muted">{{ addresses.length }} saved · Flipkart-style</span></div>
+          <div class="stack" *ngIf="addresses.length; else noAddr">
+            <div class="pay-card" *ngFor="let a of addresses" [class.on]="a.default || a.isDefault">
+              <div class="row" style="justify-content:space-between">
+                <strong>{{ a.fullName }} <span class="badge info">{{ a.addressType || 'HOME' }}</span></strong>
+                <span class="badge ok" *ngIf="a.default || a.isDefault">DEFAULT</span>
+              </div>
+              <span class="muted">{{ a.addressLine }}, {{ a.city }}, {{ a.state }} — {{ a.pincode }} · {{ a.phone }}</span>
+              <div class="row">
+                <button class="btn-ghost btn-sm" (click)="editAddr(a)">Edit</button>
+                <button class="btn-ghost btn-sm" *ngIf="!(a.default || a.isDefault)" (click)="makeDefault(a)">Set default</button>
+                <button class="btn-ghost btn-sm" (click)="delAddr(a)">Delete</button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noAddr><p class="muted">No addresses yet — save your home / work / family addresses here.</p></ng-template>
+          <div class="row" style="margin-top:8px"><button class="btn-ghost btn-sm" (click)="addrFormShow=!addrFormShow">{{ addrFormShow ? 'Cancel' : (editingId ? 'Editing…' : '+ Add address') }}</button></div>
+          <div *ngIf="addrFormShow" class="form-grid" style="margin-top:10px;max-width:none">
+            <div class="profile-2col">
+              <label>Full name<input [(ngModel)]="addrForm.fullName" name="a-fullName"></label>
+              <label>Phone<input [(ngModel)]="addrForm.phone" name="a-phone"></label>
+            </div>
+            <div class="profile-2col">
+              <label>Pincode<input [(ngModel)]="addrForm.pincode" name="a-pin" maxlength="6"></label>
+              <label>Type<select [(ngModel)]="addrForm.addressType" name="a-type"><option>HOME</option><option>WORK</option><option>OTHER</option></select></label>
+            </div>
+            <label>Address<input [(ngModel)]="addrForm.addressLine" name="a-line"></label>
+            <div class="profile-2col">
+              <label>City<input [(ngModel)]="addrForm.city" name="a-city"></label>
+              <label>State<input [(ngModel)]="addrForm.state" name="a-state"></label>
+            </div>
+            <label>Landmark<input [(ngModel)]="addrForm.landmark" name="a-land"></label>
+            <label class="row" style="gap:6px"><input type="checkbox" [(ngModel)]="addrForm.isDefault" name="a-def" style="width:auto"> Set as default</label>
+            <div class="row"><button class="primary btn-sm" (click)="saveAddr()" [disabled]="addrSaving">{{ addrSaving ? 'Saving…' : (editingId ? 'Update' : 'Save') }}</button></div>
+            <p class="error" *ngIf="addrError">{{ addrError }}</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0">
           <div class="section-title"><h2>Recently viewed</h2><span class="muted">powers recommendations</span></div>
           <div class="table-wrap" *ngIf="views.length; else noHist"><table>
             <tr><th>Product</th><th>Viewed</th><th></th></tr>
@@ -90,6 +129,12 @@ export class ProfileComponent implements OnInit {
   saving = false;
   loading = true;
   error = '';
+  addresses: any[] = [];
+  addrFormShow = false;
+  addrSaving = false;
+  addrError = '';
+  editingId = '';
+  addrForm: any = { fullName: '', phone: '', pincode: '', addressLine: '', city: '', state: '', landmark: '', addressType: 'HOME', isDefault: false };
 
   constructor(
     private shop: ShopService,
@@ -113,6 +158,7 @@ export class ProfileComponent implements OnInit {
       next: (r: any) => (this.views = r.items || r || []),
       error: () => (this.views = [])
     });
+    this.loadAddresses();
   }
 
   initial(): string {
@@ -141,5 +187,38 @@ export class ProfileComponent implements OnInit {
         this.error = e.error?.message || 'Save failed';
       }
     });
+  }
+
+  addrId(a: any): string { return a.id || a._id || ''; }
+
+  loadAddresses(): void {
+    this.shop.addresses(this.auth.userId()).subscribe({
+      next: (r: any) => (this.addresses = Array.isArray(r) ? r : []),
+      error: () => (this.addresses = [])
+    });
+  }
+
+  editAddr(a: any): void {
+    this.editingId = this.addrId(a);
+    this.addrForm = { ...a, isDefault: !!(a.default || a.isDefault) };
+    this.addrFormShow = true;
+  }
+
+  saveAddr(): void {
+    if (this.addrSaving) return;
+    this.addrSaving = true; this.addrError = '';
+    const body = { userId: this.auth.userId(), ...this.addrForm };
+    const done = { next: () => { this.addrSaving = false; this.addrFormShow = false; this.editingId = ''; this.toast.ok('Address saved'); this.loadAddresses(); }, error: (e: any) => { this.addrSaving = false; this.addrError = e.error?.message || 'Save failed'; } };
+    if (this.editingId) this.shop.addressUpdate(this.editingId, body).subscribe(done);
+    else this.shop.addressCreate(body).subscribe(done);
+  }
+
+  delAddr(a: any): void {
+    if (!confirm('Delete this address?')) return;
+    this.shop.addressDelete(this.addrId(a), this.auth.userId()).subscribe({ next: () => { this.toast.ok('Deleted'); this.loadAddresses(); }, error: (e: any) => this.toast.err(e.error?.message || 'Delete failed') });
+  }
+
+  makeDefault(a: any): void {
+    this.shop.addressDefault(this.addrId(a), this.auth.userId()).subscribe({ next: () => { this.toast.ok('Default updated'); this.loadAddresses(); }, error: (e: any) => this.toast.err(e.error?.message || 'Failed') });
   }
 }
