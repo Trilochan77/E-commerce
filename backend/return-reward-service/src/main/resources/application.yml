@@ -18,8 +18,8 @@ eureka:
 reward:
   point-value-rupees: 1
   point-rate: 1
-  return-window-days: 14
-  full-refund-window-days: 14
+  return-window-days: 7
+  full-refund-window-days: 7
   reward-window-days: 0
   multipliers:
     LIKE_NEW: 0.8

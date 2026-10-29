@@ -23,8 +23,9 @@ const INFO: Record<string, { pct: number; tip: string }> = {
       <div class="card" style="margin:0">
         <h2> Request a Return</h2>
         <p class="muted">Order <strong>{{ orderId }}</strong> · Product <strong>{{ productId }}</strong> · platform purchase only</p>
-        <p class="muted" *ngIf="track==='FULL_REFUND'">Within <strong>14-day full-refund window</strong> — money back to source after inspection (condition gates pass/fail).</p>
-        <p class="muted" *ngIf="track==='REWARD_POINTS'">Past 14 days — <strong>reward points only</strong> (no money back, eligible anytime).</p>
+        <p class="muted" *ngIf="track==='FULL_REFUND'">Within <strong>7-day full-refund window</strong> — 100% money back to source after inspection (condition gates pass/fail).</p>
+        <p class="muted" *ngIf="track==='REWARD_POINTS'">Past 7 days — <strong>reward points only</strong> (Electronics & Mixer Grinder 750W exclusive program).</p>
+        <p class="error" *ngIf="track==='EXPIRED'"><strong>Return window closed:</strong> 7-day full refund window has expired. The extended reward points return program is only available for Electronics & Mixer Grinder 750W.</p>
         <label>Reason for return
           <textarea [(ngModel)]="reason" name="reason" rows="3" placeholder="e.g. Size didn’t fit, changed mind, minor defect…"></textarea>
         </label>
@@ -35,6 +36,7 @@ const INFO: Record<string, { pct: number; tip: string }> = {
             <strong>{{ c.replace('_',' ') }}</strong><span class="muted">{{ INFO[c].tip }}</span>
             <span class="badge violet" style="margin-top:6px" *ngIf="track==='REWARD_POINTS'">{{ INFO[c].pct }}% pts</span>
             <span class="badge ok" style="margin-top:6px" *ngIf="track==='FULL_REFUND'">Full refund</span>
+            <span class="badge bad" style="margin-top:6px" *ngIf="track==='EXPIRED'">Expired</span>
           </div>
         </div>
       </div>
@@ -46,7 +48,7 @@ const INFO: Record<string, { pct: number; tip: string }> = {
         <p class="error" *ngIf="error">{{ error }}</p>
         <p class="muted" style="text-align:center">No pickup needed in demo · admin evaluates next</p>
       </aside>
-      <aside class="card summary" *ngIf="track!=='FULL_REFUND'">
+      <aside class="card summary" *ngIf="track==='REWARD_POINTS'">
         <h3>Estimated Reward</h3>
         <div style="font-size:36px;font-weight:800;color:#15803d">{{ est != null ? est : '—' }} <span style="font-size:14px">pts</span></div>
         <p class="muted">≈ ₹{{ est || 0 }} off a future order · final depends on warehouse inspection</p>
@@ -55,6 +57,12 @@ const INFO: Record<string, { pct: number; tip: string }> = {
         <button class="primary" style="width:100%" (click)="submit()" [disabled]="busy">{{ busy ? 'Submitting…' : 'Confirm Return →' }}</button>
         <p class="error" *ngIf="error">{{ error }}</p>
         <p class="muted" style="text-align:center">No pickup needed in demo · admin evaluates next</p>
+      </aside>
+      <aside class="card summary" *ngIf="track==='EXPIRED'">
+        <h3>Return Closed</h3>
+        <div style="font-size:28px;font-weight:800;color:#b91c1c">Expired (> 7d)</div>
+        <p class="muted">7-day full refund window has closed. Reward points program is only available for Electronics & Mixer Grinder 750W.</p>
+        <a routerLink="/orders"><button class="btn-ghost" style="width:100%;margin-top:12px">Back to Orders</button></a>
       </aside>
     </div>
   `
@@ -66,7 +74,7 @@ export class ReturnRequest implements OnInit {
   condition = 'LIKE_NEW';
   est: number | null = null;
   refund: number | null = null;
-  track: 'FULL_REFUND' | 'REWARD_POINTS' = 'FULL_REFUND';
+  track: 'FULL_REFUND' | 'REWARD_POINTS' | 'EXPIRED' = 'FULL_REFUND';
   error = '';
   busy = false;
   submitted = false;
@@ -92,11 +100,23 @@ export class ReturnRequest implements OnInit {
     return Math.floor((Date.now() - t) / 86400000);
   }
 
+  isPointsEligible(pid: string): boolean {
+    const p = (pid || '').toUpperCase();
+    return p.startsWith('P-1') || p === 'P-3005';
+  }
+
   resolveTrack(): void {
     this.shop.orderHistory(this.auth.userId()).subscribe({
       next: (orders: any) => {
         const o = (Array.isArray(orders) ? orders : []).find((x: any) => (x.id || x._id) === this.orderId);
-        this.track = this.orderAgeDays(o?.orderDate) <= 14 ? 'FULL_REFUND' : 'REWARD_POINTS';
+        const age = this.orderAgeDays(o?.orderDate);
+        if (age <= 7) {
+          this.track = 'FULL_REFUND';
+        } else if (this.isPointsEligible(this.productId)) {
+          this.track = 'REWARD_POINTS';
+        } else {
+          this.track = 'EXPIRED';
+        }
         this.preview();
       },
       error: () => { this.track = 'FULL_REFUND'; }
@@ -107,7 +127,13 @@ export class ReturnRequest implements OnInit {
     if (!this.productId) return;
     this.shop.estimate(this.productId, this.condition, this.orderId).subscribe({
       next: (r: any) => {
-        this.track = r.returnType === 'REWARD_POINTS' ? 'REWARD_POINTS' : (r.returnType === 'FULL_REFUND' ? 'FULL_REFUND' : this.track);
+        if (r.returnType === 'EXPIRED') {
+          this.track = 'EXPIRED';
+        } else if (r.returnType === 'REWARD_POINTS') {
+          this.track = 'REWARD_POINTS';
+        } else if (r.returnType === 'FULL_REFUND') {
+          this.track = 'FULL_REFUND';
+        }
         this.est = r.estimatedReward ?? null;
         this.refund = r.estimatedRefund ?? null;
       },

@@ -18,8 +18,8 @@ public class RewardProperties {
 
   private double pointRate = 1;
   /** Legacy alias — kept in sync with fullRefundWindowDays. */
-  private int returnWindowDays = 14;
-  private int fullRefundWindowDays = 14;
+  private int returnWindowDays = 7;
+  private int fullRefundWindowDays = 7;
   /** Maximum days for reward points return; 0 or negative means no expiration / unlimited. */
   private int rewardWindowDays = 0;
   private Map<String, Double> multipliers = new LinkedHashMap<>(Map.of(

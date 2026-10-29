@@ -35,7 +35,17 @@ import { EmptyState } from '../shared/empty-state';
           <tr *ngFor="let i of o.items">
             <td><a [routerLink]="['/products', i.productId]">{{ i.productId }}</a></td>
             <td>{{ i.quantity }}</td><td>₹{{ i.price | number }}</td>
-            <td><a *ngIf="o.orderStatus === 'DELIVERED'" [routerLink]="['/returns/new']" [queryParams]="{orderId: o.id || o._id, productId: i.productId}"><button class="btn-ghost btn-sm">{{ ageDays(o.orderDate) <= 14 ? 'Return · full refund' : 'Return · earn points' }}</button></a></td>
+            <td>
+              <ng-container *ngIf="o.orderStatus === 'DELIVERED'">
+                <a *ngIf="canReturn(o.orderDate, i.productId); else returnClosed"
+                   [routerLink]="['/returns/new']" [queryParams]="{orderId: o.id || o._id, productId: i.productId}">
+                  <button class="btn-ghost btn-sm">{{ returnLabel(o.orderDate, i.productId) }}</button>
+                </a>
+                <ng-template #returnClosed>
+                  <span class="muted" style="font-size:12px">Return closed (>7d)</span>
+                </ng-template>
+              </ng-container>
+            </td>
           </tr>
         </table></div>
         <div class="row" style="justify-content:space-between;margin-top:8px">
@@ -65,6 +75,18 @@ export class Orders implements OnInit {
     if (s === 'PAID') return 'ok';
     if (s === 'PENDING') return 'info';
     return 'warn';
+  }
+  canEarnPoints(productId: string): boolean {
+    const p = (productId || '').toUpperCase();
+    return p.startsWith('P-1') || p === 'P-3005';
+  }
+  canReturn(orderDate: any, productId: string): boolean {
+    return this.ageDays(orderDate) <= 7 || this.canEarnPoints(productId);
+  }
+  returnLabel(orderDate: any, productId: string): string {
+    if (this.ageDays(orderDate) <= 7) return 'Return · full refund';
+    if (this.canEarnPoints(productId)) return 'Return · earn points';
+    return 'Return expired (>7d)';
   }
   ageDays(d: any): number {
     const t = d ? new Date(d).getTime() : NaN;

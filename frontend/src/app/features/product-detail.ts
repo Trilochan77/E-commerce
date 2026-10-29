@@ -33,8 +33,9 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <p class="muted">{{ product.description }}</p>
         <div class="reward-box" *ngIf="product.eligibleForReturn">
           <strong> Easy returns</strong>
-          <div class="muted">≤14 days: 100% money back · after 14d: LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet pts</div>
-          <div class="muted">Est. on LIKE_NEW: <strong style="color:#15803d">₹{{ estLikeNew() | number }} pts</strong></div>
+          <div class="muted" *ngIf="hasPointsTrack()">≤7 days: 100% money back · after 7d: LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet pts</div>
+          <div class="muted" *ngIf="!hasPointsTrack()">≤7 days: 100% full money back guarantee after inspection</div>
+          <div class="muted" *ngIf="hasPointsTrack()">Est. on LIKE_NEW: <strong style="color:#15803d">₹{{ estLikeNew() | number }} pts</strong></div>
         </div>
         <div class="buy-box" style="margin-top:12px" *ngIf="auth.isLoggedIn(); else loginCta">
           <div class="row">
@@ -48,7 +49,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <ng-template #loginCta><p><a routerLink="/login"><button class="primary">Login to buy</button></a></p></ng-template>
         <div class="trust">
           <div>🚚 <strong>Fast delivery</strong><br>2–4 days · free over ₹999</div>
-          <div> <strong>14-day refunds</strong><br>full money back · pts after 14d</div>
+          <div> <strong>7-day refunds</strong><br>100% money back (pts for tech)</div>
           <div>🔒 <strong>Secure pay</strong><br>COD · UPI · Card (mock)</div>
         </div>
       </div>
@@ -61,11 +62,15 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
       </div>
       <p *ngIf="tab==='desc'" class="muted">{{ product?.description || 'Quality-assured product synced to search index. Stock validated at cart, checkout and order time.' }}</p>
       <div *ngIf="tab==='returns'">
-        <p class="muted"><strong>≤14 days:</strong> 100% money back after inspection (condition gates pass/fail).</p>
-        <div class="reward-compare">
-          <div class="reward-box" *ngFor="let c of ['LIKE_NEW','GOOD','FAIR','POOR']"><strong>{{ c }}</strong><div class="muted">{{ (MULT[c]*100) }}% of price</div><div class="price">₹{{ floor(product.price * MULT[c]) | number }} pts</div></div>
+        <p class="muted"><strong>≤7 days:</strong> 100% money back after inspection (condition gates pass/fail).</p>
+        <div *ngIf="hasPointsTrack()">
+          <p class="muted"><strong>After 7 days:</strong> Extended returns for reward points (exclusive to Electronics & Mixer Grinder 750W):</p>
+          <div class="reward-compare">
+            <div class="reward-box" *ngFor="let c of ['LIKE_NEW','GOOD','FAIR','POOR']"><strong>{{ c }}</strong><div class="muted">{{ (MULT[c]*100) }}% of price</div><div class="price">₹{{ floor(product.price * MULT[c]) | number }} pts</div></div>
+          </div>
+          <p class="muted">Points track: estimated at claim, final after inspection. NOT_ELIGIBLE = 0.</p>
         </div>
-        <p class="muted">Points track (after 14 days): estimated at claim, final after inspection. NOT_ELIGIBLE = 0.</p>
+        <p *ngIf="!hasPointsTrack()" class="muted">Return window for this product is 7 days from delivery for full money refund.</p>
       </div>
       <p *ngIf="tab==='reco'" class="muted">Scored as 3× purchase-category + 2× views + 2× search-match + 1× popularity. Viewing this item logged a VIEW event to improve your rail.</p>
     </div>
@@ -103,6 +108,13 @@ export class ProductDetail implements OnInit {
       },
       error: () => this.router.navigate(['/products'])
     });
+  }
+
+  hasPointsTrack(): boolean {
+    const cat = (this.product?.categoryId || '').toUpperCase();
+    const id = (this.product?.id || this.product?._id || '').toUpperCase();
+    const name = (this.product?.name || '').toLowerCase();
+    return cat === 'C-01' || id === 'P-3005' || name.includes('mixer grinder');
   }
 
   inStock(): boolean {

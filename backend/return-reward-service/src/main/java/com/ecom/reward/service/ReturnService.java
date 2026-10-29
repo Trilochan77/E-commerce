@@ -61,6 +61,18 @@ public class ReturnService {
   public static final String ESTIMATE_DISCLAIMER =
       "Estimated reward only — final reward depends on verified condition after inspection.";
 
+  /**
+   * Electronics (Category C-01) and Mixer Grinder 750W (P-3005) follow both:
+   * 7-day full refund AND extended reward points return. Other products only get 7-day full refund.
+   */
+  public boolean isEligibleForRewardPointsAfterFullRefund(ProductRef product) {
+    if (product == null) return false;
+    boolean isElectronics = "C-01".equalsIgnoreCase(product.getCategoryId());
+    boolean isMixerGrinder = "P-3005".equalsIgnoreCase(product.getId())
+        || (product.getName() != null && product.getName().toLowerCase().contains("mixer grinder"));
+    return isElectronics || isMixerGrinder;
+  }
+
   /** Submit a return request after eligibility verification (SRS 3.1.13). */
   public Map<String, Object> submit(SubmitReturnRequest req) {
     OrderRef order = orders.findById(req.orderId())
@@ -75,13 +87,30 @@ public class ReturnService {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Only DELIVERED orders are eligible (current: " + order.getOrderStatus() + ")");
     }
+
+    ProductRef product = products.findById(req.productId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+    if (!product.isEligibleForReturn()) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Product is not eligible for return");
+    }
+
     long ageDays = order.getOrderDate() == null ? 0
         : Duration.between(order.getOrderDate(), Instant.now()).toDays();
-    String track = ageDays <= props.getFullRefundWindowDays() ? "FULL_REFUND" : "REWARD_POINTS";
-    if (props.getRewardWindowDays() > 0 && ageDays > props.getRewardWindowDays()) {
+    String track;
+    if (ageDays <= props.getFullRefundWindowDays()) {
+      track = "FULL_REFUND";
+    } else if (isEligibleForRewardPointsAfterFullRefund(product)) {
+      track = "REWARD_POINTS";
+      if (props.getRewardWindowDays() > 0 && ageDays > props.getRewardWindowDays()) {
+        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+            "Return window expired (" + props.getRewardWindowDays() + " days)");
+      }
+    } else {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "Return window expired (" + props.getRewardWindowDays() + " days)");
+          "Return window expired (" + props.getFullRefundWindowDays() + " days). Only Electronics and Mixer Grinder 750W are eligible for reward points return after " + props.getFullRefundWindowDays() + " days.");
     }
+
     OrderRef.Item line = order.getItems() == null ? null : order.getItems().stream()
         .filter(i -> i.getProductId().equals(req.productId())).findFirst().orElse(null);
     if (line == null) {
@@ -90,12 +119,6 @@ public class ReturnService {
     if (req.quantity() > line.getQuantity()) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Return quantity exceeds purchased quantity (" + line.getQuantity() + ")");
-    }
-    ProductRef product = products.findById(req.productId())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
-    if (!product.isEligibleForReturn()) {
-      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          "Product is not eligible for the return reward program");
     }
     boolean open = returns.findByUserIdAndOrderIdAndProductId(req.userId(), req.orderId(), req.productId())
         .stream().anyMatch(r -> !r.getStatus().equals("REJECTED"));
@@ -258,12 +281,14 @@ public class ReturnService {
     ProductRef p = products.findById(productId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
     int pts = calc.estimate(p.getPrice(), quantity, condition.trim().toUpperCase());
+    boolean hasPoints = isEligibleForRewardPointsAfterFullRefund(p);
     return Map.of("productId", productId, "unitPrice", p.getPrice(), "quantity", quantity,
         "condition", condition.trim().toUpperCase(), "estimatedReward", pts,
+        "hasPointsTrack", hasPoints,
         "disclaimer", ESTIMATE_DISCLAIMER);
   }
 
-  /** Order-aware preview: FULL_REFUND (full ₹) within 14d, else REWARD_POINTS. */
+  /** Order-aware preview: FULL_REFUND (full ₹) within 7d, else REWARD_POINTS if electronics/mixer grinder. */
   public Map<String, Object> estimateForOrder(String orderId, String productId, int quantity, String condition) {
     ProductRef p = products.findById(productId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
@@ -272,20 +297,32 @@ public class ReturnService {
       if (order != null) {
         long ageDays = order.getOrderDate() == null ? 0
             : Duration.between(order.getOrderDate(), Instant.now()).toDays();
+        var line = order.getItems() == null ? null : order.getItems().stream()
+            .filter(i -> i.getProductId().equals(productId)).findFirst().orElse(null);
+        double unit = line == null ? p.getPrice() : line.getPrice();
+
         if (ageDays <= props.getFullRefundWindowDays()) {
-          var line = order.getItems() == null ? null : order.getItems().stream()
-              .filter(i -> i.getProductId().equals(productId)).findFirst().orElse(null);
-          double unit = line == null ? p.getPrice() : line.getPrice();
           int full = (int) Math.floor(unit * quantity);
           return Map.of("productId", productId, "unitPrice", unit, "quantity", quantity,
               "condition", condition.trim().toUpperCase(), "returnType", "FULL_REFUND",
               "estimatedRefund", full, "disclaimer", ESTIMATE_DISCLAIMER);
+        } else if (isEligibleForRewardPointsAfterFullRefund(p)) {
+          int pts = calc.estimate(unit, quantity, condition.trim().toUpperCase());
+          return Map.of("productId", productId, "unitPrice", unit, "quantity", quantity,
+              "condition", condition.trim().toUpperCase(), "returnType", "REWARD_POINTS",
+              "estimatedReward", pts, "disclaimer", ESTIMATE_DISCLAIMER);
+        } else {
+          return Map.of("productId", productId, "unitPrice", unit, "quantity", quantity,
+              "condition", condition.trim().toUpperCase(), "returnType", "EXPIRED",
+              "error", "Return window expired (7 days). Only Electronics and Mixer Grinder 750W are eligible for reward points return after 7 days.",
+              "disclaimer", ESTIMATE_DISCLAIMER);
         }
       }
     }
     int pts = calc.estimate(p.getPrice(), quantity, condition.trim().toUpperCase());
+    String defaultType = isEligibleForRewardPointsAfterFullRefund(p) ? "REWARD_POINTS" : "FULL_REFUND";
     return Map.of("productId", productId, "unitPrice", p.getPrice(), "quantity", quantity,
-        "condition", condition.trim().toUpperCase(), "returnType", "REWARD_POINTS",
+        "condition", condition.trim().toUpperCase(), "returnType", defaultType,
         "estimatedReward", pts, "disclaimer", ESTIMATE_DISCLAIMER);
   }
 }
