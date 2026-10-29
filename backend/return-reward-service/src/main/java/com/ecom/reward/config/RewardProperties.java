@@ -9,8 +9,7 @@ import org.springframework.context.annotation.Configuration;
  * Two-track return policy:
  * <ul>
  *   <li>age ≤ fullRefundWindowDays → FULL_REFUND (full money back after inspection).</li>
- *   <li>fullRefundWindowDays &lt; age ≤ rewardWindowDays → REWARD_POINTS (condition multipliers).</li>
- *   <li>age &gt; rewardWindowDays → rejected.</li>
+ *   <li>age > fullRefundWindowDays → REWARD_POINTS (condition multipliers; unlimited when rewardWindowDays ≤ 0).</li>
  * </ul>
  */
 @Configuration
@@ -21,7 +20,8 @@ public class RewardProperties {
   /** Legacy alias — kept in sync with fullRefundWindowDays. */
   private int returnWindowDays = 14;
   private int fullRefundWindowDays = 14;
-  private int rewardWindowDays = 90;
+  /** Maximum days for reward points return; 0 or negative means no expiration / unlimited. */
+  private int rewardWindowDays = 0;
   private Map<String, Double> multipliers = new LinkedHashMap<>(Map.of(
       "LIKE_NEW", 0.8, "GOOD", 0.6, "FAIR", 0.4, "POOR", 0.1, "NOT_ELIGIBLE", 0.0));
 

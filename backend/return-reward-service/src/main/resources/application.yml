@@ -20,7 +20,7 @@ reward:
   point-rate: 1
   return-window-days: 14
   full-refund-window-days: 14
-  reward-window-days: 90
+  reward-window-days: 0
   multipliers:
     LIKE_NEW: 0.8
     GOOD: 0.6

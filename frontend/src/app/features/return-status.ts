@@ -13,7 +13,7 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
   imports: [CommonModule, RouterModule, EmptyState],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Returns</div>
-    <div class="page-head"><div><h1 style="font-size:28px">Returns & Refunds</h1><p>≤14 days: full money back · after 14 days (to 90): wallet points.</p></div>
+    <div class="page-head"><div><h1 style="font-size:28px">Returns & Refunds</h1><p>≤14 days: full money back · after 14 days: wallet points.</p></div>
       <a routerLink="/orders"><button class="btn-ghost btn-sm">+ New return from orders</button></a></div>
     <div class="stack" *ngIf="returns.length; else none">
       <div class="card" style="margin:0" *ngFor="let r of returns">
@@ -40,7 +40,7 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
         <p class="muted" *ngIf="r.adminNote">📝 Inspector: {{ r.adminNote }}</p>
       </div>
     </div>
-    <ng-template #none><app-empty-state icon="" title="No returns yet" hint="Delivered items: full refund within 14 days, points to 90 days." ctaLink="/orders" ctaLabel="Go to orders"></app-empty-state></ng-template>
+    <ng-template #none><app-empty-state icon="" title="No returns yet" hint="Delivered items: full refund within 14 days, points after 14 days." ctaLink="/orders" ctaLabel="Go to orders"></app-empty-state></ng-template>
   `
 })
 export class ReturnStatus implements OnInit {

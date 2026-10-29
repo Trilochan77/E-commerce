@@ -33,7 +33,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <p class="muted">{{ product.description }}</p>
         <div class="reward-box" *ngIf="product.eligibleForReturn">
           <strong> Easy returns</strong>
-          <div class="muted">≤14 days: 100% money back · after 14d (to 90d): LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet pts</div>
+          <div class="muted">≤14 days: 100% money back · after 14d: LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet pts</div>
           <div class="muted">Est. on LIKE_NEW: <strong style="color:#15803d">₹{{ estLikeNew() | number }} pts</strong></div>
         </div>
         <div class="buy-box" style="margin-top:12px" *ngIf="auth.isLoggedIn(); else loginCta">
@@ -48,7 +48,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <ng-template #loginCta><p><a routerLink="/login"><button class="primary">Login to buy</button></a></p></ng-template>
         <div class="trust">
           <div>🚚 <strong>Fast delivery</strong><br>2–4 days · free over ₹999</div>
-          <div> <strong>14-day refunds</strong><br>full money back · pts to 90d</div>
+          <div> <strong>14-day refunds</strong><br>full money back · pts after 14d</div>
           <div>🔒 <strong>Secure pay</strong><br>COD · UPI · Card (mock)</div>
         </div>
       </div>
@@ -65,7 +65,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <div class="reward-compare">
           <div class="reward-box" *ngFor="let c of ['LIKE_NEW','GOOD','FAIR','POOR']"><strong>{{ c }}</strong><div class="muted">{{ (MULT[c]*100) }}% of price</div><div class="price">₹{{ floor(product.price * MULT[c]) | number }} pts</div></div>
         </div>
-        <p class="muted">Points track (after 14d, to 90d): estimated at claim, final after inspection. NOT_ELIGIBLE = 0.</p>
+        <p class="muted">Points track (after 14 days): estimated at claim, final after inspection. NOT_ELIGIBLE = 0.</p>
       </div>
       <p *ngIf="tab==='reco'" class="muted">Scored as 3× purchase-category + 2× views + 2× search-match + 1× popularity. Viewing this item logged a VIEW event to improve your rail.</p>
     </div>

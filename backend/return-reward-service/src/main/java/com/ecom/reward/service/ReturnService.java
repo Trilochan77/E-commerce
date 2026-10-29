@@ -78,7 +78,7 @@ public class ReturnService {
     long ageDays = order.getOrderDate() == null ? 0
         : Duration.between(order.getOrderDate(), Instant.now()).toDays();
     String track = ageDays <= props.getFullRefundWindowDays() ? "FULL_REFUND" : "REWARD_POINTS";
-    if (ageDays > props.getRewardWindowDays()) {
+    if (props.getRewardWindowDays() > 0 && ageDays > props.getRewardWindowDays()) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           "Return window expired (" + props.getRewardWindowDays() + " days)");
     }

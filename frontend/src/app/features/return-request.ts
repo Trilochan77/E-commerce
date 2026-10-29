@@ -24,7 +24,7 @@ const INFO: Record<string, { pct: number; tip: string }> = {
         <h2> Request a Return</h2>
         <p class="muted">Order <strong>{{ orderId }}</strong> · Product <strong>{{ productId }}</strong> · platform purchase only</p>
         <p class="muted" *ngIf="track==='FULL_REFUND'">Within <strong>14-day full-refund window</strong> — money back to source after inspection (condition gates pass/fail).</p>
-        <p class="muted" *ngIf="track==='REWARD_POINTS'">Past 14 days — <strong>reward points only</strong> (no money back), up to 90 days.</p>
+        <p class="muted" *ngIf="track==='REWARD_POINTS'">Past 14 days — <strong>reward points only</strong> (no money back, eligible anytime).</p>
         <label>Reason for return
           <textarea [(ngModel)]="reason" name="reason" rows="3" placeholder="e.g. Size didn’t fit, changed mind, minor defect…"></textarea>
         </label>
