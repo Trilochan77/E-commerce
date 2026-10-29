@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 const CATEGORY_STYLE: Record<string, { label: string; short: string; hue: number }> = {
@@ -15,6 +15,7 @@ const CATEGORY_STYLE: Record<string, { label: string; short: string; hue: number
  * category initial + type label on a tinted tile. No stock photos.
  */
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-visual',
   imports: [CommonModule],
   template: `

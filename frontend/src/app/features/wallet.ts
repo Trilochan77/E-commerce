@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Shop } from '../core/shop';
@@ -6,6 +6,7 @@ import { Auth } from '../core/auth';
 import { EmptyState } from '../shared/empty-state';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-wallet',
   imports: [CommonModule, RouterModule, EmptyState],
   template: `

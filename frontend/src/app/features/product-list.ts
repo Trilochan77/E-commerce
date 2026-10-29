@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -8,6 +8,7 @@ import { ProductVisual } from '../shared/product-visual';
 import { EmptyState } from '../shared/empty-state';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-list',
   imports: [CommonModule, FormsModule, RouterModule, ProductCard, ProductVisual, EmptyState],
   template: `

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Shop } from '../core/shop';
@@ -7,6 +7,7 @@ import { Toast } from '../shared/toast';
 const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', 'APPROVED_FOR_REWARD', 'COMPLETED'];
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-admin-returns',
   imports: [CommonModule, FormsModule],
   template: `

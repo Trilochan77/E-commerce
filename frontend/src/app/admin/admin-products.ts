@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Shop } from '../core/shop';
@@ -6,6 +6,7 @@ import { Toast } from '../shared/toast';
 import { ProductVisual } from '../shared/product-visual';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-admin-products',
   imports: [CommonModule, FormsModule, ProductVisual],
   template: `

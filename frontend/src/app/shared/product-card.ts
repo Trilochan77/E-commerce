@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Auth } from '../core/auth';
@@ -7,6 +7,7 @@ import { Toast } from './toast';
 import { ProductVisual } from './product-visual';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-card',
   imports: [CommonModule, RouterModule, ProductVisual],
   template: `

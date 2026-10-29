@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Shop } from '../core/shop';
@@ -8,6 +8,7 @@ import { ProductVisual } from '../shared/product-visual';
 import { Toast } from '../shared/toast';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-cart',
   imports: [CommonModule, RouterModule, EmptyState, ProductVisual],
   template: `

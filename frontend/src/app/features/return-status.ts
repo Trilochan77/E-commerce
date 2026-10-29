@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Shop } from '../core/shop';
@@ -8,6 +8,7 @@ import { EmptyState } from '../shared/empty-state';
 const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', 'APPROVED_FOR_REWARD', 'COMPLETED'];
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-return-status',
   imports: [CommonModule, RouterModule, EmptyState],
   template: `
