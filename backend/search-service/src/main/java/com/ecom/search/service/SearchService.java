@@ -2,8 +2,8 @@ package com.ecom.search.service;
 
 import com.ecom.search.entity.ProductDoc;
 import com.ecom.search.repository.ProductDocRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class SearchService {
 
   private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(3)).build();
-  private final ObjectMapper mapper = new ObjectMapper();
+  private final JsonMapper mapper = JsonMapper.builder().build();
   private final ProductDocRepository mongo;
 
   @Value("${elasticsearch.uris:http://localhost:9200}")
@@ -80,10 +80,10 @@ public class SearchService {
       for (JsonNode hit : root.path("hits").path("hits")) {
         JsonNode src = hit.path("_source");
         Map<String, Object> m = new LinkedHashMap<>();
-        m.put("productId", src.path("product_id").asText(hit.path("_id").asText()));
-        m.put("name", src.path("name").asText(null));
-        m.put("description", src.path("description").asText(null));
-        m.put("category", src.path("category").asText(null));
+        m.put("productId", src.path("product_id").asString(hit.path("_id").asString()));
+        m.put("name", src.path("name").asString(null));
+        m.put("description", src.path("description").asString(null));
+        m.put("category", src.path("category").asString(null));
         m.put("price", src.path("price").asDouble(0));
         m.put("availability", src.path("availability").asBoolean(true));
         items.add(m);
