@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface Toast { id: number; msg: string; kind: 'ok' | 'err' | 'info'; }
+export interface ToastEntry { id: number; msg: string; kind: 'ok' | 'err' | 'info'; }
 
 @Injectable({ providedIn: 'root' })
-export class ToastService {
+export class Toast {
   private seq = 1;
-  toasts$ = new BehaviorSubject<Toast[]>([]);
+  toasts$ = new BehaviorSubject<ToastEntry[]>([]);
 
-  show(msg: string, kind: Toast['kind'] = 'info'): void {
+  show(msg: string, kind: ToastEntry['kind'] = 'info'): void {
     const t = { id: this.seq++, msg, kind };
     this.toasts$.next([...this.toasts$.value, t]);
     setTimeout(() => this.dismiss(t.id), 3600);

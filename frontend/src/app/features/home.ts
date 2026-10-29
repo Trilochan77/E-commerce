@@ -2,15 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { ProductCardComponent } from '../shared/product-card.component';
-import { EmptyStateComponent } from '../shared/empty-state.component';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { ProductCard } from '../shared/product-card';
+import { EmptyState } from '../shared/empty-state';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ProductCardComponent, EmptyStateComponent],
+  imports: [CommonModule, RouterModule, FormsModule, ProductCard, EmptyState],
   template: `
     <section class="hero">
       <div>
@@ -71,7 +70,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
     </div>
   `
 })
-export class HomeComponent implements OnInit {
+export class Home implements OnInit {
   products: any[] = [];
   categories: any[] = [];
   recommendations: any[] = [];
@@ -81,7 +80,7 @@ export class HomeComponent implements OnInit {
   loadingRec = false;
   activeCat = '';
 
-  constructor(private shop: ShopService, public auth: AuthService, private router: Router) {}
+  constructor(private shop: Shop, public auth: Auth, private router: Router) {}
 
   ngOnInit(): void {
     this.shop.products().subscribe((r: any) => {

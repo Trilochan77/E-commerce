@@ -1,53 +1,53 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 import { adminGuard } from './core/admin.guard';
-import { LoginComponent } from './features/login.component';
-import { RegisterComponent } from './features/register.component';
-import { HomeComponent } from './features/home.component';
-import { ProductListComponent } from './features/product-list.component';
-import { ProductDetailComponent } from './features/product-detail.component';
-import { CartComponent } from './features/cart.component';
-import { CheckoutComponent } from './features/checkout.component';
-import { OrdersComponent } from './features/orders.component';
-import { ReturnRequestComponent } from './features/return-request.component';
-import { ReturnStatusComponent } from './features/return-status.component';
-import { WalletComponent } from './features/wallet.component';
-import { ProfileComponent } from './features/profile.component';
-import { AdminLayoutComponent } from './admin/admin-layout.component';
-import { AdminLoginComponent } from './admin/admin-login.component';
-import { AdminDashboardComponent } from './admin/admin-dashboard.component';
-import { AdminProductsComponent } from './admin/admin-products.component';
-import { AdminCategoriesComponent } from './admin/admin-categories.component';
-import { AdminOrdersComponent } from './admin/admin-orders.component';
-import { AdminReturnsComponent } from './admin/admin-returns.component';
-import { AdminUsersComponent } from './admin/admin-users.component';
+import { Login } from './features/login';
+import { Register } from './features/register';
+import { Home } from './features/home';
+import { ProductList } from './features/product-list';
+import { ProductDetail } from './features/product-detail';
+import { Cart } from './features/cart';
+import { Checkout } from './features/checkout';
+import { Orders } from './features/orders';
+import { ReturnRequest } from './features/return-request';
+import { ReturnStatus } from './features/return-status';
+import { Wallet } from './features/wallet';
+import { Profile } from './features/profile';
+import { AdminLayout } from './admin/admin-layout';
+import { AdminLogin } from './admin/admin-login';
+import { AdminDashboard } from './admin/admin-dashboard';
+import { AdminProducts } from './admin/admin-products';
+import { AdminCategories } from './admin/admin-categories';
+import { AdminOrders } from './admin/admin-orders';
+import { AdminReturns } from './admin/admin-returns';
+import { AdminUsers } from './admin/admin-users';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'products', component: ProductListComponent },
-  { path: 'products/:id', component: ProductDetailComponent },
-  { path: 'cart', component: CartComponent, canActivate: [authGuard] },
-  { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
-  { path: 'orders', component: OrdersComponent, canActivate: [authGuard] },
-  { path: 'returns/new', component: ReturnRequestComponent, canActivate: [authGuard] },
-  { path: 'returns', component: ReturnStatusComponent, canActivate: [authGuard] },
-  { path: 'wallet', component: WalletComponent, canActivate: [authGuard] },
-  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
-  { path: 'admin/login', component: AdminLoginComponent },
+  { path: '', component: Home },
+  { path: 'login', component: Login },
+  { path: 'register', component: Register },
+  { path: 'products', component: ProductList },
+  { path: 'products/:id', component: ProductDetail },
+  { path: 'cart', component: Cart, canActivate: [authGuard] },
+  { path: 'checkout', component: Checkout, canActivate: [authGuard] },
+  { path: 'orders', component: Orders, canActivate: [authGuard] },
+  { path: 'returns/new', component: ReturnRequest, canActivate: [authGuard] },
+  { path: 'returns', component: ReturnStatus, canActivate: [authGuard] },
+  { path: 'wallet', component: Wallet, canActivate: [authGuard] },
+  { path: 'profile', component: Profile, canActivate: [authGuard] },
+  { path: 'admin/login', component: AdminLogin },
   {
     path: 'admin',
-    component: AdminLayoutComponent,
+    component: AdminLayout,
     canActivate: [adminGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: AdminDashboardComponent },
-      { path: 'products', component: AdminProductsComponent },
-      { path: 'categories', component: AdminCategoriesComponent },
-      { path: 'orders', component: AdminOrdersComponent },
-      { path: 'returns', component: AdminReturnsComponent },
-      { path: 'users', component: AdminUsersComponent }
+      { path: 'dashboard', component: AdminDashboard },
+      { path: 'products', component: AdminProducts },
+      { path: 'categories', component: AdminCategories },
+      { path: 'orders', component: AdminOrders },
+      { path: 'returns', component: AdminReturns },
+      { path: 'users', component: AdminUsers }
     ]
   },
   { path: '**', redirectTo: '' }

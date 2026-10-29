@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { EmptyStateComponent } from '../shared/empty-state.component';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { EmptyState } from '../shared/empty-state';
 
 const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', 'APPROVED_FOR_REWARD', 'COMPLETED'];
 
 @Component({
   selector: 'app-return-status',
-  standalone: true,
-  imports: [CommonModule, RouterModule, EmptyStateComponent],
+  imports: [CommonModule, RouterModule, EmptyState],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Returns</div>
     <div class="page-head"><div><h1 style="font-size:28px">Returns & Refunds</h1><p>≤14 days: full money back · after 14 days (to 90): wallet points.</p></div>
@@ -43,11 +42,11 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
     <ng-template #none><app-empty-state icon="" title="No returns yet" hint="Delivered items: full refund within 14 days, points to 90 days." ctaLink="/orders" ctaLabel="Go to orders"></app-empty-state></ng-template>
   `
 })
-export class ReturnStatusComponent implements OnInit {
+export class ReturnStatus implements OnInit {
   returns: any[] = [];
   flow = FLOW;
 
-  constructor(private shop: ShopService, private auth: AuthService) {}
+  constructor(private shop: Shop, private auth: Auth) {}
 
   ngOnInit(): void {
     this.shop.myReturns(this.auth.userId()).subscribe((r: any) => (this.returns = Array.isArray(r) ? r : []));

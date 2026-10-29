@@ -2,15 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { ProductCardComponent } from '../shared/product-card.component';
-import { ProductVisualComponent } from '../shared/product-visual.component';
-import { EmptyStateComponent } from '../shared/empty-state.component';
+import { Shop } from '../core/shop';
+import { ProductCard } from '../shared/product-card';
+import { ProductVisual } from '../shared/product-visual';
+import { EmptyState } from '../shared/empty-state';
 
 @Component({
   selector: 'app-product-list',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ProductCardComponent, ProductVisualComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ProductCard, ProductVisual, EmptyState],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Shop</div>
     <div class="page-head">
@@ -79,7 +78,7 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
     </div>
   `
 })
-export class ProductListComponent implements OnInit {
+export class ProductList implements OnInit {
   q = '';
   category = '';
   sort = '';
@@ -94,7 +93,7 @@ export class ProductListComponent implements OnInit {
   source = '';
   loading = false;
 
-  constructor(private shop: ShopService, private route: ActivatedRoute) {}
+  constructor(private shop: Shop, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.shop.categories().subscribe((r: any) => (this.categories = Array.isArray(r) ? r : []));

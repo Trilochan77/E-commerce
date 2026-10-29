@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { Toast } from '../shared/toast';
 
 const INFO: Record<string, { pct: number; tip: string }> = {
   LIKE_NEW: { pct: 80, tip: 'Unused · tags & box intact' },
@@ -15,7 +15,6 @@ const INFO: Record<string, { pct: number; tip: string }> = {
 
 @Component({
   selector: 'app-return-request',
-  standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="breadcrumb"><a routerLink="/orders">Orders</a> / Return request</div>
@@ -59,7 +58,7 @@ const INFO: Record<string, { pct: number; tip: string }> = {
     </div>
   `
 })
-export class ReturnRequestComponent implements OnInit {
+export class ReturnRequest implements OnInit {
   orderId = '';
   productId = '';
   reason = '';
@@ -73,8 +72,8 @@ export class ReturnRequestComponent implements OnInit {
   conds = ['LIKE_NEW', 'GOOD', 'FAIR', 'POOR'];
   INFO = INFO;
 
-  constructor(private shop: ShopService, private auth: AuthService,
-    private route: ActivatedRoute, private router: Router, private toast: ToastService) {}
+  constructor(private shop: Shop, private auth: Auth,
+    private route: ActivatedRoute, private router: Router, private toast: Toast) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((p: any) => {

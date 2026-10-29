@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../core/auth.service';
-import { ShopService } from '../core/shop.service';
-import { ToastService } from '../shared/toast.service';
+import { Auth } from '../core/auth';
+import { Shop } from '../core/shop';
+import { Toast } from '../shared/toast';
 
 @Component({
   selector: 'app-admin-users',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page-head">
@@ -36,12 +35,12 @@ import { ToastService } from '../shared/toast.service';
     </div>
   `
 })
-export class AdminUsersComponent implements OnInit {
+export class AdminUsers implements OnInit {
   users: any[] = [];
   q = '';
   error = '';
 
-  constructor(private shop: ShopService, private auth: AuthService, private toast: ToastService) {}
+  constructor(private shop: Shop, private auth: Auth, private toast: Toast) {}
 
   ngOnInit(): void { this.load(); }
 

@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopService } from '../core/shop.service';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Toast } from '../shared/toast';
 
 const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', 'APPROVED_FOR_REWARD', 'COMPLETED'];
 
 @Component({
   selector: 'app-admin-returns',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page-head">
@@ -55,14 +54,14 @@ const FLOW = ['REQUESTED', 'APPROVED', 'PRODUCT_RECEIVED', 'UNDER_INSPECTION', '
     <p class="muted" *ngIf="loading"><span class="spinner"></span> Loading…</p>
   `
 })
-export class AdminReturnsComponent implements OnInit {
+export class AdminReturns implements OnInit {
   returns: any[] = [];
   filter = '';
   error = '';
   loading = true;
   flow = FLOW;
 
-  constructor(private shop: ShopService, private toast: ToastService) {}
+  constructor(private shop: Shop, private toast: Toast) {}
 
   ngOnInit(): void { this.load(); }
 

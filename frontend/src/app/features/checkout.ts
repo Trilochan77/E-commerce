@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { Toast } from '../shared/toast';
 
 @Component({
   selector: 'app-checkout',
-  standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / <a routerLink="/cart">Cart</a> / Checkout</div>
@@ -93,7 +92,7 @@ import { ToastService } from '../shared/toast.service';
     </div>
   `
 })
-export class CheckoutComponent implements OnInit {
+export class Checkout implements OnInit {
   cart: any = null;
   wallet: any = null;
   points = 0;
@@ -110,7 +109,7 @@ export class CheckoutComponent implements OnInit {
   savingAddr = false;
   form: any = { fullName: '', phone: '', pincode: '', addressLine: '', city: '', state: '', landmark: '', addressType: 'HOME', isDefault: false };
 
-  constructor(private shop: ShopService, private auth: AuthService, private router: Router, private toast: ToastService) {}
+  constructor(private shop: Shop, private auth: Auth, private router: Router, private toast: Toast) {}
 
   ngOnInit(): void {
     this.shop.cart(this.auth.userId()).subscribe((c: any) => (this.cart = c));

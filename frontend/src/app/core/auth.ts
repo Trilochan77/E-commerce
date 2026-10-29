@@ -5,7 +5,7 @@ import { Observable, tap } from 'rxjs';
 const GATEWAY = 'http://localhost:8080';
 
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class Auth {
   constructor(private http: HttpClient) {}
 
   register(name: string, email: string, password: string): Observable<any> {

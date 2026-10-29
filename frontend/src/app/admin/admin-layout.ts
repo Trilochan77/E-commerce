@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { AuthService } from '../core/auth.service';
+import { Auth } from '../core/auth';
 
 @Component({
   selector: 'app-admin-layout',
-  standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
     <div class="admin-shell">
@@ -42,8 +41,8 @@ import { AuthService } from '../core/auth.service';
     </div>
   `
 })
-export class AdminLayoutComponent {
-  constructor(public auth: AuthService, private router: Router) {}
+export class AdminLayout {
+  constructor(public auth: Auth, private router: Router) {}
 
   email(): string {
     return localStorage.getItem('ecom_email') || 'admin@shop.com';

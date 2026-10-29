@@ -2,18 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { ProductCardComponent } from '../shared/product-card.component';
-import { ProductVisualComponent } from '../shared/product-visual.component';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { ProductCard } from '../shared/product-card';
+import { ProductVisual } from '../shared/product-visual';
+import { Toast } from '../shared/toast';
 
 const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR: 0.1 };
 
 @Component({
   selector: 'app-product-detail',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ProductCardComponent, ProductVisualComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ProductCard, ProductVisual],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / <a routerLink="/products">Shop</a> / {{ product?.name || '…' }}</div>
     <div class="detail-layout" *ngIf="product">
@@ -75,7 +74,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
     </div>
   `
 })
-export class ProductDetailComponent implements OnInit {
+export class ProductDetail implements OnInit {
   product: any = null;
   qty = 1;
   error = '';
@@ -85,8 +84,8 @@ export class ProductDetailComponent implements OnInit {
   tab: 'desc' | 'returns' | 'reco' = 'desc';
   MULT = MULT;
 
-  constructor(private shop: ShopService, public auth: AuthService,
-    private route: ActivatedRoute, private router: Router, private toast: ToastService) {}
+  constructor(private shop: Shop, public auth: Auth,
+    private route: ActivatedRoute, private router: Router, private toast: Toast) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') || '';

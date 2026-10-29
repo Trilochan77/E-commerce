@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { Toast } from '../shared/toast';
 
 @Component({
   selector: 'app-profile',
-  standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Profile</div>
@@ -119,7 +118,7 @@ import { ToastService } from '../shared/toast.service';
     </div>
   `
 })
-export class ProfileComponent implements OnInit {
+export class Profile implements OnInit {
   me: any = null;
   name = '';
   phone = '';
@@ -137,9 +136,9 @@ export class ProfileComponent implements OnInit {
   addrForm: any = { fullName: '', phone: '', pincode: '', addressLine: '', city: '', state: '', landmark: '', addressType: 'HOME', isDefault: false };
 
   constructor(
-    private shop: ShopService,
-    private auth: AuthService,
-    private toast: ToastService,
+    private shop: Shop,
+    private auth: Auth,
+    private toast: Toast,
     private router: Router
   ) {}
 

@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopService } from '../core/shop.service';
-import { ToastService } from '../shared/toast.service';
-import { ProductVisualComponent } from '../shared/product-visual.component';
+import { Shop } from '../core/shop';
+import { Toast } from '../shared/toast';
+import { ProductVisual } from '../shared/product-visual';
 
 @Component({
   selector: 'app-admin-products',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ProductVisualComponent],
+  imports: [CommonModule, FormsModule, ProductVisual],
   template: `
     <div class="page-head">
       <div><h1>Products</h1><p>{{ products.length }} items · saves sync to search index.</p></div>
@@ -64,7 +63,7 @@ import { ProductVisualComponent } from '../shared/product-visual.component';
     </div>
   `
 })
-export class AdminProductsComponent implements OnInit {
+export class AdminProducts implements OnInit {
   products: any[] = [];
   categories: any[] = [];
   q = '';
@@ -75,7 +74,7 @@ export class AdminProductsComponent implements OnInit {
   form: any = { name: '', description: '', price: 0, categoryId: '', stockQuantity: 10, imageUrl: '', eligibleForReturn: true };
   imgError = '';
 
-  constructor(private shop: ShopService, private toast: ToastService) {}
+  constructor(private shop: Shop, private toast: Toast) {}
 
   ngOnInit(): void { this.load(); }
 

@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { AuthService } from '../core/auth.service';
-import { ToastService } from '../shared/toast.service';
+import { Auth } from '../core/auth';
+import { Toast } from '../shared/toast';
 
 @Component({
   selector: 'app-login',
-  standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="auth-page">
@@ -56,7 +55,7 @@ import { ToastService } from '../shared/toast.service';
     </div>
   `
 })
-export class LoginComponent implements OnInit {
+export class Login implements OnInit {
   email = '';
   password = '';
   error = '';
@@ -65,10 +64,10 @@ export class LoginComponent implements OnInit {
   returnUrl = '';
 
   constructor(
-    private auth: AuthService,
+    private auth: Auth,
     private router: Router,
     private route: ActivatedRoute,
-    private toast: ToastService
+    private toast: Toast
   ) {}
 
   ngOnInit(): void {

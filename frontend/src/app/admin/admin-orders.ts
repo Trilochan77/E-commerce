@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopService } from '../core/shop.service';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Toast } from '../shared/toast';
 
 @Component({
   selector: 'app-admin-orders',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page-head">
@@ -40,13 +39,13 @@ import { ToastService } from '../shared/toast.service';
     </div>
   `
 })
-export class AdminOrdersComponent implements OnInit {
+export class AdminOrders implements OnInit {
   orders: any[] = [];
   statusFilter = '';
   error = '';
   loading = true;
 
-  constructor(private shop: ShopService, private toast: ToastService) {}
+  constructor(private shop: Shop, private toast: Toast) {}
 
   ngOnInit(): void { this.load(); }
 

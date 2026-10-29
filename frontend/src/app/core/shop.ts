@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 const GATEWAY = 'http://localhost:8080';
 
 @Injectable({ providedIn: 'root' })
-export class ShopService {
+export class Shop {
   constructor(private http: HttpClient) {}
 
   private adminHeaders(): HttpHeaders {

@@ -1,15 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../core/auth.service';
-import { ShopService } from '../core/shop.service';
-import { ToastService } from './toast.service';
-import { ProductVisualComponent } from './product-visual.component';
+import { Auth } from '../core/auth';
+import { Shop } from '../core/shop';
+import { Toast } from './toast';
+import { ProductVisual } from './product-visual';
 
 @Component({
   selector: 'app-product-card',
-  standalone: true,
-  imports: [CommonModule, RouterModule, ProductVisualComponent],
+  imports: [CommonModule, RouterModule, ProductVisual],
   template: `
     <article class="product">
       <div class="product-media">
@@ -36,10 +35,10 @@ import { ProductVisualComponent } from './product-visual.component';
     </article>
   `
 })
-export class ProductCardComponent {
+export class ProductCard {
   @Input() product: any;
 
-  constructor(public auth: AuthService, private shop: ShopService, private toast: ToastService) {}
+  constructor(public auth: Auth, private shop: Shop, private toast: Toast) {}
 
   id(): string {
     return this.product?.productId || this.product?.id || this.product?._id || '';

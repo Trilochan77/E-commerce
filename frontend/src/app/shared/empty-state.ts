@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-empty-state',
-  standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
     <div class="empty">
@@ -14,7 +13,7 @@ import { RouterModule } from '@angular/router';
     </div>
   `
 })
-export class EmptyStateComponent {
+export class EmptyState {
   @Input() icon = '';
   @Input() title = 'Nothing here yet';
   @Input() hint = 'Try a different search or explore trending products.';

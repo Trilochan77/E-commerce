@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { EmptyStateComponent } from '../shared/empty-state.component';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { EmptyState } from '../shared/empty-state';
 
 @Component({
   selector: 'app-wallet',
-  standalone: true,
-  imports: [CommonModule, RouterModule, EmptyStateComponent],
+  imports: [CommonModule, RouterModule, EmptyState],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Wallet</div>
     <div class="wallet-hero">
@@ -41,11 +40,11 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
     </div>
   `
 })
-export class WalletComponent implements OnInit {
+export class Wallet implements OnInit {
   balance = 0;
   txs: any[] = [];
 
-  constructor(private shop: ShopService, private auth: AuthService) {}
+  constructor(private shop: Shop, private auth: Auth) {}
 
   ngOnInit(): void {
     this.shop.wallet(this.auth.userId()).subscribe((w: any) => (this.balance = w.balance ?? w.pointBalance ?? 0));

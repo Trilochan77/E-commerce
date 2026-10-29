@@ -2,14 +2,13 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from './core/auth.service';
-import { ShopService } from './core/shop.service';
-import { ToastService } from './shared/toast.service';
+import { Auth } from './core/auth';
+import { Shop } from './core/shop';
+import { Toast } from './shared/toast';
 import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <header class="topbar" *ngIf="!isAdminPage">
@@ -109,7 +108,7 @@ import { filter } from 'rxjs';
     </div>
   `
 })
-export class AppComponent {
+export class App {
   q = '';
   menuOpen = false;
   acctOpen = false;
@@ -118,7 +117,7 @@ export class AppComponent {
   toasts: any[] = [];
   isAdminPage = false;
 
-  constructor(public auth: AuthService, private shop: ShopService, private router: Router, private toast: ToastService) {
+  constructor(public auth: Auth, private shop: Shop, private router: Router, private toast: Toast) {
     this.toast.toasts$.subscribe((t) => (this.toasts = t));
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e: any) => {
       this.menuOpen = false;

@@ -16,7 +16,6 @@ const CATEGORY_STYLE: Record<string, { label: string; short: string; hue: number
  */
 @Component({
   selector: 'app-product-visual',
-  standalone: true,
   imports: [CommonModule],
   template: `
     <div class="pvisual pvisual-photo" [ngClass]="size" *ngIf="photo(); else tile">
@@ -30,7 +29,7 @@ const CATEGORY_STYLE: Record<string, { label: string; short: string; hue: number
     </ng-template>
   `
 })
-export class ProductVisualComponent {
+export class ProductVisual {
   @Input() product: any = null;
   @Input() categoryId = '';
   @Input() categoryName = '';

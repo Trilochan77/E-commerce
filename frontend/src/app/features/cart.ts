@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { EmptyStateComponent } from '../shared/empty-state.component';
-import { ProductVisualComponent } from '../shared/product-visual.component';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { EmptyState } from '../shared/empty-state';
+import { ProductVisual } from '../shared/product-visual';
+import { Toast } from '../shared/toast';
 
 @Component({
   selector: 'app-cart',
-  standalone: true,
-  imports: [CommonModule, RouterModule, EmptyStateComponent, ProductVisualComponent],
+  imports: [CommonModule, RouterModule, EmptyState, ProductVisual],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Cart</div>
     <div class="steps-checkout"><span class="step now">1 · Cart</span><span>→</span><span class="step">2 · Checkout</span><span>→</span><span class="step">3 · Done</span></div>
@@ -50,12 +49,12 @@ import { ToastService } from '../shared/toast.service';
     </ng-template>
   `
 })
-export class CartComponent implements OnInit {
+export class Cart implements OnInit {
   cart: any = null;
   error = '';
   names: Record<string, string> = {};
 
-  constructor(private shop: ShopService, private auth: AuthService, private toast: ToastService) {}
+  constructor(private shop: Shop, private auth: Auth, private toast: Toast) {}
 
   ngOnInit(): void { this.reload(); }
 

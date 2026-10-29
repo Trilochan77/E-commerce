@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
+import { Shop } from '../core/shop';
 
 @Component({
   selector: 'app-admin-dashboard',
-  standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
     <div class="page-head">
@@ -30,7 +29,7 @@ import { ShopService } from '../core/shop.service';
     </div>
   `
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboard implements OnInit {
   loading = true;
   error = '';
   users = 0;
@@ -42,7 +41,7 @@ export class AdminDashboardComponent implements OnInit {
   pending = 0;
   completed = 0;
 
-  constructor(private shop: ShopService) {}
+  constructor(private shop: Shop) {}
 
   ngOnInit(): void { this.load(); }
 

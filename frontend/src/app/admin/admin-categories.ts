@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShopService } from '../core/shop.service';
-import { ToastService } from '../shared/toast.service';
+import { Shop } from '../core/shop';
+import { Toast } from '../shared/toast';
 
 @Component({
   selector: 'app-admin-categories',
-  standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
     <div class="page-head"><div><h1>Categories</h1><p>{{ categories.length }} categories.</p></div></div>
@@ -37,14 +36,14 @@ import { ToastService } from '../shared/toast.service';
     </div>
   `
 })
-export class AdminCategoriesComponent implements OnInit {
+export class AdminCategories implements OnInit {
   categories: any[] = [];
   name = '';
   desc = '';
   editId = '';
   error = '';
 
-  constructor(private shop: ShopService, private toast: ToastService) {}
+  constructor(private shop: Shop, private toast: Toast) {}
 
   ngOnInit(): void { this.load(); }
 

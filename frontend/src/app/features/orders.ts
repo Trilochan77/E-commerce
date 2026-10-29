@@ -2,14 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { ShopService } from '../core/shop.service';
-import { AuthService } from '../core/auth.service';
-import { EmptyStateComponent } from '../shared/empty-state.component';
+import { Shop } from '../core/shop';
+import { Auth } from '../core/auth';
+import { EmptyState } from '../shared/empty-state';
 
 @Component({
   selector: 'app-orders',
-  standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, RouterModule, EmptyState],
   template: `
     <div class="breadcrumb"><a routerLink="/">Home</a> / Orders</div>
     <div class="page-head">
@@ -49,11 +48,11 @@ import { EmptyStateComponent } from '../shared/empty-state.component';
     <ng-template #noOrders><app-empty-state icon="" title="No orders yet" hint="Your placed orders, tracking and return buttons will live here." ctaLink="/products"></app-empty-state></ng-template>
   `
 })
-export class OrdersComponent implements OnInit {
+export class Orders implements OnInit {
   orders: any[] = [];
   filter = '';
 
-  constructor(private shop: ShopService, private auth: AuthService) {}
+  constructor(private shop: Shop, private auth: Auth) {}
 
   ngOnInit(): void {
     this.shop.orderHistory(this.auth.userId()).subscribe((r: any) => (this.orders = Array.isArray(r) ? r : []));
