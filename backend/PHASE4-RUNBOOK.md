@@ -1,7 +1,7 @@
 # Phase 4 — Angular Storefront + Admin Console: runbook
 
 ## What was scaffolded
-`frontend/` — Angular 17 standalone-components SPA (no NgModules), all screens from SRS §4.1:
+`frontend/` — Angular 22 standalone-components SPA (no NgModules), all screens from SRS §4.1:
 
 | Route | Component | Backend used |
 |---|---|---|

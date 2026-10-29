@@ -10,7 +10,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:application",
+          "builder": "@angular/build:application",
           "options": {
             "outputPath": "dist/ecom-frontend",
             "index": "src/index.html",
@@ -37,7 +37,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular-devkit/build-angular:dev-server",
+          "builder": "@angular/build:dev-server",
           "configurations": {
             "production": { "buildTarget": "ecom-frontend:build:production" },
             "development": { "buildTarget": "ecom-frontend:build:development" }

@@ -6,7 +6,7 @@ Run everything natively on your machine. No Docker needed.
 
 | Tool | This machine | Install / fix if missing |
 |---|---|---|
-| Java JDK 17+ | ✅ Java 25 (works, compiles `--release 17`) | — |
+| Java JDK 17+ | ✅ Java 25 (project now compiles `--release 25` on Spring Boot 4) | — |
 | Maven 3.9+ | ✅ 3.9.16 | `winget install Apache.Maven` |
 | Node.js 20+ + npm | ✅ Node 24 + npm 11 | — |
 | MongoDB | ✅ Server 8.3 installed, service `MongoDB` present but **Stopped** | Start it, **as Administrator** (see §2) or manual `mongod` |
@@ -221,5 +221,5 @@ When finished:
 - ✅ `mongosh` 2.11.1 in User PATH; database seeded with 5 categories & 20 products.
 - ✅ All 8 Spring Boot microservices compiled into production JARs and registered in Eureka.
 - ✅ `api-gateway` routes verified: `/api/products` (20 items), `/api/categories` (5 items), `/api/users/login` (JWT token issued).
-- ✅ Angular 17 frontend serving on `http://localhost:4200` (HTTP 200 OK).
+- ✅ Angular 22 frontend serving on `http://localhost:4200` (HTTP 200 OK).
 - ✅ Single-command orchestrator `start-backend.ps1` and shutdown script `stop-backend.ps1` operational.

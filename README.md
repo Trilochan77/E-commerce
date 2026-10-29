@@ -1,9 +1,9 @@
 # 🛍️ NextGen AI E-Commerce & Reward Platform
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg?logo=springboot)](https://spring.io/projects/spring-boot)
-[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2023.0.1-blue.svg)](https://spring.io/projects/spring-cloud)
-[![Angular](https://img.shields.io/badge/Angular-17%2B-dd0031.svg?logo=angular)](https://angular.io/)
-[![Java](https://img.shields.io/badge/Java-17%2B-orange.svg?logo=openjdk)](https://www.oracle.com/java/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-brightgreen.svg?logo=springboot)](https://spring.io/projects/spring-boot)
+[![Spring Cloud](https://img.shields.io/badge/Spring%20Cloud-2025.1.4-blue.svg)](https://spring.io/projects/spring-cloud)
+[![Angular](https://img.shields.io/badge/Angular-22%2B-dd0031.svg?logo=angular)](https://angular.dev/)
+[![Java](https://img.shields.io/badge/Java-25%2B-orange.svg?logo=openjdk)](https://www.oracle.com/java/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green.svg?logo=mongodb)](https://www.mongodb.com/)
 [![Elasticsearch](https://img.shields.io/badge/Elasticsearch-8.11-005571.svg?logo=elasticsearch)](https://www.elastic.co/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -60,7 +60,7 @@ The solution follows a distributed, decoupled **Cloud-Native Microservices Archi
 ```mermaid
 graph TB
     subgraph ClientLayer ["Client Layer"]
-        SPA["🌐 Angular 17 SPA (Browser :4200)"]
+        SPA["🌐 Angular 22 SPA (Browser :4200)"]
     end
 
     subgraph EdgeLayer ["Edge & Discovery Layer"]
@@ -68,7 +68,7 @@ graph TB
         Eureka["🧭 Eureka Discovery Server (:8761)<br/>• Service Registry & Heartbeats"]
     end
 
-    subgraph CoreServices ["Backend Microservices (Spring Boot 3.x)"]
+    subgraph CoreServices ["Backend Microservices (Spring Boot 4.x)"]
         UserSvc["👤 user-service (:8081)<br/>• Auth, JWT, Profiles"]
         ProdSvc["📦 product-service (:8082)<br/>• Catalog, Stock, Categories"]
         SearchSvc["🔍 search-service (:8083)<br/>• ES Full-Text & Filters"]
@@ -215,7 +215,7 @@ flowchart LR
 │   ├── pom.xml                           # Root Maven aggregator POM
 │   └── PHASE0-RUNBOOK.md                 # Bootstrap verification runbook
 │
-├── frontend/                             # Angular 17 Single Page Application
+├── frontend/                             # Angular 22 Single Page Application
 │   └── src/app/
 │       ├── core/                         # Guards (Auth, Admin), JWT Interceptor, Services
 │       ├── features/                     # Auth, Catalog, Cart, Checkout, Returns, Wallet, Admin
@@ -301,8 +301,8 @@ All external requests pass through `http://localhost:8080`:
 
 Ensure the following tools are installed on your workstation:
 
-- **Java JDK 17+** (JDK 21 or 25 with `--release 17` supported)
-- **Node.js 20+** and **npm 10+**
+- **Java JDK 17+** (JDK 25 recommended — the project targets `--release 25`)
+- **Node.js 22+** and **npm 10+**
 - **Apache Maven 3.9+** (`winget install Apache.Maven` on Windows)
 - **MongoDB 7+** (local install or MongoDB Atlas) + `mongosh`
 - **Elasticsearch 8.11+** (local install or Elastic Cloud)

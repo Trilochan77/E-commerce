@@ -2,7 +2,7 @@
 
 ## What Phase 0 created
 - Native MongoDB 7 (27017) + Elasticsearch 8.11 (9200) setup, eureka-server (8761), api-gateway (8080)
-- `backend/pom.xml` (parent: Spring Boot 3.2.5, Cloud 2023.0.1, Java 17), `common-lib` (JwtUtil + ErrorResponse), `eureka-server`, `api-gateway` (all gateway routes pre-wired for Phase 1+)
+- `backend/pom.xml` (parent: Spring Boot 4.1.2, Cloud 2025.1.4, Java 25), `common-lib` (JwtUtil + ErrorResponse), `eureka-server`, `api-gateway` (all gateway routes pre-wired for Phase 1+)
 - `seed/mongo_seed.js` → 5 categories + 20 products
 - `postman/ecom-phase0.json` → health + auth skeleton
 

@@ -18,8 +18,8 @@ Build a web-based e-commerce platform with two differentiators:
 ### 1.2 Tech Stack (per SRS §5.2)
 | Layer | Technology |
 |---|---|
-| Frontend | Angular 17+ (SPA), Node.js 20+, Angular Material / Bootstrap |
-| Backend | Java 17+, Spring Boot 3.x, Spring Cloud Gateway, Spring Cloud Eureka, Spring Security + JWT, Spring Data MongoDB, Spring Data Elasticsearch |
+| Frontend | Angular 22 (SPA), Node.js 22/24+, Bootstrap |
+| Backend | Java 25+, Spring Boot 4.x, Spring Cloud Gateway 5 (2025.1), Spring Cloud Netflix Eureka, Spring Security + JWT, Spring Data MongoDB, Elasticsearch HTTP Client |
 | DB | MongoDB 7+ (port 27017) |
 | Search | Elasticsearch 8+ (port 9200) |
 | Auth | JWT (access + refresh), BCrypt |
