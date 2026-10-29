@@ -4,9 +4,8 @@ server:
 spring:
   application:
     name: cart-service
-  data:
-    mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/ecom}
+  mongodb:
+    uri: ${SPRING_MONGODB_URI:mongodb://localhost:27017/ecom}
 
 eureka:
   instance:
