@@ -42,13 +42,13 @@ import { Toast } from '../shared/toast';
           </button>
           <p class="error" *ngIf="error">{{ error }}</p>
           <div class="demo-box">
-            <strong>Demo login — tap to fill</strong>
+            <strong>Example login (for demo purposes only)</strong>
             <div class="demo-grid">
               <button type="button" class="demo-card" (click)="fill('user@shop.com','User@123')">
-                <strong>Customer</strong><span>user&#64;shop.com</span><code>User&#64;123</code>
+                <strong>Example Customer</strong><span>user&#64;shop.com</span><code>User&#64;123</code>
               </button>
             </div>
-            <p class="muted" style="margin:6px 0 0">Password shown for demo only. Admin? <a routerLink="/admin/login">Console sign in →</a></p>
+            <p class="muted" style="margin:6px 0 0">This is just an example account, not a real user. Admin? <a routerLink="/admin/login">Console sign in →</a></p>
           </div>
           <p class="auth-switch">No account? <a routerLink="/register" [queryParams]="returnUrl ? { returnUrl } : {}">Create one</a> · Admin? <a routerLink="/admin/login">Console sign in</a></p>
         </form>
