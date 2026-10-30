@@ -20,7 +20,7 @@ import { Toast } from '../shared/toast';
         <p class="muted">Customer accounts are rejected here. Use <a routerLink="/login">shop login</a> for shopping.</p>
         <label>Admin email
           <input [(ngModel)]="email" name="email" type="email" autocomplete="username"
-            placeholder="admin@shop.com" required autofocus>
+            placeholder="trilochan@nextgen.com" required autofocus>
         </label>
         <div class="field-err" *ngIf="email && !validEmail()">Enter a valid email address.</div>
         <label>Password
@@ -34,15 +34,7 @@ import { Toast } from '../shared/toast';
           <span class="spinner" *ngIf="busy"></span> {{ busy ? 'Verifying…' : 'Sign in to console' }}
         </button>
         <p class="error" *ngIf="error">{{ error }}</p>
-        <div class="demo-box">
-          <strong>Demo admin — tap to fill</strong>
-          <div class="demo-grid">
-            <button type="button" class="demo-card" (click)="fill()">
-              <strong>Admin</strong><span>admin&#64;shop.com</span><code>Admin&#64;123</code>
-            </button>
-          </div>
-          <p class="muted" style="margin:6px 0 0">Password shown for demo only.</p>
-        </div>
+        <!-- Demo admin removed -->
         <p class="auth-switch"><a routerLink="/">Back to shop</a> · <a routerLink="/login">Customer login</a></p>
       </form>
     </div>
@@ -71,7 +63,7 @@ export class AdminLogin implements OnInit {
   }
 
   validEmail(): boolean { return /.+@.+\..+/.test(this.email); }
-  fill(): void { this.email = 'admin@shop.com'; this.password = 'Admin@123'; this.error = ''; }
+  fill(): void { this.error = ''; }
 
   submit(): void {
     if (!this.email || !this.password || !this.validEmail() || this.busy) return;

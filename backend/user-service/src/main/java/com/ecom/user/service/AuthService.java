@@ -69,8 +69,8 @@ public class AuthService {
       String demoName = null;
       String demoRole = null;
       String demoId = null;
-      if (email.equals("admin@shop.com")) {
-        demoPassword = "Admin@123"; demoName = "Admin"; demoRole = "ADMIN"; demoId = "U-ADMIN01";
+      if (email.equals("trilochan@nextgen.com")) {
+        demoPassword = "trilochan@123"; demoName = "Trilochan"; demoRole = "ADMIN"; demoId = "U-ADMIN01";
       } else if (email.equals("user@shop.com")) {
         demoPassword = "User@123"; demoName = "Demo Customer"; demoRole = "CUSTOMER"; demoId = "U-USER01";
       } else if (email.equals("john@example.com")) {

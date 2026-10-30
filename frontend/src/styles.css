@@ -6,14 +6,14 @@
   --ink-2: #334155;
   --muted: #64748b;
   --line: #e2e8f0;
-  --brand: #1d4ed8;
-  --brand-dark: #1e3a8a;
+  --brand: #7c3aed;
+  --brand-dark: #6d28d9;
   --ok: #15803d;
   --ok-bg: #dcfce7;
   --warn: #92400e;
   --warn-bg: #fef3c7;
-  --info: #1d4ed8;
-  --info-bg: #dbeafe;
+  --info: #8b5cf6;
+  --info-bg: #f5f3ff;
   --bad: #b91c1c;
   --bad-bg: #fee2e2;
   --radius: 10px;
@@ -59,12 +59,12 @@ a:hover { text-decoration: underline; }
 .nav-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
 .nav-link { padding: 8px 11px; border-radius: 8px; color: var(--ink-2); font-weight: 600; font-size: 13px; white-space: nowrap; }
 .nav-link:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
-.nav-link.active { color: var(--brand); background: #eff6ff; }
+.nav-link.active { color: var(--brand); background: #f5f3ff; }
 .wallet-pill { display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; font-weight: 700; font-size: 12px; padding: 7px 11px; border-radius: 999px; white-space: nowrap; }
 .wallet-pill:hover { text-decoration: none; background: #dcfce7; }
 .cart-btn { position: relative; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 12px; font-weight: 600; font-size: 13px; color: var(--ink); cursor: pointer; }
 .cart-btn:hover { border-color: var(--brand); color: var(--brand); text-decoration: none; }
-.cart-btn.active { border-color: var(--brand); color: var(--brand); background: #eff6ff; }
+.cart-btn.active { border-color: var(--brand); color: var(--brand); background: #f5f3ff; }
 .cart-count { position: absolute; top: -8px; right: -8px; display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; background: var(--brand); color: #fff; border-radius: 999px; font-size: 11px; font-weight: 700; border: 2px solid #fff; }
 .btn-login { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 14px; font-weight: 600; font-size: 13px; color: var(--ink); }
 .btn-login:hover { border-color: var(--brand); color: var(--brand); text-decoration: none; }
@@ -82,7 +82,7 @@ a:hover { text-decoration: underline; }
 .mobile-panel nav { display: grid; gap: 2px; }
 .mobile-panel a, .mobile-panel button.m-link { padding: 10px 10px; border-radius: 8px; font-weight: 600; font-size: 14px; color: var(--ink-2); border: 0; background: transparent; text-align: left; cursor: pointer; }
 .mobile-panel a:hover, .mobile-panel button.m-link:hover { background: var(--surface-2); }
-.mobile-panel a.active { color: var(--brand); background: #eff6ff; }
+.mobile-panel a.active { color: var(--brand); background: #f5f3ff; }
 .container { max-width: var(--max); margin: 0 auto; padding: 20px 16px 40px; }
 .page-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 8px 0 16px; flex-wrap: wrap; }
 .page-head p { color: var(--muted); margin: 4px 0 0; font-size: 13px; }
@@ -162,7 +162,7 @@ button.danger:hover { background: var(--bad); color: #fff; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
 .stack { display: grid; gap: 12px; }
 input, select, textarea { padding: 9px 12px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; background: #fff; width: 100%; color: var(--ink); }
-input:focus, select:focus, textarea:focus { border-color: var(--brand); outline: 2px solid #bfdbfe; }
+input:focus, select:focus, textarea:focus { border-color: var(--brand); outline: 2px solid #ddd6fe; }
 label { font-size: 13px; font-weight: 600; color: var(--ink-2); display: grid; gap: 6px; }
 .form-grid { display: grid; gap: 10px; max-width: 440px; }
 .field-err { color: var(--bad); font-size: 12px; font-weight: 600; }
@@ -212,7 +212,7 @@ label { font-size: 13px; font-weight: 600; color: var(--ink-2); display: grid; g
 .step.now { background: var(--ink); color: #fff; border-color: var(--ink); }
 .pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .pay-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; cursor: pointer; background: #fff; }
-.pay-card.on { border-color: var(--brand); box-shadow: 0 0 0 2px #bfdbfe; }
+.pay-card.on { border-color: var(--brand); box-shadow: 0 0 0 2px #ddd6fe; }
 .pay-card strong { display: block; }
 .timeline { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
 .timeline .t { font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 999px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
@@ -237,7 +237,7 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
 /* refreshed auth UX */
 .auth-page { display: grid; place-items: center; padding: 28px 12px; }
 .auth-card { width: min(920px, 100%); display: grid; grid-template-columns: 1fr 1fr; background: #fff; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
-.auth-side { background: linear-gradient(160deg, #0f172a, #1e3a8a); color: #fff; padding: 30px; display: grid; gap: 10px; align-content: start; }
+.auth-side { background: linear-gradient(160deg, #0f172a, #4c1d95); color: #fff; padding: 30px; display: grid; gap: 10px; align-content: start; }
 .auth-side h1 { color: #fff; font-size: 30px; margin: 6px 0; }
 .auth-sub { color: #cbd5e1; margin: 0; }
 .auth-points { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
@@ -273,7 +273,7 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
 .stat-card .bar > div { height: 100%; background: var(--brand); }
 .toast-wrap { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 100; max-width: min(340px, 90vw); }
 .toast { background: #0f172a; color: #fff; border-radius: 8px; padding: 11px 13px; font-size: 13px; display: flex; gap: 8px; align-items: start; }
-.toast.ok { border-left: 3px solid #22c55e; } .toast.err { border-left: 3px solid #ef4444; } .toast.info { border-left: 3px solid #60a5fa; }
+.toast.ok { border-left: 3px solid #22c55e; } .toast.err { border-left: 3px solid #ef4444; } .toast.info { border-left: 3px solid #a78bfa; }
 .skeleton { border-radius: 8px; background: #e2e8f0; min-height: 18px; }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #cbd5e1; border-top-color: var(--brand); animation: spin 0.8s linear infinite; display: inline-block; vertical-align: -3px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -298,13 +298,13 @@ th { background: var(--bg); font-size: 11px; text-transform: uppercase; letter-s
 .admin-nav a:hover { background: #1e293b; color: #fff; text-decoration: none; }
 .admin-nav a.active { background: #fff; color: #0f172a; }
 .admin-side-foot { margin-top: auto; display: grid; gap: 8px; }
-.admin-side-foot a { color: #93c5fd; font-size: 13px; font-weight: 600; }
+.admin-side-foot a { color: #c4b5fd; font-size: 13px; font-weight: 600; }
 .admin-main { min-width: 0; }
 .admin-top { background: #fff; border-bottom: 1px solid var(--line); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 10; }
 .admin-content { padding: 20px; max-width: 1100px; }
 .admin-grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
 /* separate admin login */
-.admin-login-page { min-height: calc(100vh - 40px); display: grid; place-items: center; padding: 24px 12px; background: radial-gradient(800px 300px at 20% 0%, #1e3a8a22, transparent), var(--bg); }
+.admin-login-page { min-height: calc(100vh - 40px); display: grid; place-items: center; padding: 24px 12px; background: radial-gradient(800px 300px at 20% 0%, #7c3aed22, transparent), var(--bg); }
 .admin-login-card { width: min(440px, 100%); background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 24px; display: grid; gap: 10px; box-shadow: var(--shadow); }
 .admin-login-brand { display: flex; align-items: center; gap: 10px; }
 .admin-login-brand strong { display: block; }

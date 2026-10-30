@@ -20,7 +20,7 @@ import { Toast } from '../shared/toast';
     .tab-pill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
     .app-icons { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; margin-bottom: 16px; }
     .app-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all .15s; }
-    .app-btn:hover, .app-btn.selected { border-color: var(--brand); background: #eff6ff; }
+    .app-btn:hover, .app-btn.selected { border-color: var(--brand); background: #f5f3ff; }
     .app-btn .icon { font-size: 22px; display: block; margin-bottom: 4px; }
     .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
     .chip { font-size: 11px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px; cursor: pointer; color: var(--ink-2); }
@@ -165,7 +165,7 @@ import { Toast } from '../shared/toast';
             Open UPI Payment Page →
           </button>
 
-          <button *ngIf="method==='CARD'" class="primary" style="width:100%;margin-top:10px;background:#2563eb" (click)="openPayment('CARD')">
+          <button *ngIf="method==='CARD'" class="primary" style="width:100%;margin-top:10px;background:#7c3aed" (click)="openPayment('CARD')">
             Open Card Payment Page →
           </button>
 
@@ -379,7 +379,7 @@ import { Toast } from '../shared/toast';
 
           <!-- Test / Action Buttons -->
           <div class="action-row">
-            <button class="primary" style="background:#2563eb" (click)="executePayment('CARD', true)" [disabled]="!cardFormValid()">
+            <button class="primary" style="background:#7c3aed" (click)="executePayment('CARD', true)" [disabled]="!cardFormValid()">
               Pay ₹{{ payable() | number }} (Test Success)
             </button>
             <button class="btn-ghost" style="color:#b91c1c;border-color:#fca5a5" (click)="executePayment('CARD', false)">
@@ -437,7 +437,7 @@ export class Checkout implements OnInit {
   // Card page state
   cardForm = {
     number: '4532 8920 1234 5678',
-    name: 'Rahul Sharma',
+    name: 'Sudhismita Nayak',
     expiry: '12/28',
     cvv: '891'
   };
@@ -458,7 +458,7 @@ export class Checkout implements OnInit {
   savingAddr = false;
   form: any = { fullName: '', phone: '', pincode: '', addressLine: '', city: '', state: '', landmark: '', addressType: 'HOME', isDefault: false };
 
-  constructor(private shop: Shop, private auth: Auth, private router: Router, private toast: Toast) {}
+  constructor(private shop: Shop, private auth: Auth, private router: Router, private toast: Toast) { }
 
   ngOnInit(): void {
     this.shop.cart(this.auth.userId()).subscribe((c: any) => (this.cart = c));

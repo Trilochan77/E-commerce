@@ -1,7 +1,7 @@
 // Demo auth reset — wipes stale users + wallets so fresh demo accounts are
 // auto-created on next login (see user-service AuthService.login):
-//   admin@shop.com / Admin@123  (ADMIN, U-ADMIN01)
-//   user@shop.com  / User@123   (CUSTOMER, U-USER01)
+//   trilochan@nextgen.com / trilochan@123  (ADMIN, U-ADMIN01)
+//   user@shop.com         / User@123        (CUSTOMER, U-USER01)
 // Run AFTER mongo is up, BEFORE logging in:
 //   mongosh --file seed/demo_auth_reset.js
 // Then restart user-service (stop-backend.ps1 first — JAR locks on Windows)
@@ -30,4 +30,4 @@ try {
 print("Remaining users: " + db.users.countDocuments());
 print("Done. Now login to recreate demos:");
 print("  Customer: user@shop.com / User@123  -> http://localhost:4200/login");
-print("  Admin:    admin@shop.com / Admin@123 -> http://localhost:4200/admin/login");
+print("  Admin:    trilochan@nextgen.com / trilochan@123 -> http://localhost:4200/admin/login");
