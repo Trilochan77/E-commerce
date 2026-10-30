@@ -127,6 +127,7 @@ export class App {
       this.refreshBadges();
     });
     this.isAdminPage = this.router.url.split('?')[0].startsWith('/admin');
+    this.shop.cartChanged.subscribe(() => this.refreshBadges());
   }
 
   ngOnInit(): void {

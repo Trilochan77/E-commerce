@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject, tap } from 'rxjs';
 
 const GATEWAY = 'http://localhost:8080';
 
 @Injectable({ providedIn: 'root' })
 export class Shop {
+  /** Emits after every successful cart mutation so badges/cart sections refresh instantly. */
+  readonly cartChanged = new Subject<void>();
   constructor(private http: HttpClient) {}
 
   private adminHeaders(): HttpHeaders {
@@ -54,19 +56,23 @@ export class Shop {
   }
 
   cartAdd(userId: string, productId: string, quantity: number): Observable<any> {
-    return this.http.post(`${GATEWAY}/api/cart/${userId}/items`, { productId, quantity });
+    return this.http.post(`${GATEWAY}/api/cart/${userId}/items`, { productId, quantity })
+      .pipe(tap(() => this.cartChanged.next()));
   }
 
   cartQty(userId: string, productId: string, quantity: number): Observable<any> {
-    return this.http.put(`${GATEWAY}/api/cart/${userId}/items/${productId}`, { quantity });
+    return this.http.put(`${GATEWAY}/api/cart/${userId}/items/${productId}`, { quantity })
+      .pipe(tap(() => this.cartChanged.next()));
   }
 
   cartRemove(userId: string, productId: string): Observable<any> {
-    return this.http.delete(`${GATEWAY}/api/cart/${userId}/items/${productId}`);
+    return this.http.delete(`${GATEWAY}/api/cart/${userId}/items/${productId}`)
+      .pipe(tap(() => this.cartChanged.next()));
   }
 
   checkout(userId: string, paymentMethod: string, pointsToUse: number, addressId = '', shippingAddress: any = null): Observable<any> {
-    return this.http.post(`${GATEWAY}/api/orders/checkout`, { userId, paymentMethod, pointsToUse, addressId, shippingAddress });
+    return this.http.post(`${GATEWAY}/api/orders/checkout`, { userId, paymentMethod, pointsToUse, addressId, shippingAddress })
+      .pipe(tap(() => this.cartChanged.next()));
   }
 
   addresses(userId: string): Observable<any> {
