@@ -1,0 +1,45 @@
+[
+  {
+    "_id": "RET-D17F7CF3",
+    "userId": "U-9E358C55",
+    "orderId": "ORD-247E7DBF",
+    "productId": "P-1001",
+    "quantity": 1,
+    "reason": "hggdhdt",
+    "claimedCondition": "LIKE_NEW",
+    "estimatedReward": 1999,
+    "verifiedCondition": "GOOD",
+    "finalReward": 1499,
+    "status": "APPROVED_FOR_REWARD",
+    "adminNote": "",
+    "createdAt": {
+      "$date": "2026-09-25T09:20:27.136Z"
+    },
+    "updatedAt": {
+      "$date": "2026-09-25T09:36:52.636Z"
+    },
+    "_class": "com.ecom.reward.entity.ReturnRequest"
+  },
+  {
+    "_id": "RET-DDBC3CA9",
+    "userId": "U-8968B9AD",
+    "orderId": "ORD-3D2EF6A2",
+    "productId": "P-1001",
+    "quantity": 1,
+    "reason": "jjhrgohjoi",
+    "claimedCondition": "LIKE_NEW",
+    "estimatedReward": 0,
+    "returnType": "FULL_REFUND",
+    "estimatedRefund": 2499,
+    "refundStatus": "PENDING",
+    "refundMethod": "NONE",
+    "status": "REQUESTED",
+    "createdAt": {
+      "$date": "2026-10-30T08:45:07.323Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-30T08:45:07.323Z"
+    },
+    "_class": "com.ecom.reward.entity.ReturnRequest"
+  }
+]

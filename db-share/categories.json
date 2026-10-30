@@ -1,0 +1,22 @@
+[
+  {
+    "_id": "C-01",
+    "name": "Electronics"
+  },
+  {
+    "_id": "C-02",
+    "name": "Fashion"
+  },
+  {
+    "_id": "C-03",
+    "name": "Home & Kitchen"
+  },
+  {
+    "_id": "C-04",
+    "name": "Books"
+  },
+  {
+    "_id": "C-05",
+    "name": "Sports"
+  }
+]

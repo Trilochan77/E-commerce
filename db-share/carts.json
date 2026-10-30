@@ -1,0 +1,70 @@
+[
+  {
+    "_id": "C-81051CFC",
+    "userId": "U-85782E03",
+    "items": [],
+    "totalAmount": 0,
+    "updatedAt": {
+      "$date": "2026-09-18T13:42:07.927Z"
+    },
+    "_class": "com.ecom.cart.entity.Cart"
+  },
+  {
+    "_id": "C-115B36E3",
+    "userId": "U-USER01",
+    "items": [],
+    "totalAmount": 0,
+    "updatedAt": {
+      "$date": "2026-09-18T13:42:31.293Z"
+    },
+    "_class": "com.ecom.cart.entity.Cart"
+  },
+  {
+    "_id": "C-7946E420",
+    "userId": "U-ADMIN01",
+    "items": [],
+    "totalAmount": 0,
+    "updatedAt": {
+      "$date": "2026-09-18T13:42:49.763Z"
+    },
+    "_class": "com.ecom.cart.entity.Cart"
+  },
+  {
+    "_id": "C-1E045090",
+    "userId": "U-9E358C55",
+    "items": [],
+    "_class": "com.ecom.order.entity.CartRef"
+  },
+  {
+    "_id": "C-F8B93D8E",
+    "userId": "U-15087753",
+    "items": [],
+    "_class": "com.ecom.order.entity.CartRef"
+  },
+  {
+    "_id": "C-2EC405A6",
+    "userId": "U-8968B9AD",
+    "items": [
+      {
+        "productId": "P-1003",
+        "quantity": 1,
+        "unitPrice": 62990
+      }
+    ],
+    "totalAmount": 62990,
+    "updatedAt": {
+      "$date": "2026-10-30T09:17:11.987Z"
+    },
+    "_class": "com.ecom.cart.entity.Cart"
+  },
+  {
+    "_id": "C-0DDBD1C5",
+    "userId": "U-D52CAFCA",
+    "items": [],
+    "totalAmount": 0,
+    "updatedAt": {
+      "$date": "2026-10-30T09:16:36.656Z"
+    },
+    "_class": "com.ecom.cart.entity.Cart"
+  }
+]

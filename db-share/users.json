@@ -1,0 +1,24 @@
+[
+  {
+    "_id": "U-ADMIN01",
+    "name": "Trilochan",
+    "email": "trilochan@nextgen.com",
+    "passwordHash": "$2a$10$UJ/SvSrycbF6WbzpKJnXjeUIWVmk6Nhcc1tGoq5PfHNP9LcvS23ru",
+    "role": "ADMIN",
+    "createdAt": {
+      "$date": "2026-10-30T16:13:32.829Z"
+    },
+    "_class": "com.ecom.user.entity.User"
+  },
+  {
+    "_id": "U-USER01",
+    "name": "Demo Customer",
+    "email": "user@shop.com",
+    "passwordHash": "$2a$10$v0dhVUIX7p0AF6mBrnuAwe46r.OGyTTm4VGEQeUd.J3iP32Nn.xf.",
+    "role": "CUSTOMER",
+    "createdAt": {
+      "$date": "2026-10-30T16:20:14.192Z"
+    },
+    "_class": "com.ecom.user.entity.User"
+  }
+]

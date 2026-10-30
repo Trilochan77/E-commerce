@@ -2,8 +2,11 @@ import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Auth } from '../core/auth';
 import { Toast } from '../shared/toast';
+
+const GATEWAY = 'http://localhost:8080';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -41,15 +44,7 @@ import { Toast } from '../shared/toast';
             <span class="spinner" *ngIf="busy"></span> {{ busy ? 'Logging in…' : 'Login' }}
           </button>
           <p class="error" *ngIf="error">{{ error }}</p>
-          <div class="demo-box">
-            <strong>Example login (for demo purposes only)</strong>
-            <div class="demo-grid">
-              <button type="button" class="demo-card" (click)="fill('user@shop.com','User@123')">
-                <strong>Example Customer</strong><span>user&#64;shop.com</span><code>User&#64;123</code>
-              </button>
-            </div>
-            <p class="muted" style="margin:6px 0 0">This is just an example account, not a real user. Admin? <a routerLink="/admin/login">Console sign in →</a></p>
-          </div>
+          <!-- Example login removed -->
           <p class="auth-switch">No account? <a routerLink="/register" [queryParams]="returnUrl ? { returnUrl } : {}">Create one</a> · Admin? <a routerLink="/admin/login">Console sign in</a></p>
         </form>
       </div>
@@ -68,7 +63,8 @@ export class Login implements OnInit {
     private auth: Auth,
     private router: Router,
     private route: ActivatedRoute,
-    private toast: Toast
+    private toast: Toast,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -92,8 +88,21 @@ export class Login implements OnInit {
     if (!this.email || !this.password || !this.validEmail() || this.busy) return;
     this.error = '';
     this.busy = true;
-    this.auth.login(this.email.trim(), this.password).subscribe({
-      next: () => {
+    this.http.post(`${GATEWAY}/api/users/login`, { email: this.email.trim(), password: this.password }).subscribe({
+      next: (r: any) => {
+        if (r?.role === 'ADMIN') {
+          this.busy = false;
+          this.error = 'Admin accounts must sign in from the Admin Console.';
+          this.toast.err('Use Admin Console to login');
+          this.router.navigate(['/admin/login']);
+          return;
+        }
+        if (r?.token) {
+          localStorage.setItem('ecom_token', r.token);
+          localStorage.setItem('ecom_userId', r.userId || '');
+          localStorage.setItem('ecom_role', r.role || 'CUSTOMER');
+          localStorage.setItem('ecom_email', r.email || '');
+        }
         this.toast.ok('Welcome back!');
         this.router.navigateByUrl(this.target());
       },

@@ -26,7 +26,7 @@ import { Toast } from '../shared/toast';
           <h2>Create account</h2>
           <p class="muted">One account for shop, orders, returns and rewards.</p>
           <label>Full name
-            <input [(ngModel)]="name" name="name" placeholder="Aarav Sharma" autocomplete="name" required autofocus>
+            <input [(ngModel)]="name" name="name" placeholder="Trilochan Sahoo" autocomplete="name" required autofocus>
           </label>
           <div class="field-err" *ngIf="name && name.trim().length < 2">Enter your name (min 2 characters).</div>
           <label>Email

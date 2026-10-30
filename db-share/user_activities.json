@@ -1,0 +1,197 @@
+[
+  {
+    "_id": "ACT-824468FA",
+    "userId": "U-ADMIN01",
+    "type": "SEARCH",
+    "keyword": "wireless",
+    "timestamp": {
+      "$date": "2026-09-18T14:11:33.032Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-B0374FA4",
+    "userId": "U-9E358C55",
+    "type": "PURCHASE",
+    "orderId": "ORD-247E7DBF",
+    "timestamp": {
+      "$date": "2026-09-25T09:16:19.383Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-00921EB4",
+    "userId": "U-15087753",
+    "type": "PURCHASE",
+    "orderId": "ORD-723315F2",
+    "timestamp": {
+      "$date": "2026-09-25T09:34:40.388Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-CEAE16D2",
+    "userId": "U-15087753",
+    "type": "VIEW",
+    "productId": "P-1001",
+    "categoryId": "C-01",
+    "timestamp": {
+      "$date": "2026-09-25T09:36:12.228Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-3170ED65",
+    "userId": "U-15087753",
+    "type": "PURCHASE",
+    "orderId": "ORD-14D449FB",
+    "timestamp": {
+      "$date": "2026-09-25T09:44:40.510Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-FA21FC9B",
+    "userId": "U-15087753",
+    "type": "PURCHASE",
+    "orderId": "ORD-56D7C56A",
+    "timestamp": {
+      "$date": "2026-09-25T09:45:10.002Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-6539C676",
+    "userId": "U-15087753",
+    "type": "PURCHASE",
+    "orderId": "ORD-05D8DF2D",
+    "timestamp": {
+      "$date": "2026-09-25T13:26:36.813Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-440DA5C4",
+    "userId": "U-15087753",
+    "type": "PURCHASE",
+    "orderId": "ORD-6BB7DFC4",
+    "timestamp": {
+      "$date": "2026-09-25T13:27:58.373Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-E6AA372D",
+    "userId": "U-15087753",
+    "type": "PURCHASE",
+    "orderId": "ORD-EC261256",
+    "timestamp": {
+      "$date": "2026-09-25T13:28:35.816Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-9180F248",
+    "userId": "U-15087753",
+    "type": "PURCHASE",
+    "orderId": "ORD-4C98B758",
+    "timestamp": {
+      "$date": "2026-09-25T14:02:49.209Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-A8E99087",
+    "userId": "U-8968B9AD",
+    "type": "PURCHASE",
+    "orderId": "ORD-F474AD83",
+    "timestamp": {
+      "$date": "2026-10-29T19:07:27.655Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-E0C05CB0",
+    "userId": "U-8968B9AD",
+    "type": "PURCHASE",
+    "orderId": "ORD-CF47DA4A",
+    "timestamp": {
+      "$date": "2026-10-29T19:46:59.907Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-12FAD892",
+    "userId": "U-8968B9AD",
+    "type": "VIEW",
+    "productId": "P-2005",
+    "categoryId": "C-02",
+    "timestamp": {
+      "$date": "2026-10-29T19:59:07.988Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-9B1D0092",
+    "userId": "U-8968B9AD",
+    "type": "VIEW",
+    "productId": "P-2005",
+    "categoryId": "C-02",
+    "timestamp": {
+      "$date": "2026-10-29T20:06:06.911Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-48D856F6",
+    "userId": "U-8968B9AD",
+    "type": "VIEW",
+    "productId": "P-2003",
+    "categoryId": "C-02",
+    "timestamp": {
+      "$date": "2026-10-29T20:23:38.300Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-256097BF",
+    "userId": "U-8968B9AD",
+    "type": "PURCHASE",
+    "orderId": "ORD-E33BCF5D",
+    "timestamp": {
+      "$date": "2026-10-29T20:26:00.752Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-67FBADB1",
+    "userId": "U-8968B9AD",
+    "type": "VIEW",
+    "productId": "P-1001",
+    "categoryId": "C-01",
+    "timestamp": {
+      "$date": "2026-10-30T08:38:50.186Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-8A08B5EA",
+    "userId": "U-8968B9AD",
+    "type": "PURCHASE",
+    "orderId": "ORD-3D2EF6A2",
+    "timestamp": {
+      "$date": "2026-10-30T08:40:21.922Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  },
+  {
+    "_id": "ACT-291BEBD7",
+    "userId": "U-8968B9AD",
+    "type": "PURCHASE",
+    "orderId": "ORD-42548CD9",
+    "timestamp": {
+      "$date": "2026-10-30T08:54:34.457Z"
+    },
+    "_class": "com.ecom.recommendation.entity.UserActivity"
+  }
+]

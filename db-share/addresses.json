@@ -1,0 +1,82 @@
+[
+  {
+    "_id": "A-83EFB11E",
+    "userId": "U-101",
+    "fullName": "Test User",
+    "phone": "9876543210",
+    "pincode": "751001",
+    "addressLine": "123 Main St",
+    "city": "Jatani",
+    "state": "Odisha",
+    "landmark": "India",
+    "addressType": "HOME",
+    "isDefault": true,
+    "createdAt": {
+      "$date": "2026-09-25T13:21:22.998Z"
+    },
+    "updatedAt": {
+      "$date": "2026-09-25T13:45:01.560Z"
+    },
+    "_class": "com.ecom.user.entity.Address"
+  },
+  {
+    "_id": "A-94EE005C",
+    "userId": "U-101",
+    "fullName": "Test User",
+    "phone": "9876543210",
+    "pincode": "751001",
+    "addressLine": "123 Main St",
+    "city": "Jatani",
+    "state": "Odisha",
+    "landmark": "India",
+    "addressType": "HOME",
+    "isDefault": false,
+    "createdAt": {
+      "$date": "2026-09-25T13:26:06.315Z"
+    },
+    "updatedAt": {
+      "$date": "2026-09-25T13:45:01.446Z"
+    },
+    "_class": "com.ecom.user.entity.Address"
+  },
+  {
+    "_id": "A-5700FE66",
+    "userId": "U-15087753",
+    "fullName": "Jitendra Nayak",
+    "phone": "7689849904",
+    "pincode": "752050",
+    "addressLine": "Sandhapur,Jatni,752050",
+    "city": "Jatani",
+    "state": "Odisha",
+    "landmark": "India",
+    "addressType": "HOME",
+    "isDefault": true,
+    "createdAt": {
+      "$date": "2026-09-25T13:26:25.827Z"
+    },
+    "updatedAt": {
+      "$date": "2026-09-25T13:26:25.827Z"
+    },
+    "_class": "com.ecom.user.entity.Address"
+  },
+  {
+    "_id": "A-47503877",
+    "userId": "U-8968B9AD",
+    "fullName": "Trilochan Sahoo",
+    "phone": "8984357974",
+    "pincode": "752050",
+    "addressLine": "Sandhapur,Jatni,752050",
+    "city": "Jatani",
+    "state": "Odisha",
+    "landmark": "India",
+    "addressType": "HOME",
+    "isDefault": true,
+    "createdAt": {
+      "$date": "2026-10-29T19:07:12.098Z"
+    },
+    "updatedAt": {
+      "$date": "2026-10-29T19:07:12.098Z"
+    },
+    "_class": "com.ecom.user.entity.Address"
+  }
+]
