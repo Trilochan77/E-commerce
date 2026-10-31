@@ -13,29 +13,29 @@ import { Toast } from '../shared/toast';
   styles: [`
     .gateway-wrap { max-width: 620px; margin: 16px auto; }
     .gateway-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
-    .amount-banner { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-    .amount-val { font-size: 26px; font-weight: 800; color: #15803d; }
+    .amount-banner { background: rgba(16, 185, 129, .12); border: 1px solid rgba(52, 211, 153, .4); border-radius: var(--radius); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+    .amount-val { font-size: 26px; font-weight: 800; color: var(--ok); }
     .tab-pills { display: flex; gap: 8px; margin-bottom: 16px; }
-    .tab-pill { padding: 8px 14px; border: 1px solid var(--line); background: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-2); }
+    .tab-pill { padding: 8px 14px; border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-2); }
     .tab-pill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
     .app-icons { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 10px; margin-bottom: 16px; }
-    .app-btn { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all .15s; }
-    .app-btn:hover, .app-btn.selected { border-color: var(--brand); background: #f5f3ff; }
+    .app-btn { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 10px; text-align: center; cursor: pointer; transition: all .15s; color: var(--ink-2); }
+    .app-btn:hover, .app-btn.selected { border-color: var(--brand); background: var(--brand-soft); color: var(--ink); }
     .app-btn .icon { font-size: 22px; display: block; margin-bottom: 4px; }
     .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
     .chip { font-size: 11px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px; cursor: pointer; color: var(--ink-2); }
-    .chip:hover { background: #e2e8f0; color: var(--brand); }
-    .qr-card { text-align: center; padding: 24px 16px; background: #fafafa; border: 1px dashed #cbd5e1; border-radius: var(--radius); margin-bottom: 16px; }
-    .qr-box { width: 170px; height: 170px; margin: 0 auto 12px; background: #fff; border: 2px solid var(--ink); border-radius: 12px; display: grid; place-items: center; position: relative; padding: 10px; }
-    .card-preview { background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff; border-radius: 14px; padding: 20px 22px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(15,23,42,.2); position: relative; }
+    .chip:hover { background: var(--surface-3); color: var(--brand); }
+    .qr-card { text-align: center; padding: 24px 16px; background: var(--surface-2); border: 1px dashed rgba(148, 163, 255, .35); border-radius: var(--radius); margin-bottom: 16px; }
+    .qr-box { width: 170px; height: 170px; margin: 0 auto 12px; background: #fff; border: 2px solid #0a0f1e; outline: 2px solid rgba(139,92,246,.4); border-radius: 12px; display: grid; place-items: center; position: relative; padding: 10px; }
+    .card-preview { background: linear-gradient(135deg, #2b1a5e, #141033 55%, #3b0f4a); border: 1px solid rgba(167, 139, 250, .35); color: #fff; border-radius: 14px; padding: 20px 22px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(2,5,12,.6); position: relative; }
     .card-chip { width: 38px; height: 26px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 5px; margin-bottom: 18px; }
     .card-num { font-size: 20px; letter-spacing: 2px; font-family: monospace; margin-bottom: 18px; }
     .card-meta { display: flex; justify-content: space-between; font-size: 11px; text-transform: uppercase; color: #94a3b8; }
     .card-val { font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px; }
     .status-box { text-align: center; padding: 36px 16px; }
     .status-icon { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-size: 32px; font-weight: 800; margin: 0 auto 14px; }
-    .status-icon.success { background: #dcfce7; color: #15803d; }
-    .status-icon.failed { background: #fee2e2; color: #b91c1c; }
+    .status-icon.success { background: var(--ok-bg); border: 1px solid rgba(52,211,153,.45); color: var(--ok); }
+    .status-icon.failed { background: var(--bad-bg); border: 1px solid rgba(248,113,113,.45); color: var(--bad); }
     .action-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
     .action-row button { flex: 1; }
   `],

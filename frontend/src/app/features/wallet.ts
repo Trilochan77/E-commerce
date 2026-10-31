@@ -17,7 +17,7 @@ import { EmptyState } from '../shared/empty-state';
         <div style="color:#e0e7ff">≈ ₹{{ balance | number }} off future orders (up to 20% per order)</div>
       </div>
       <div style="display:grid;gap:8px;align-content:center">
-        <a routerLink="/products"><button class="primary" style="background:#fff;color:#4f46e5;box-shadow:none">Shop & redeem →</button></a>
+        <a routerLink="/products"><button class="primary" style="background:#fff;color:#4c1d95;box-shadow:none">Shop & redeem →</button></a>
         <a routerLink="/returns" style="color:#fff;text-align:center">Track returns</a>
       </div>
     </div>
