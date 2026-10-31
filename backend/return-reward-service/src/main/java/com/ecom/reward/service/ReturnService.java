@@ -171,7 +171,7 @@ public class ReturnService {
 
   public List<ReturnRequest> all(String status) {
     if (status != null && !status.isBlank()) return returns.findByStatusOrderByCreatedAtDesc(status);
-    return returns.findAll();
+    return returns.findAllByOrderByCreatedAtDesc();
   }
 
   public ReturnRequest updateStatus(String id, String status, String adminNote) {

@@ -77,7 +77,9 @@ export class AdminReturns implements OnInit {
     this.error = '';
     this.shop.allReturns(this.filter).subscribe({
       next: (r: any) => {
-        this.returns = (Array.isArray(r) ? r : []).map((x: any) => ({ ...x, _evalCond: 'GOOD', _evalNote: '' }));
+        const list = Array.isArray(r) ? r : [];
+        list.sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+        this.returns = list.map((x: any) => ({ ...x, _evalCond: 'GOOD', _evalNote: '' }));
         this.loading = false;
       },
       error: (e) => { this.error = e.error?.message || 'Failed to load returns'; this.loading = false; }
