@@ -53,6 +53,23 @@ public class WishlistService {
     return repo.save(w);
   }
 
+  public Wishlist clear(String userId) {
+    Wishlist w = getOrCreate(userId);
+    w.getItems().clear();
+    w.setUpdatedAt(Instant.now());
+    return repo.save(w);
+  }
+
+  public Wishlist updatePriceAtAdd(String userId, String productId, double newPriceAtAdd) {
+    Wishlist w = getOrCreate(userId);
+    w.getItems().stream()
+        .filter(i -> i.getProductId().equals(productId))
+        .findFirst()
+        .ifPresent(i -> i.setPriceAtAdd(newPriceAtAdd));
+    w.setUpdatedAt(Instant.now());
+    return repo.save(w);
+  }
+
   public boolean isInWishlist(String userId, String productId) {
     return getOrCreate(userId).getItems().stream()
         .anyMatch(i -> i.getProductId().equals(productId));
