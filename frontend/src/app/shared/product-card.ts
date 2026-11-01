@@ -27,6 +27,10 @@ import { ProductVisual } from './product-visual';
         <h4><a [routerLink]="['/products', id()]">{{ product?.name }}</a></h4>
         <div class="product-meta">
           <span class="muted">{{ product?.category || categoryName() }}</span>
+          <span class="stars" style="font-size:12px" *ngIf="product?.reviewCount > 0">
+            ★ {{ product.averageRating | number:'1.1-1' }} <span class="muted" style="font-size:11px">({{ product.reviewCount }})</span>
+          </span>
+          <span class="muted" style="font-size:11px" *ngIf="!product?.reviewCount">★ New</span>
         </div>
         <div class="price-row">
           <span class="price">Rs.{{ price() | number }}</span>

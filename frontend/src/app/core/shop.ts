@@ -213,4 +213,38 @@ export class Shop {
     return this.http.put(`${GATEWAY}/api/returns/${id}/evaluate`,
       { verifiedCondition, adminNote }, { headers: this.adminHeaders() });
   }
+
+  /* ---- reviews & feedback ---- */
+  reviews(productId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/products/${productId}/reviews`);
+  }
+
+  reviewEligibility(productId: string, userId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/products/${productId}/reviews/eligibility?userId=${userId}`, { headers: this.userHeader() });
+  }
+
+  reviewSubmit(productId: string, body: any): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/products/${productId}/reviews`, body, { headers: this.userHeader() });
+  }
+
+  reviewUpdate(productId: string, reviewId: string, body: any): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/products/${productId}/reviews/${reviewId}`, body, { headers: this.userHeader() });
+  }
+
+  reviewDelete(productId: string, reviewId: string, userId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/products/${productId}/reviews/${reviewId}?userId=${userId}`, { headers: this.userHeader() });
+  }
+
+  adminReviews(status = ''): Observable<any> {
+    const url = status && status !== 'ALL' ? `${GATEWAY}/api/products/reviews/admin/all?status=${status}` : `${GATEWAY}/api/products/reviews/admin/all`;
+    return this.http.get(url, { headers: this.adminHeaders() });
+  }
+
+  adminReviewStatus(reviewId: string, status: string, adminNote = ''): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/products/reviews/admin/${reviewId}/status`, { status, adminNote }, { headers: this.adminHeaders() });
+  }
+
+  adminReviewDelete(reviewId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/products/reviews/admin/${reviewId}`, { headers: this.adminHeaders() });
+  }
 }

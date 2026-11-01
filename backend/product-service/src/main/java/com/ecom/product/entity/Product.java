@@ -16,6 +16,8 @@ public class Product {
   private int stockQuantity;
   private boolean availability;
   private boolean eligibleForReturn;
+  private double averageRating = 0.0;
+  private int reviewCount = 0;
   private Instant createdAt = Instant.now();
   private Instant updatedAt = Instant.now();
 
@@ -37,6 +39,10 @@ public class Product {
   public void setAvailability(boolean availability) { this.availability = availability; }
   public boolean isEligibleForReturn() { return eligibleForReturn; }
   public void setEligibleForReturn(boolean eligibleForReturn) { this.eligibleForReturn = eligibleForReturn; }
+  public double getAverageRating() { return averageRating; }
+  public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
+  public int getReviewCount() { return reviewCount; }
+  public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
   public Instant getCreatedAt() { return createdAt; }
   public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
   public Instant getUpdatedAt() { return updatedAt; }
