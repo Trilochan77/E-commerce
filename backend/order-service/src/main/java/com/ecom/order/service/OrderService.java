@@ -247,6 +247,9 @@ public class OrderService {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid order status: " + status);
     }
     o.setOrderStatus(next);
+    if (next.equals("DELIVERED") && o.getDeliveredDate() == null) {
+      o.setDeliveredDate(Instant.now());
+    }
     // Cash collected on delivery: COD order becomes PAID once delivered.
     if (next.equals("DELIVERED") && "COD".equals(o.getPaymentMethod()) && "PENDING".equals(o.getPaymentStatus())) {
       o.setPaymentStatus("PAID");

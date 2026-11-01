@@ -132,6 +132,19 @@ export class App {
 
   ngOnInit(): void {
     this.refreshBadges();
+    this.ensureNameStored();
+  }
+
+  /** Backfill ecom_name for sessions created before the name field was added. */
+  ensureNameStored(): void {
+    if (!this.auth.isLoggedIn()) return;
+    if (localStorage.getItem('ecom_name')) return;
+    this.auth.me().subscribe({
+      next: (u: any) => {
+        if (u?.name) localStorage.setItem('ecom_name', u.name);
+      },
+      error: () => undefined
+    });
   }
 
   refreshBadges(): void {
@@ -150,6 +163,10 @@ export class App {
   }
 
   initial(): string {
+    const name = localStorage.getItem('ecom_name');
+    if (name && name.trim().length > 0) {
+      return name.trim().charAt(0).toUpperCase();
+    }
     const e = localStorage.getItem('ecom_email') || 'U';
     return e.charAt(0).toUpperCase();
   }

@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Shop } from '../core/shop';
 import { Auth } from '../core/auth';
 import { Toast } from '../shared/toast';
+import QRCode from 'qrcode';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -26,7 +27,10 @@ import { Toast } from '../shared/toast';
     .chip { font-size: 11px; font-weight: 600; background: var(--surface-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px; cursor: pointer; color: var(--ink-2); }
     .chip:hover { background: var(--surface-3); color: var(--brand); }
     .qr-card { text-align: center; padding: 24px 16px; background: var(--surface-2); border: 1px dashed rgba(148, 163, 255, .35); border-radius: var(--radius); margin-bottom: 16px; }
-    .qr-box { width: 170px; height: 170px; margin: 0 auto 12px; background: #fff; border: 2px solid #0a0f1e; outline: 2px solid rgba(139,92,246,.4); border-radius: 12px; display: grid; place-items: center; position: relative; padding: 10px; }
+    .qr-box { width: 100%; max-width: 300px; margin: 0 auto 12px; background: #fff; border: 2px solid #0a0f1e; outline: 2px solid rgba(139,92,246,.4); border-radius: 12px; display: grid; place-items: center; position: relative; padding: 10px; }
+    .qr-box img { max-width: 100%; height: auto; border-radius: 8px; }
+    .qr-info { text-align: center; }
+    .qr-info strong { display: block; font-size: 18px; margin-bottom: 4px; color: var(--ink); }
     .card-preview { background: linear-gradient(135deg, #2b1a5e, #141033 55%, #3b0f4a); border: 1px solid rgba(167, 139, 250, .35); color: #fff; border-radius: 14px; padding: 20px 22px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(2,5,12,.6); position: relative; }
     .card-chip { width: 38px; height: 26px; background: linear-gradient(135deg, #fbbf24, #d97706); border-radius: 5px; margin-bottom: 18px; }
     .card-num { font-size: 20px; letter-spacing: 2px; font-family: monospace; margin-bottom: 18px; }
@@ -77,7 +81,7 @@ import { Toast } from '../shared/toast';
             <!-- Address Form -->
             <div *ngIf="showForm" class="form-grid" style="margin-top:10px;max-width:none">
               <div class="profile-2col">
-                <label>Full name (or receiver)<input [(ngModel)]="form.fullName" name="f-fullName" placeholder="e.g. Rahul Sharma"></label>
+                <label>Full name (or receiver)<input [(ngModel)]="form.fullName" name="f-fullName" placeholder="e.g. Trilochan Sahoo"></label>
                 <label>Phone<input [(ngModel)]="form.phone" name="f-phone" placeholder="10-digit mobile"></label>
               </div>
               <div class="profile-2col">
@@ -244,26 +248,21 @@ import { Toast } from '../shared/toast';
           <!-- Tab 2: Scan QR Code -->
           <div *ngIf="upiTab === 'QR'">
             <div class="qr-card">
-              <div class="qr-box">
-                <!-- Clean Mock QR SVG -->
-                <svg width="130" height="130" viewBox="0 0 100 100" fill="#0f172a">
-                  <path d="M0,0 h30 v30 h-30 z M5,5 v20 h20 v-20 z M10,10 h10 v10 h-10 z" />
-                  <path d="M70,0 h30 v30 h-30 z M75,5 v20 h20 v-20 z M80,10 h10 v10 h-10 z" />
-                  <path d="M0,70 h30 v30 h-30 z M5,75 v20 h20 v-20 z M10,80 h10 v10 h-10 z" />
-                  <rect x="40" y="10" width="8" height="8" />
-                  <rect x="52" y="10" width="8" height="8" />
-                  <rect x="40" y="22" width="12" height="6" />
-                  <rect x="15" y="40" width="10" height="10" />
-                  <rect x="40" y="40" width="20" height="20" />
-                  <rect x="70" y="40" width="10" height="10" />
-                  <rect x="85" y="45" width="10" height="15" />
-                  <rect x="40" y="70" width="8" height="20" />
-                  <rect x="52" y="80" width="15" height="10" />
-                  <rect x="75" y="70" width="18" height="18" />
-                </svg>
+              <div class="qr-box" *ngIf="qrCodeData; else noQr">
+                <img [src]="qrCodeData" alt="UPI QR" width="260" height="260" />
               </div>
-              <strong>Scan to pay ₹{{ payable() | number }}</strong>
-              <p class="muted">Compatible with any UPI App: GPay, PhonePe, Paytm, BHIM</p>
+              <ng-template #noQr>
+                <div class="qr-box">
+                  <div class="muted">Generating your order QR…</div>
+                </div>
+              </ng-template>
+              <div class="qr-info">
+                <strong>Pay ₹{{ payable() | number }}</strong>
+                <div class="muted" *ngIf="orderId">Order ID: {{ orderId }}</div>
+                <div class="muted" *ngIf="upiVpa">Merchant VPA: {{ upiVpa }}</div>
+                <p class="muted">Compatible with any UPI App: GPay, PhonePe, Paytm, BHIM</p>
+                <p class="muted" style="font-size:11px">Scan this QR with any UPI app to pay</p>
+              </div>
             </div>
           </div>
 
@@ -428,6 +427,9 @@ export class Checkout implements OnInit {
   paymentStatus: 'IDLE' | 'PROCESSING' | 'SUCCESS' | 'FAILED' = 'IDLE';
   paymentError = '';
   txnRef = '';
+  orderId: string | null = null;
+  qrCodeData: string | null = null;
+  upiVpa = 'demo@upi';   // demo VPA for project demo — replace with your real UPI ID in production
 
   // UPI page state
   upiTab: 'APP' | 'QR' = 'APP';
@@ -541,6 +543,12 @@ export class Checkout implements OnInit {
     this.paymentStatus = 'IDLE';
     this.paymentError = '';
     this.view = targetMethod;
+
+    // Generate a temporary QR immediately when opening UPI page
+    if (targetMethod === 'UPI') {
+      this.orderId = 'ORD-TEMP-' + Math.floor(100000 + Math.random() * 900000);
+      this.generateQR();
+    }
   }
 
   selectUpiApp(app: string, defaultId: string): void {
@@ -580,10 +588,26 @@ export class Checkout implements OnInit {
     return num.length >= 12 && !!this.cardForm.name?.trim() && (this.cardForm.cvv || '').length >= 3;
   }
 
+  /** Generate a real, scannable UPI QR code for this order (no external API needed). */
+  async generateQR(): Promise<void> {
+    if (!this.orderId) return;
+    const amount = this.payable();
+    const upiString = `upi://pay?pa=${encodeURIComponent(this.upiVpa)}&pn=${encodeURIComponent('NextGen Shop')}&am=${amount}&tn=${encodeURIComponent(this.orderId)}&cu=INR`;
+    try {
+      this.qrCodeData = await QRCode.toDataURL(upiString, { width: 300, margin: 2 });
+      this.qrCodeData = this.qrCodeData || null;
+    } catch (e) {
+      console.error('QR generation failed', e);
+      this.qrCodeData = null;
+    }
+  }
+
   // Executes online payment via mock gateway (tests both Success & Failure)
   executePayment(targetMethod: 'UPI' | 'CARD', shouldSucceed: boolean): void {
     this.paymentStatus = 'PROCESSING';
     this.paymentError = '';
+    this.orderId = null;
+    this.qrCodeData = null;
     this.txnRef = Math.floor(10000000 + Math.random() * 90000000).toString();
 
     // 1.5s simulated network delay
@@ -605,7 +629,9 @@ export class Checkout implements OnInit {
 
       // Test Success: Call real checkout with targetMethod ('UPI' or 'CARD')
       this.shop.checkout(this.auth.userId(), targetMethod, +this.points || 0, this.selectedId, this.addressSnapshot()).subscribe({
-        next: () => {
+        next: (r: any) => {
+          this.orderId = r?.id || r?.orderId || this.orderId;
+          this.generateQR();
           this.paymentStatus = 'SUCCESS';
           this.toast.ok('Payment successful! Order placed.');
         },

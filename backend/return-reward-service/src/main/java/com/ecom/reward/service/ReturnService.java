@@ -95,8 +95,9 @@ public class ReturnService {
           "Product is not eligible for return");
     }
 
-    long ageDays = order.getOrderDate() == null ? 0
-        : Duration.between(order.getOrderDate(), Instant.now()).toDays();
+    Instant baseDate = order.getDeliveredDate() != null ? order.getDeliveredDate() : order.getOrderDate();
+    long ageDays = baseDate == null ? 0
+        : Duration.between(baseDate, Instant.now()).toDays();
     String track;
     if (ageDays <= props.getFullRefundWindowDays()) {
       track = "FULL_REFUND";
@@ -295,8 +296,9 @@ public class ReturnService {
     if (orderId != null && !orderId.isBlank()) {
       var order = orders.findById(orderId).orElse(null);
       if (order != null) {
-        long ageDays = order.getOrderDate() == null ? 0
-            : Duration.between(order.getOrderDate(), Instant.now()).toDays();
+        Instant baseDate = order.getDeliveredDate() != null ? order.getDeliveredDate() : order.getOrderDate();
+        long ageDays = baseDate == null ? 0
+            : Duration.between(baseDate, Instant.now()).toDays();
         var line = order.getItems() == null ? null : order.getItems().stream()
             .filter(i -> i.getProductId().equals(productId)).findFirst().orElse(null);
         double unit = line == null ? p.getPrice() : line.getPrice();

@@ -18,12 +18,42 @@ export class Auth {
       .pipe(tap((r: any) => this.store(r)));
   }
 
+  sendOtp(email: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/users/otp/send`, { email });
+  }
+
+  verifyOtp(email: string, otp: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/users/otp/verify`, { email, otp });
+  }
+
+  registerViaOtp(otpToken: string, name: string, password: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/users/register/complete`, {
+      otpToken, name, password
+    }).pipe(tap((r: any) => this.store(r)));
+  }
+
+  loginViaOtp(otpToken: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/users/login/otp`, { otpToken })
+      .pipe(tap((r: any) => this.store(r)));
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/users/forgot-password`, { email });
+  }
+
+  resetPassword(otpToken: string, newPassword: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/users/reset-password`, {
+      otpToken, newPassword
+    }).pipe(tap((r: any) => this.store(r)));
+  }
+
   private store(r: any): void {
     if (!r || !r.token) return;
     localStorage.setItem('ecom_token', r.token);
     localStorage.setItem('ecom_userId', r.userId || '');
     localStorage.setItem('ecom_role', r.role || 'CUSTOMER');
     localStorage.setItem('ecom_email', r.email || '');
+    localStorage.setItem('ecom_name', r.name || '');
   }
 
   logout(): void {

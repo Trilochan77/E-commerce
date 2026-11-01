@@ -37,9 +37,9 @@ import { EmptyState } from '../shared/empty-state';
             <td>{{ i.quantity }}</td><td>₹{{ i.price | number }}</td>
             <td>
               <ng-container *ngIf="o.orderStatus === 'DELIVERED'">
-                <a *ngIf="canReturn(o.orderDate, i.productId); else returnClosed"
+                <a *ngIf="canReturn(o.deliveredDate || o.orderDate, i.productId); else returnClosed"
                    [routerLink]="['/returns/new']" [queryParams]="{orderId: o.id || o._id, productId: i.productId}">
-                  <button class="btn-ghost btn-sm">{{ returnLabel(o.orderDate, i.productId) }}</button>
+                  <button class="btn-ghost btn-sm">{{ returnLabel(o.deliveredDate || o.orderDate, i.productId) }}</button>
                 </a>
                 <ng-template #returnClosed>
                   <span class="muted" style="font-size:12px">Return closed (>7d)</span>

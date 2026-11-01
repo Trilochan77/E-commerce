@@ -109,7 +109,7 @@ export class ReturnRequest implements OnInit {
     this.shop.orderHistory(this.auth.userId()).subscribe({
       next: (orders: any) => {
         const o = (Array.isArray(orders) ? orders : []).find((x: any) => (x.id || x._id) === this.orderId);
-        const age = this.orderAgeDays(o?.orderDate);
+        const age = this.orderAgeDays(o?.deliveredDate || o?.orderDate);
         if (age <= 7) {
           this.track = 'FULL_REFUND';
         } else if (this.isPointsEligible(this.productId)) {

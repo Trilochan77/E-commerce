@@ -6,6 +6,20 @@ spring:
     name: user-service
   mongodb:
     uri: ${SPRING_MONGODB_URI:mongodb://localhost:27017/ecom}
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 eureka:
   instance:

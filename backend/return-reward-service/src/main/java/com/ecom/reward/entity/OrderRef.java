@@ -15,6 +15,7 @@ public class OrderRef {
   private String paymentStatus;
   private String orderStatus;
   private Instant orderDate;
+  private Instant deliveredDate;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -30,6 +31,8 @@ public class OrderRef {
   public void setOrderStatus(String orderStatus) { this.orderStatus = orderStatus; }
   public Instant getOrderDate() { return orderDate; }
   public void setOrderDate(Instant orderDate) { this.orderDate = orderDate; }
+  public Instant getDeliveredDate() { return deliveredDate; }
+  public void setDeliveredDate(Instant deliveredDate) { this.deliveredDate = deliveredDate; }
 
   public static class Item {
     private String productId;

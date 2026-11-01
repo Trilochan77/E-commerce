@@ -21,6 +21,7 @@ public class Order {
   private String addressId;     // reference to address book entry (optional)
   private ShippingAddress shippingAddress; // snapshot at checkout — never auto-updated
   private Instant orderDate = Instant.now();
+  private Instant deliveredDate;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -44,6 +45,8 @@ public class Order {
   public void setOrderStatus(String orderStatus) { this.orderStatus = orderStatus; }
   public Instant getOrderDate() { return orderDate; }
   public void setOrderDate(Instant orderDate) { this.orderDate = orderDate; }
+  public Instant getDeliveredDate() { return deliveredDate; }
+  public void setDeliveredDate(Instant deliveredDate) { this.deliveredDate = deliveredDate; }
   public String getAddressId() { return addressId; }
   public void setAddressId(String addressId) { this.addressId = addressId; }
   public ShippingAddress getShippingAddress() { return shippingAddress; }
