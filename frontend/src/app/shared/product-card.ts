@@ -19,8 +19,8 @@ import { ProductVisual } from './product-visual';
           <span class="flag amber" *ngIf="!inStock()">Out of stock</span>
           <span class="flag violet" *ngIf="product?.eligibleForReturn || product?.isEligibleForReturn">Return eligible</span>
         </div>
-        <button class="wishlist-btn" *ngIf="auth.isLoggedIn()" (click)="toggleWishlist($event)" [class.on]="inWishlist">
-          {{ inWishlist ? '❤' : '♡' }}
+        <button class="wishlist-btn" (click)="toggleWishlist($event)" [class.on]="inWishlist" [title]="inWishlist ? 'Remove from wishlist' : 'Save to wishlist'" aria-label="Toggle wishlist">
+          {{ inWishlist ? '❤️' : '🤍' }}
         </button>
       </div>
       <div class="product-body">
@@ -46,6 +46,11 @@ export class ProductCard implements OnInit {
   constructor(public auth: Auth, private shop: Shop, private toast: Toast) {}
 
   ngOnInit(): void {
+    this.checkWishlist();
+    this.shop.wishlistChanged.subscribe(() => this.checkWishlist());
+  }
+
+  checkWishlist(): void {
     if (!this.auth.isLoggedIn()) return;
     const id = this.id();
     if (!id) return;
@@ -93,4 +98,3 @@ export class ProductCard implements OnInit {
     }
   }
 }
-

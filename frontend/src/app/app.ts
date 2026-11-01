@@ -32,6 +32,11 @@ import { filter } from 'rxjs';
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" class="wallet-pill" title="Reward wallet">{{ walletBal ?? 0 }} pts</a>
+          <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Wishlist" title="View Wishlist">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <span class="hide-m">Wishlist</span>
+            <span class="cart-count" *ngIf="wishlistCount>0">{{ wishlistCount }}</span>
+          </a>
           <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Cart">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h15l-1.5 9h-12z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
             <span class="hide-m">Cart</span>
@@ -69,6 +74,7 @@ import { filter } from 'rxjs';
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
           <a routerLink="/products" routerLinkActive="active">Shop all</a>
           <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Cart ({{ cartCount }})</a>
+          <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active">❤️ Wishlist ({{ wishlistCount }})</a>
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Wallet ({{ walletBal ?? 0 }} pts)</a>
@@ -115,6 +121,7 @@ export class App {
   menuOpen = false;
   acctOpen = false;
   cartCount = 0;
+  wishlistCount = 0;
   walletBal: number | null = null;
   toasts: any[] = [];
   isAdminPage = false;
@@ -129,6 +136,7 @@ export class App {
     });
     this.isAdminPage = this.router.url.split('?')[0].startsWith('/admin');
     this.shop.cartChanged.subscribe(() => this.refreshBadges());
+    this.shop.wishlistChanged.subscribe(() => this.refreshBadges());
   }
 
   ngOnInit(): void {
@@ -151,16 +159,22 @@ export class App {
   refreshBadges(): void {
     if (!this.auth.isLoggedIn()) {
       this.cartCount = 0;
+      this.wishlistCount = 0;
       this.walletBal = null;
       return;
     }
     const uid = this.auth.userId();
-    this.shop.cart(uid).subscribe({ next: (c: any) => {
-      this.cartCount = (c?.items || []).reduce((s: number, i: any) => s + (i.quantity || 0), 0);
-    }, error: () => undefined });
-    this.shop.wallet(uid).subscribe({ next: (w: any) => {
-      this.walletBal = w.balance ?? w.pointBalance ?? 0;
-    }, error: () => (this.walletBal = null) });
+    this.shop.cart(uid).subscribe({
+      next: (c: any) => {
+        this.cartCount = (c?.items || []).reduce((s: number, i: any) => s + (i.quantity || 0), 0);
+      }, error: () => undefined
+    });
+    this.shop.wishlist(uid).subscribe({ next: (w: any) => { this.wishlistCount = (w?.items || []).length; }, error: () => { this.wishlistCount = 0; } });
+    this.shop.wallet(uid).subscribe({
+      next: (w: any) => {
+        this.walletBal = w.balance ?? w.pointBalance ?? 0;
+      }, error: () => (this.walletBal = null)
+    });
   }
 
   initial(): string {

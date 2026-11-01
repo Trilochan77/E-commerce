@@ -8,6 +8,8 @@ const GATEWAY = 'http://localhost:8080';
 export class Shop {
   /** Emits after every successful cart mutation so badges/cart sections refresh instantly. */
   readonly cartChanged = new Subject<void>();
+  /** Emits after every wishlist mutation so navbar badges and product cards update instantly. */
+  readonly wishlistChanged = new Subject<void>();
   constructor(private http: HttpClient) {}
 
   private adminHeaders(): HttpHeaders {
@@ -76,11 +78,23 @@ export class Shop {
   }
 
   wishlistAdd(userId: string, productId: string, priceAtAdd: number): Observable<any> {
-    return this.http.post(`${GATEWAY}/api/wishlist/${userId}/items`, { productId, priceAtAdd });
+    return this.http.post(`${GATEWAY}/api/wishlist/${userId}/items`, { productId, priceAtAdd })
+      .pipe(tap(() => this.wishlistChanged.next()));
   }
 
   wishlistRemove(userId: string, productId: string): Observable<any> {
-    return this.http.delete(`${GATEWAY}/api/wishlist/${userId}/items/${productId}`);
+    return this.http.delete(`${GATEWAY}/api/wishlist/${userId}/items/${productId}`)
+      .pipe(tap(() => this.wishlistChanged.next()));
+  }
+
+  wishlistClear(userId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/wishlist/${userId}/clear`)
+      .pipe(tap(() => this.wishlistChanged.next()));
+  }
+
+  wishlistUpdatePrice(userId: string, productId: string, priceAtAdd: number): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/wishlist/${userId}/items/${productId}/price`, { priceAtAdd })
+      .pipe(tap(() => this.wishlistChanged.next()));
   }
 
   wishlistContains(userId: string, productId: string): Observable<any> {

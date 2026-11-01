@@ -41,7 +41,9 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
           <div class="row">
             <div class="qty-stepper"><button (click)="qty=max(1,qty-1)" aria-label="Decrease">−</button><span>{{ qty }}</span><button (click)="qty=min(stock(),qty+1)" aria-label="Increase">+</button></div>
             <button class="primary" (click)="add()" [disabled]="!inStock() || adding">{{ adding ? 'Adding…' : 'Add to Cart · ₹' + (product.price*qty | number) }}</button>
-            <button class="btn-ghost" (click)="toggleWishlist()" [disabled]="wishBusy">{{ inWishlist ? '❤ Saved' : '♡ Save' }}</button>
+            <button class="btn-ghost" (click)="toggleWishlist()" [disabled]="wishBusy" [style.color]="inWishlist ? '#ef4444' : ''">
+              {{ inWishlist ? '❤️ In Wishlist' : '🤍 Save to Wishlist' }}
+            </button>
             <a routerLink="/cart"><button class="btn-ghost">Go to cart</button></a>
           </div>
           <p class="error" *ngIf="error">{{ error }}</p>
@@ -108,6 +110,7 @@ export class ProductDetail implements OnInit {
             error: () => undefined
           });
           this.checkWishlist(id);
+          this.shop.wishlistChanged.subscribe(() => this.checkWishlist(id));
         }
       },
       error: () => this.router.navigate(['/products'])
