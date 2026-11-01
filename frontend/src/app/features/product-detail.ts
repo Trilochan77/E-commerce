@@ -41,6 +41,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
           <div class="row">
             <div class="qty-stepper"><button (click)="qty=max(1,qty-1)" aria-label="Decrease">−</button><span>{{ qty }}</span><button (click)="qty=min(stock(),qty+1)" aria-label="Increase">+</button></div>
             <button class="primary" (click)="add()" [disabled]="!inStock() || adding">{{ adding ? 'Adding…' : 'Add to Cart · ₹' + (product.price*qty | number) }}</button>
+            <button class="btn-ghost" (click)="toggleWishlist()" [disabled]="wishBusy">{{ inWishlist ? '❤ Saved' : '♡ Save' }}</button>
             <a routerLink="/cart"><button class="btn-ghost">Go to cart</button></a>
           </div>
           <p class="error" *ngIf="error">{{ error }}</p>
@@ -86,6 +87,8 @@ export class ProductDetail implements OnInit {
   error = '';
   added = false;
   adding = false;
+  inWishlist = false;
+  wishBusy = false;
   related: any[] = [];
   tab: 'desc' | 'returns' | 'reco' = 'desc';
   MULT = MULT;
@@ -104,10 +107,36 @@ export class ProductDetail implements OnInit {
             next: (r: any) => (this.related = (r.items || []).filter((x: any) => (x.productId || x.id) !== id).slice(0, 6)),
             error: () => undefined
           });
+          this.checkWishlist(id);
         }
       },
       error: () => this.router.navigate(['/products'])
     });
+  }
+
+  checkWishlist(id: string): void {
+    this.shop.wishlistContains(this.auth.userId(), id).subscribe({
+      next: (r: any) => (this.inWishlist = !!r?.inWishlist),
+      error: () => undefined
+    });
+  }
+
+  toggleWishlist(): void {
+    if (!this.auth.isLoggedIn()) return;
+    const id = this.product.id || this.product._id;
+    const price = this.product.price || 0;
+    this.wishBusy = true;
+    if (this.inWishlist) {
+      this.shop.wishlistRemove(this.auth.userId(), id).subscribe({
+        next: () => { this.wishBusy = false; this.inWishlist = false; this.toast.show('Removed from wishlist'); },
+        error: () => { this.wishBusy = false; this.toast.err('Could not remove'); }
+      });
+    } else {
+      this.shop.wishlistAdd(this.auth.userId(), id, price).subscribe({
+        next: () => { this.wishBusy = false; this.inWishlist = true; this.toast.ok('Saved to wishlist'); },
+        error: () => { this.wishBusy = false; this.toast.err('Could not save to wishlist'); }
+      });
+    }
   }
 
   hasPointsTrack(): boolean {

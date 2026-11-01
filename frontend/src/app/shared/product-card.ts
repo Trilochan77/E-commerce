@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Auth } from '../core/auth';
@@ -19,6 +19,9 @@ import { ProductVisual } from './product-visual';
           <span class="flag amber" *ngIf="!inStock()">Out of stock</span>
           <span class="flag violet" *ngIf="product?.eligibleForReturn || product?.isEligibleForReturn">Return eligible</span>
         </div>
+        <button class="wishlist-btn" *ngIf="auth.isLoggedIn()" (click)="toggleWishlist($event)" [class.on]="inWishlist">
+          {{ inWishlist ? '❤' : '♡' }}
+        </button>
       </div>
       <div class="product-body">
         <h4><a [routerLink]="['/products', id()]">{{ product?.name }}</a></h4>
@@ -36,10 +39,21 @@ import { ProductVisual } from './product-visual';
     </article>
   `
 })
-export class ProductCard {
+export class ProductCard implements OnInit {
   @Input() product: any;
+  inWishlist = false;
 
   constructor(public auth: Auth, private shop: Shop, private toast: Toast) {}
+
+  ngOnInit(): void {
+    if (!this.auth.isLoggedIn()) return;
+    const id = this.id();
+    if (!id) return;
+    this.shop.wishlistContains(this.auth.userId(), id).subscribe({
+      next: (r: any) => (this.inWishlist = !!r?.inWishlist),
+      error: () => undefined
+    });
+  }
 
   id(): string {
     return this.product?.productId || this.product?.id || this.product?._id || '';
@@ -60,4 +74,23 @@ export class ProductCard {
       error: (e) => this.toast.err(e.error?.message || 'Could not add to cart')
     });
   }
+  toggleWishlist(e: Event): void {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!this.auth.isLoggedIn()) { this.toast.err('Please log in to save to wishlist'); return; }
+    const id = this.id();
+    const price = this.price();
+    if (this.inWishlist) {
+      this.shop.wishlistRemove(this.auth.userId(), id).subscribe({
+        next: () => { this.inWishlist = false; this.toast.show('Removed from wishlist'); },
+        error: () => this.toast.err('Could not remove from wishlist')
+      });
+    } else {
+      this.shop.wishlistAdd(this.auth.userId(), id, price).subscribe({
+        next: () => { this.inWishlist = true; this.toast.ok('Saved to wishlist'); },
+        error: () => this.toast.err('Could not save to wishlist')
+      });
+    }
+  }
 }
+

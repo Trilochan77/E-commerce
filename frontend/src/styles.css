@@ -276,7 +276,16 @@ a:hover { text-decoration: none; color: var(--brand-2); }
 .pv-type { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; opacity: .75; }
 .product-media app-product-visual { display: block; }
 .list-row app-product-visual, .line-item app-product-visual { flex: none; }
-.tag-row { position: absolute; left: 8px; top: 8px; display: flex; gap: 6px; }
+.wishlist-btn {
+  position: absolute; top: 8px; right: 8px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--line); background: rgba(6, 9, 20, .72);
+  color: #fff; font-size: 16px; cursor: pointer; backdrop-filter: blur(6px);
+  display: grid; place-items: center; z-index: 2;
+  transition: transform .15s ease, background .15s ease, color .15s ease;
+}
+.wishlist-btn:hover { transform: scale(1.1); }
+.wishlist-btn.on { color: #ef4444; background: rgba(239, 68, 68, .18); border-color: rgba(239, 68, 68, .5); }
 .flag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(6, 9, 20, .72); border: 1px solid rgba(167, 139, 250, .4); color: #e2e8f0; backdrop-filter: blur(6px); }
 .flag.green { background: rgba(16, 185, 129, .9); border-color: transparent; color: #052e1c; }
 .flag.amber { background: rgba(251, 191, 36, .9); border-color: transparent; color: #452c03; }

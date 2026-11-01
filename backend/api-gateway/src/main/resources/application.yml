@@ -39,14 +39,19 @@ spring:
               order: 5
               predicates:
                 - Path=/api/cart, /api/cart/**
+            - id: wishlist-service
+              uri: lb://wishlist-service
+              order: 6
+              predicates:
+                - Path=/api/wishlist, /api/wishlist/**
             - id: order-service
               uri: lb://order-service
-              order: 6
+              order: 7
               predicates:
                 - Path=/api/orders, /api/orders/**
             - id: return-reward-service
               uri: lb://return-reward-service
-              order: 7
+              order: 8
               predicates:
                 - Path=/api/returns, /api/returns/**, /api/wallet, /api/wallet/**, /api/rewards, /api/rewards/**
           globalcors:

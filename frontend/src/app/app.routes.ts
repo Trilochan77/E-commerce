@@ -13,6 +13,7 @@ import { ReturnRequest } from './features/return-request';
 import { ReturnStatus } from './features/return-status';
 import { Wallet } from './features/wallet';
 import { Profile } from './features/profile';
+import { Wishlist } from './features/wishlist';
 import { AdminLayout } from './admin/admin-layout';
 import { AdminLogin } from './admin/admin-login';
 import { AdminDashboard } from './admin/admin-dashboard';
@@ -34,6 +35,7 @@ export const routes: Routes = [
   { path: 'returns/new', component: ReturnRequest, canActivate: [authGuard] },
   { path: 'returns', component: ReturnStatus, canActivate: [authGuard] },
   { path: 'wallet', component: Wallet, canActivate: [authGuard] },
+  { path: 'wishlist', component: Wishlist, canActivate: [authGuard] },
   { path: 'profile', component: Profile, canActivate: [authGuard] },
   { path: 'admin/login', component: AdminLogin },
   {

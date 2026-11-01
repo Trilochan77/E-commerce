@@ -70,7 +70,8 @@ $services = @(
     @{ Name = "recommendation-service"; Port = 8084; Jar = "recommendation-service\target\recommendation-service.jar" },
     @{ Name = "cart-service";          Port = 8085; Jar = "cart-service\target\cart-service.jar" },
     @{ Name = "order-service";         Port = 8086; Jar = "order-service\target\order-service.jar" },
-    @{ Name = "return-reward-service"; Port = 8087; Jar = "return-reward-service\target\return-reward-service.jar" }
+    @{ Name = "return-reward-service"; Port = 8087; Jar = "return-reward-service\target\return-reward-service.jar" },
+    @{ Name = "wishlist-service";      Port = 8088; Jar = "wishlist-service\target\wishlist-service.jar" }
 )
 
 Write-Host "`n[2/3] Launching backend microservices (Logs in backend/logs/)..." -ForegroundColor Cyan

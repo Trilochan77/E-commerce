@@ -70,6 +70,23 @@ export class Shop {
       .pipe(tap(() => this.cartChanged.next()));
   }
 
+  /* ---- wishlist ---- */
+  wishlist(userId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/wishlist/${userId}`);
+  }
+
+  wishlistAdd(userId: string, productId: string, priceAtAdd: number): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/wishlist/${userId}/items`, { productId, priceAtAdd });
+  }
+
+  wishlistRemove(userId: string, productId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/wishlist/${userId}/items/${productId}`);
+  }
+
+  wishlistContains(userId: string, productId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/wishlist/${userId}/contains/${productId}`);
+  }
+
   checkout(userId: string, paymentMethod: string, pointsToUse: number, addressId = '', shippingAddress: any = null): Observable<any> {
     return this.http.post(`${GATEWAY}/api/orders/checkout`, { userId, paymentMethod, pointsToUse, addressId, shippingAddress })
       .pipe(tap(() => this.cartChanged.next()));

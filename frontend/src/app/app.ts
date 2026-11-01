@@ -47,6 +47,7 @@ import { filter } from 'rxjs';
               <div class="dd-head"><strong style="font-size:13px">{{ displayEmail() }}</strong><div class="muted">{{ walletBal ?? 0 }} pts balance</div></div>
               <a routerLink="/profile" (click)="acctOpen=false">Profile</a>
               <a routerLink="/wallet" (click)="acctOpen=false">Wallet</a>
+              <a routerLink="/wishlist" (click)="acctOpen=false">Wishlist</a>
               <a routerLink="/admin" *ngIf="auth.isAdmin()" (click)="acctOpen=false">Admin</a>
               <button (click)="logout()">Log out</button>
             </div>

@@ -18,6 +18,7 @@
     <module>product-service</module>
     <module>search-service</module>
     <module>cart-service</module>
+    <module>wishlist-service</module>
     <module>order-service</module>
     <module>recommendation-service</module>
     <module>return-reward-service</module>
