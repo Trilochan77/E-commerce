@@ -132,3 +132,4 @@ export class AppLogo {
   @Input() showText = true;
   @Input() link = '/';
 }
+
