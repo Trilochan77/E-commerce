@@ -29,6 +29,7 @@ import { filter } from 'rxjs';
         <div class="nav-actions">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link hide-m">Home</a>
           <a routerLink="/products" routerLinkActive="active" class="nav-link hide-m">Shop</a>
+          <a routerLink="/assistant" routerLinkActive="active" class="nav-link hide-m">✦ Ask AI</a>
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" class="wallet-pill" title="Reward wallet">{{ walletBal ?? 0 }} pts</a>
@@ -73,6 +74,7 @@ import { filter } from 'rxjs';
         <nav>
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
           <a routerLink="/products" routerLinkActive="active">Shop all</a>
+          <a routerLink="/assistant" routerLinkActive="active">✦ Ask AI Assistant</a>
           <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Cart ({{ cartCount }})</a>
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active">❤️ Wishlist ({{ wishlistCount }})</a>
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Orders</a>
@@ -96,6 +98,7 @@ import { filter } from 'rxjs';
         <div>
           <h4>Shop</h4>
           <a routerLink="/products">All products</a>
+          <a routerLink="/assistant">✦ Ask AI assistant</a>
           <a routerLink="/cart">Cart</a>
           <a routerLink="/orders">Track orders</a>
           <a routerLink="/returns">Returns</a>

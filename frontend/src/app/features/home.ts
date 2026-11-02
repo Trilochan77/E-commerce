@@ -35,6 +35,15 @@ import { EmptyState } from '../shared/empty-state';
       </div>
     </section>
 
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;background:linear-gradient(120deg, rgba(139,92,246,.18), rgba(34,211,238,.07));border-color:rgba(139,92,246,.35)">
+      <div>
+        <span class="badge violet">✦ AI SHOPPING ASSISTANT</span>
+        <h2 style="margin:8px 0 4px">Tell me your budget. I'll find the real product.</h2>
+        <p class="muted" style="margin:0">Budget and requirement search, side-by-side comparisons, feature and stock answers, alternatives and history-based picks — all read from the live catalog. No invented products, prices or ratings.</p>
+      </div>
+      <a routerLink="/assistant"><button class="primary">Ask the assistant →</button></a>
+    </div>
+
     <div class="card" *ngIf="auth.isLoggedIn()">
       <div class="section-title">
         <h2>Recommended for You</h2>

@@ -14,6 +14,9 @@ public class ProductDoc {
   private List<String> images;
   private int stockQuantity;
   private boolean availability;
+  private boolean eligibleForReturn;
+  private double averageRating;
+  private int reviewCount;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -31,4 +34,10 @@ public class ProductDoc {
   public void setStockQuantity(int stockQuantity) { this.stockQuantity = stockQuantity; }
   public boolean isAvailability() { return availability; }
   public void setAvailability(boolean availability) { this.availability = availability; }
+  public boolean isEligibleForReturn() { return eligibleForReturn; }
+  public void setEligibleForReturn(boolean eligibleForReturn) { this.eligibleForReturn = eligibleForReturn; }
+  public double getAverageRating() { return averageRating; }
+  public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
+  public int getReviewCount() { return reviewCount; }
+  public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
 }

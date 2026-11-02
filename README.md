@@ -197,6 +197,39 @@ flowchart LR
 
 ---
 
+## 🤖 AI Shopping Assistant (Deterministic, Grounded)
+
+The storefront ships a shopping assistant that runs **without machine learning, without an LLM and without any paid API**. It is a rules + retrieval pipeline over the same MongoDB `products` collection the catalog uses:
+
+1. **Parse** — budget (`under ₹50,000`, `50k`, `between 30k and 50k`), category synonyms (`phone`→Electronics, `shoe`→Fashion), intent (`compare`, `feature`, `alternative`, `history`, `policy`) and product-name references.
+2. **Retrieve** — candidate rows from the live catalog (in-stock first).
+3. **Score** — transparent weighted formula: category match + request-keyword match + use-case fit (`MCA student`) + budget fit + rating + stock.
+4. **Answer** — text and cards built **only** from stored fields (`name`, `description`, `price`, `stockQuantity`, `averageRating`, `reviewCount`, `eligibleForReturn`).
+
+Grounding guarantees:
+
+- If no listing matches, the answer says so and offers the **closest real in-stock alternatives** (including "the cheapest laptop is ₹62,990, ₹12,990 above your budget").
+- Ratings are only shown when `reviewCount > 0`; otherwise it says "no customer ratings yet".
+- Features not present in the description are reported as "not mentioned in the listing" rather than invented.
+- History-based picks reuse the recommendation engine and explicitly announce a cold-start popularity fallback.
+
+```http
+POST /api/assistant/chat
+Content-Type: application/json
+
+{
+  "userId": "U-102",
+  "message": "Suggest a laptop under ₹50,000 for MCA students",
+  "contextIds": []
+}
+```
+
+Response: `reply`, `intent`, `products[]` (cards), `compare[]` (side-by-side fields), `followUps[]`, `grounded: true`, `strategy: "rules+retrieval"`.
+
+UI: `/assistant` (navbar **✦ Ask AI**) with chat bubbles, product cards, a comparison table, follow-up chips and add-to-cart.
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -290,6 +323,7 @@ All external requests pass through `http://localhost:8080`:
 | `/api/categories/**` | `product-service:8082` | Read: Public \| Write: `ADMIN` |
 | `/api/search/**` | `search-service:8083` | Public |
 | `/api/recommendations/**` | `recommendation-service:8084` | Contextual (Public / User ID) |
+| `/api/assistant/**` | `recommendation-service:8084` | Public (optional `userId` for personalization) |
 | `/api/cart/**` | `cart-service:8085` | Authenticated (JWT) |
 | `/api/orders/**` | `order-service:8086` | Authenticated (JWT) |
 | `/api/returns/**` | `return-reward-service:8087` | Customer (Own) / `ADMIN` (Evaluate) |

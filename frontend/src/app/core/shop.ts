@@ -53,6 +53,11 @@ export class Shop {
     return this.http.get(`${GATEWAY}/api/activity/history/${userId}?limit=20`);
   }
 
+  /** Grounded shopping assistant: deterministic rules + live catalog retrieval. */
+  assistant(userId: string | null, message: string, contextIds: string[] = []): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/assistant/chat`, { userId, message, contextIds });
+  }
+
   cart(userId: string): Observable<any> {
     return this.http.get(`${GATEWAY}/api/cart/${userId}`);
   }

@@ -33,7 +33,7 @@ spring:
               uri: lb://recommendation-service
               order: 4
               predicates:
-                - Path=/api/recommendations, /api/recommendations/**, /api/activity, /api/activity/**
+                - Path=/api/recommendations, /api/recommendations/**, /api/activity, /api/activity/**, /api/assistant, /api/assistant/**
             - id: cart-service
               uri: lb://cart-service
               order: 5

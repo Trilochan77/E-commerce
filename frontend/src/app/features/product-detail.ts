@@ -45,6 +45,9 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
               {{ inWishlist ? '❤️ In Wishlist' : '🤍 Save to Wishlist' }}
             </button>
             <a routerLink="/cart"><button class="btn-ghost">Go to cart</button></a>
+            <a [routerLink]="['/assistant']" [queryParams]="{ q: 'Is the ' + product.name + ' in stock?' }">
+              <button class="btn-ghost">✦ Ask AI</button>
+            </a>
           </div>
           <p class="error" *ngIf="error">{{ error }}</p>
           <p class="success" *ngIf="added"> Added — continue shopping or checkout.</p>
