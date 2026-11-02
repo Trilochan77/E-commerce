@@ -154,7 +154,40 @@ import QRCode from 'qrcode';
         <aside class="card summary">
           <h3>Order Summary</h3>
           <p class="muted">{{ itemCount() }} items · Subtotal ₹{{ cart?.totalAmount || 0 }}</p>
+
+          <!-- Coupon Box -->
+          <div class="coupon-box" style="margin:12px 0;padding:12px;background:rgba(124,58,237,0.1);border:1px dashed #a855f7;border-radius:8px">
+            <div style="font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px">
+              <span>🎟️</span> Coupon & Promo Code
+            </div>
+            <div class="row" style="margin:8px 0 0 0;gap:6px" *ngIf="!appliedCoupon">
+              <input [(ngModel)]="couponInput" placeholder="Enter coupon code" style="flex:1;text-transform:uppercase;font-family:monospace;font-size:12px">
+              <button type="button" class="primary btn-sm" (click)="applyCoupon(couponInput)" [disabled]="validatingCoupon || !couponInput.trim()">
+                {{ validatingCoupon ? '...' : 'Apply' }}
+              </button>
+            </div>
+            <div *ngIf="appliedCoupon" style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;background:rgba(34,197,94,0.15);padding:6px 10px;border-radius:6px;border:1px solid #22c55e">
+              <div>
+                <strong style="color:#22c55e;font-size:12px">✓ {{ appliedCoupon.code }}</strong>
+                <div class="muted" style="font-size:11px">{{ appliedCoupon.title }} (Saved ₹{{ couponDiscount }})</div>
+              </div>
+              <button type="button" class="btn-ghost btn-sm" style="color:#ef4444;padding:2px 6px;font-size:11px" (click)="removeCoupon()">✕</button>
+            </div>
+            <div *ngIf="!appliedCoupon && availableCoupons.length" style="margin-top:8px">
+              <span class="muted" style="font-size:11px">Won Spin Coupons:</span>
+              <div class="chip-row" style="margin-top:4px">
+                <button type="button" class="chip" *ngFor="let c of availableCoupons" (click)="applyCoupon(c.code)" [title]="c.title">
+                  {{ c.code }} ({{ c.discountLabel || (c.value + (c.type==='PERCENT' ? '%' : '₹') + ' OFF') }})
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="row" style="justify-content:space-between"><span>Subtotal</span><span>₹{{ cart?.totalAmount || 0 }}</span></div>
+          <div class="row" style="justify-content:space-between" *ngIf="appliedCoupon">
+            <span>Coupon ({{ appliedCoupon.code }})</span>
+            <span style="color:#22c55e;font-weight:700">− ₹{{ couponDiscount || 0 }}</span>
+          </div>
           <div class="row" style="justify-content:space-between"><span>Wallet (−)</span><span style="color:#15803d">− ₹{{ points || 0 }}</span></div>
           <div class="divider"></div>
           <p class="muted" *ngIf="selected">Deliver to: <strong>{{ selected.fullName }}</strong>, {{ selected.city }} ({{ selected.pincode }})</p>
@@ -462,12 +495,19 @@ export class Checkout implements OnInit {
   savingAddr = false;
   form: any = { fullName: '', phone: '', pincode: '', addressLine: '', city: '', state: '', landmark: '', addressType: 'HOME', isDefault: false };
 
+  couponInput = '';
+  appliedCoupon: any = null;
+  couponDiscount = 0;
+  validatingCoupon = false;
+  availableCoupons: any[] = [];
+
   constructor(private shop: Shop, private auth: Auth, private router: Router, private toast: Toast) { }
 
   ngOnInit(): void {
     this.shop.cart(this.auth.userId()).subscribe((c: any) => (this.cart = c));
     this.shop.wallet(this.auth.userId()).subscribe({ next: (w: any) => (this.wallet = w), error: () => undefined });
     this.loadAddresses();
+    this.loadAvailableCoupons();
   }
 
   addrId(a: any): string { return a.id || a._id || ''; }
@@ -530,7 +570,44 @@ export class Checkout implements OnInit {
   }
   payable(): number {
     const sub = this.cart?.totalAmount || 0;
-    return Math.max(0, sub - (+this.points || 0));
+    const cDiscount = this.couponDiscount || 0;
+    return Math.max(0, sub - cDiscount - (+this.points || 0));
+  }
+
+  loadAvailableCoupons(): void {
+    const uid = this.auth.userId();
+    if (!uid) return;
+    this.shop.myCoupons(uid).subscribe({
+      next: (res: any) => {
+        this.availableCoupons = (Array.isArray(res) ? res : []).filter((c: any) => c.status === 'ACTIVE');
+      }
+    });
+  }
+
+  applyCoupon(code: string): void {
+    if (!code || !code.trim()) return;
+    const uid = this.auth.userId();
+    const subTotal = this.cart?.totalAmount || 0;
+    this.validatingCoupon = true;
+    this.shop.validateCoupon(uid, code.trim().toUpperCase(), subTotal).subscribe({
+      next: (res: any) => {
+        this.appliedCoupon = res;
+        this.couponDiscount = res.discount || 0;
+        this.validatingCoupon = false;
+        this.toast.ok(`Coupon ${res.code} applied! Saved ₹${this.couponDiscount}`);
+      },
+      error: (err: any) => {
+        this.validatingCoupon = false;
+        this.toast.err(err.error?.message || 'Invalid, expired or ineligible coupon');
+      }
+    });
+  }
+
+  removeCoupon(): void {
+    this.appliedCoupon = null;
+    this.couponDiscount = 0;
+    this.couponInput = '';
+    this.toast.ok('Coupon removed');
   }
 
   // Opens either the UPI page or the Card page
@@ -613,10 +690,11 @@ export class Checkout implements OnInit {
     this.txnRef = Math.floor(10000000 + Math.random() * 90000000).toString();
 
     // 1.5s simulated network delay
+    const cCode = this.appliedCoupon ? this.appliedCoupon.code : null;
     setTimeout(() => {
       if (!shouldSucceed) {
         // Test Failure: Call with 'FAIL' method so backend also registers payment failure
-        this.shop.checkout(this.auth.userId(), 'FAIL', +this.points || 0, this.selectedId, this.addressSnapshot()).subscribe({
+        this.shop.checkout(this.auth.userId(), 'FAIL', +this.points || 0, this.selectedId, this.addressSnapshot(), cCode).subscribe({
           next: () => {
             this.paymentStatus = 'FAILED';
             this.paymentError = targetMethod === 'UPI' ? 'Transaction declined by UPI bank server.' : 'Card declined: Insufficient funds or invalid CVV.';
@@ -630,7 +708,7 @@ export class Checkout implements OnInit {
       }
 
       // Test Success: Call real checkout with targetMethod ('UPI' or 'CARD')
-      this.shop.checkout(this.auth.userId(), targetMethod, +this.points || 0, this.selectedId, this.addressSnapshot()).subscribe({
+      this.shop.checkout(this.auth.userId(), targetMethod, +this.points || 0, this.selectedId, this.addressSnapshot(), cCode).subscribe({
         next: (r: any) => {
           this.orderId = r?.id || r?.orderId || this.orderId;
           this.generateQR();
@@ -664,7 +742,8 @@ export class Checkout implements OnInit {
       return;
     }
 
-    this.shop.checkout(this.auth.userId(), 'COD', +this.points || 0, this.selectedId, this.addressSnapshot()).subscribe({
+    const cCode = this.appliedCoupon ? this.appliedCoupon.code : null;
+    this.shop.checkout(this.auth.userId(), 'COD', +this.points || 0, this.selectedId, this.addressSnapshot(), cCode).subscribe({
       next: () => {
         this.toast.ok('Order placed! Pay cash on delivery.');
         this.router.navigate(['/orders']);

@@ -32,6 +32,7 @@ import { filter } from 'rxjs';
           <a routerLink="/products" routerLinkActive="active" class="nav-link hide-m">Shop</a>
           <a routerLink="/compare" routerLinkActive="active" class="nav-link hide-m">⇄ Compare<span class="nav-count" *ngIf="compareCount>0">{{ compareCount }}</span></a>
           <a routerLink="/assistant" routerLinkActive="active" class="nav-link hide-m">✦ Ask AI</a>
+          <a routerLink="/spin" routerLinkActive="active" class="nav-link hide-m" style="color:#f472b6;font-weight:700">🎡 Spin &amp; Win</a>
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" class="wallet-pill" title="Reward wallet">{{ walletBal ?? 0 }} pts</a>
@@ -60,6 +61,7 @@ import { filter } from 'rxjs';
               <div class="dd-head"><strong style="font-size:13px">{{ displayEmail() }}</strong><div class="muted">{{ walletBal ?? 0 }} pts balance</div></div>
               <a routerLink="/profile" (click)="acctOpen=false">Profile</a>
               <a routerLink="/wallet" (click)="acctOpen=false">Wallet</a>
+              <a routerLink="/spin" (click)="acctOpen=false">🎡 Spin &amp; Win</a>
               <a routerLink="/wishlist" (click)="acctOpen=false">Wishlist</a>
               <a routerLink="/notifications" (click)="acctOpen=false">Price alerts</a>
               <a routerLink="/admin" *ngIf="auth.isAdmin()" (click)="acctOpen=false">Admin</a>

@@ -140,12 +140,13 @@ export class Shop {
     return this.http.get(`${GATEWAY}/api/wishlist/${userId}/contains/${productId}`);
   }
 
-  /* ---- price-drop notifications ---- */
-  notifications(userId: string, unreadOnly = false): Observable<any> {
-    const url = unreadOnly
-      ? `${GATEWAY}/api/notifications/${userId}?unreadOnly=true`
-      : `${GATEWAY}/api/notifications/${userId}`;
-    return this.http.get(url);
+  /* ---- smart notifications ---- */
+  notifications(userId: string, unreadOnly = false, category = 'ALL'): Observable<any> {
+    const params = new URLSearchParams();
+    if (unreadOnly) params.append('unreadOnly', 'true');
+    if (category && category !== 'ALL') params.append('category', category);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return this.http.get(`${GATEWAY}/api/notifications/${userId}${qs}`);
   }
 
   notificationUnreadCount(userId: string): Observable<any> {
@@ -162,8 +163,18 @@ export class Shop {
       .pipe(tap(() => this.notificationsChanged.next()));
   }
 
+  notificationDelete(userId: string, notificationId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/notifications/${userId}/${notificationId}`)
+      .pipe(tap(() => this.notificationsChanged.next()));
+  }
+
   notificationsClear(userId: string): Observable<any> {
     return this.http.delete(`${GATEWAY}/api/notifications/${userId}`)
+      .pipe(tap(() => this.notificationsChanged.next()));
+  }
+
+  createNotification(notif: any): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/notifications`, notif)
       .pipe(tap(() => this.notificationsChanged.next()));
   }
 
@@ -173,8 +184,8 @@ export class Shop {
       .pipe(tap(() => this.notificationsChanged.next()));
   }
 
-  checkout(userId: string, paymentMethod: string, pointsToUse: number, addressId = '', shippingAddress: any = null): Observable<any> {
-    return this.http.post(`${GATEWAY}/api/orders/checkout`, { userId, paymentMethod, pointsToUse, addressId, shippingAddress })
+  checkout(userId: string, paymentMethod: string, pointsToUse: number, addressId = '', shippingAddress: any = null, couponCode: string | null = null): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/orders/checkout`, { userId, paymentMethod, pointsToUse, couponCode, addressId, shippingAddress })
       .pipe(tap(() => this.cartChanged.next()));
   }
 
@@ -331,5 +342,22 @@ export class Shop {
 
   resetTracking(orderId: string): Observable<any> {
     return this.http.post(`${GATEWAY}/api/orders/${orderId}/tracking/reset`, {}, { headers: this.userHeader() });
+  }
+
+  /* ---- spin and win & coupons ---- */
+  spinStatus(userId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/rewards/spin/status?userId=${userId}`, { headers: this.userHeader() });
+  }
+
+  spinWheel(userId: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/rewards/spin`, { userId }, { headers: this.userHeader() });
+  }
+
+  validateCoupon(userId: string, code: string, subTotal: number): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/rewards/coupons/validate`, { userId, code, subTotal }, { headers: this.userHeader() });
+  }
+
+  myCoupons(userId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/rewards/coupons/user/${userId}`, { headers: this.userHeader() });
   }
 }

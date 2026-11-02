@@ -15,6 +15,8 @@ public class Order {
   private int pointsUsed;
   private double discountValue;
   private double payableAmount;
+  private String couponCode;
+  private double couponDiscount;
   private String paymentMethod;
   private String paymentStatus; // PENDING | PAID | FAILED
   private String orderStatus;   // PLACED | SHIPPED | DELIVERED | CANCELLED
@@ -38,6 +40,10 @@ public class Order {
   public void setDiscountValue(double discountValue) { this.discountValue = discountValue; }
   public double getPayableAmount() { return payableAmount; }
   public void setPayableAmount(double payableAmount) { this.payableAmount = payableAmount; }
+  public String getCouponCode() { return couponCode; }
+  public void setCouponCode(String couponCode) { this.couponCode = couponCode; }
+  public double getCouponDiscount() { return couponDiscount; }
+  public void setCouponDiscount(double couponDiscount) { this.couponDiscount = couponDiscount; }
   public String getPaymentMethod() { return paymentMethod; }
   public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
   public String getPaymentStatus() { return paymentStatus; }

@@ -1,10 +1,10 @@
 package com.ecom.wishlist.service;
 
-import com.ecom.wishlist.entity.PriceDropNotification;
+import com.ecom.wishlist.entity.Notification;
 import com.ecom.wishlist.entity.ProductSnapshot;
 import com.ecom.wishlist.entity.UserSnapshot;
 import com.ecom.wishlist.entity.Wishlist;
-import com.ecom.wishlist.repository.PriceDropNotificationRepository;
+import com.ecom.wishlist.repository.NotificationRepository;
 import com.ecom.wishlist.repository.WishlistRepository;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class PriceTrackerService {
   private static final Logger log = LoggerFactory.getLogger(PriceTrackerService.class);
 
   private final WishlistRepository wishlists;
-  private final PriceDropNotificationRepository notifications;
+  private final NotificationRepository notifications;
   private final MongoTemplate mongo;
   private final NotificationEmailService emailService;
 
@@ -43,7 +43,7 @@ public class PriceTrackerService {
   private boolean scanEnabled;
 
   public PriceTrackerService(WishlistRepository wishlists,
-                             PriceDropNotificationRepository notifications,
+                             NotificationRepository notifications,
                              MongoTemplate mongo,
                              NotificationEmailService emailService) {
     this.wishlists = wishlists;
@@ -58,62 +58,63 @@ public class PriceTrackerService {
   public void scheduledScan() {
     if (!scanEnabled) return;
     try {
-      ScanResult result = scanAll();
-      if (result.notificationsCreated() > 0) {
-        log.info("Price scan created {} notification(s) across {} wishlist(s)",
-            result.notificationsCreated(), result.wishlistsScanned());
-      }
+      scanAll();
     } catch (Exception e) {
-      log.warn("Scheduled price scan failed: {}", e.getMessage());
+      log.warn("Price tracker scan failed: {}", e.getMessage());
     }
   }
 
-  /** Scan every wishlist. Serialized so an on-demand scan cannot race the scheduler. */
-  public synchronized ScanResult scanAll() {
+  /** Run a scan for every user with at least one wishlisted product. */
+  public ScanResult scanAll() {
     List<Wishlist> all = wishlists.findAll();
-    return scanWishlists(all, all.size());
+    return executeScan(all);
   }
 
-  /** Scan one user's wishlist, used by the "check now" action. */
-  public synchronized ScanResult scanUser(String userId) {
-    Wishlist w = wishlists.findByUserId(userId).orElse(null);
-    if (w == null) {
-      return new ScanResult(0, 0, 0, List.of(), Instant.now());
+  /** Run a scan for a single user (called on demand by the UI). */
+  public ScanResult scanUser(String userId) {
+    List<Wishlist> list = wishlists.findByUserId(userId)
+        .map(List::of)
+        .orElseGet(Collections::emptyList);
+    return executeScan(list);
+  }
+
+  private ScanResult executeScan(List<Wishlist> list) {
+    int scannedWishlists = list.size();
+    if (list.isEmpty()) {
+      return new ScanResult(0, 0, 0, Collections.emptyList(), Instant.now());
     }
-    return scanWishlists(List.of(w), 1);
-  }
 
-  private ScanResult scanWishlists(List<Wishlist> list, int scannedWishlists) {
     Set<String> productIds = new HashSet<>();
     for (Wishlist w : list) {
-      for (Wishlist.WishlistItem item : w.getItems()) {
-        if (item.getProductId() != null) productIds.add(item.getProductId());
+      if (w.getItems() == null) continue;
+      for (Wishlist.WishlistItem it : w.getItems()) {
+        if (it.getProductId() != null) productIds.add(it.getProductId());
       }
     }
 
     Map<String, ProductSnapshot> catalog = loadCatalog(productIds);
-    List<PriceDropNotification> created = new ArrayList<>();
+    List<Notification> created = new ArrayList<>();
     int itemsScanned = 0;
 
     for (Wishlist w : list) {
+      if (w.getItems() == null || w.getItems().isEmpty()) continue;
       boolean dirty = false;
       for (Wishlist.WishlistItem item : w.getItems()) {
-        ProductSnapshot product = catalog.get(item.getProductId());
-        if (product == null || product.getPrice() <= 0) continue;
         itemsScanned++;
+        ProductSnapshot product = catalog.get(item.getProductId());
+        if (product == null) continue;
 
-        double current = round(product.getPrice());
-        double previous = round(item.getLastKnownPrice() != null
-            ? item.getLastKnownPrice()
-            : item.getPriceAtAdd());
+        double previous = item.getLastKnownPrice() != null && item.getLastKnownPrice() > 0 ? item.getLastKnownPrice() : item.getPriceAtAdd();
+        double current = product.getPrice();
 
         if (previous <= 0) {
-          // No usable baseline yet: start tracking silently from the current catalog price.
+          // Initialize baseline on first scan if not present.
           item.setLastKnownPrice(current);
           item.setLastCheckedAt(Instant.now());
           dirty = true;
           continue;
         }
+
         if (current < previous) {
           item.setLastKnownPrice(current);
           item.setLastCheckedAt(Instant.now());
@@ -136,8 +137,8 @@ public class PriceTrackerService {
     }
 
     // Persist notifications before attempting delivery so the in-app record always exists.
-    List<PriceDropNotification> saved = new ArrayList<>();
-    for (PriceDropNotification n : created) {
+    List<Notification> saved = new ArrayList<>();
+    for (Notification n : created) {
       try {
         saved.add(notifications.save(n));
       } catch (Exception e) {
@@ -145,7 +146,7 @@ public class PriceTrackerService {
             n.getUserId(), n.getProductId(), e.getMessage());
       }
     }
-    for (PriceDropNotification n : saved) {
+    for (Notification n : saved) {
       UserSnapshot user = mongo.findById(n.getUserId(), UserSnapshot.class);
       n.setEmailStatus(emailService.sendPriceDrop(user, n));
       try {
@@ -168,21 +169,30 @@ public class PriceTrackerService {
     return byId;
   }
 
-  private PriceDropNotification buildNotification(String userId, ProductSnapshot product,
-                                                  double previous, double current) {
+  private Notification buildNotification(String userId, ProductSnapshot product,
+                                         double previous, double current) {
     double savings = round(previous - current);
-    PriceDropNotification n = new PriceDropNotification();
-    n.setId("NTC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+    int savingsPct = previous > 0 ? (int) Math.round((savings / previous) * 100) : 0;
+
+    Notification n = new Notification();
+    n.setId("NTF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
     n.setUserId(userId);
+    n.setType("PRICE_DROP");
+    n.setCategory("PRICE_DROPS");
+    n.setTitle("Price Drop: " + product.getName());
+    n.setMessage("Great news! " + product.getName() + " dropped to ₹" + Math.round(current) + " (Save ₹" + Math.round(savings) + " / " + savingsPct + "% OFF).");
+    n.setLink("/products/" + product.getId());
+    n.setIcon("📉");
     n.setProductId(product.getId());
     n.setProductName(product.getName());
     n.setPreviousPrice(previous);
     n.setCurrentPrice(current);
     n.setSavings(savings);
-    n.setSavingsPercent(previous > 0 ? (int) Math.round((savings / previous) * 100) : 0);
+    n.setSavingsPercent(savingsPct);
     n.setRead(false);
     n.setCreatedAt(Instant.now());
     n.setEmailStatus("PENDING");
+    n.setMetadata(Map.of("productId", product.getId(), "savings", savings));
     return n;
   }
 
@@ -194,6 +204,6 @@ public class PriceTrackerService {
       int wishlistsScanned,
       int itemsScanned,
       int notificationsCreated,
-      List<PriceDropNotification> notifications,
+      List<Notification> notifications,
       Instant scannedAt) {}
 }

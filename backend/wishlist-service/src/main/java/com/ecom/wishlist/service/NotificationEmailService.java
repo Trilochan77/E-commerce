@@ -1,5 +1,6 @@
 package com.ecom.wishlist.service;
 
+import com.ecom.wishlist.entity.Notification;
 import com.ecom.wishlist.entity.PriceDropNotification;
 import com.ecom.wishlist.entity.UserSnapshot;
 import jakarta.mail.internet.MimeMessage;
@@ -14,11 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 /**
- * Optional price-drop email delivery.
- *
- * <p>Email is only attempted when explicitly enabled and SMTP credentials are present.
- * The returned status is stored on the notification so the UI can state exactly what
- * happened instead of claiming delivery that never occurred.
+ * Optional email delivery for price drops and critical notifications.
  */
 @Service
 public class NotificationEmailService {
@@ -48,7 +45,7 @@ public class NotificationEmailService {
     this.mailSenderProvider = mailSenderProvider;
   }
 
-  public String sendPriceDrop(UserSnapshot user, PriceDropNotification n) {
+  public String sendPriceDrop(UserSnapshot user, Notification n) {
     if (!enabled) return "DISABLED";
     if (user == null || !StringUtils.hasText(user.getEmail())) return "NOT_CONFIGURED";
     if (!StringUtils.hasText(smtpHost)
@@ -61,13 +58,18 @@ public class NotificationEmailService {
 
     String senderAddress = StringUtils.hasText(from) ? from : smtpUsername;
     String name = StringUtils.hasText(user.getName()) ? user.getName() : "there";
-    String product = StringUtils.hasText(n.getProductName()) ? n.getProductName() : n.getProductId();
+    String product = StringUtils.hasText(n.getProductName()) ? n.getProductName() : (n.getProductId() != null ? n.getProductId() : "Item");
+    double prev = n.getPreviousPrice() != null ? n.getPreviousPrice() : 0.0;
+    double curr = n.getCurrentPrice() != null ? n.getCurrentPrice() : 0.0;
+    double sav = n.getSavings() != null ? n.getSavings() : 0.0;
+    int savPct = n.getSavingsPercent() != null ? n.getSavingsPercent() : 0;
+
     String body = "Hi " + name + ",\n\n"
         + "A product on your wishlist just got cheaper.\n\n"
         + "Product: " + product + "\n"
-        + "Previous price: Rs. " + money(n.getPreviousPrice()) + "\n"
-        + "Current price:  Rs. " + money(n.getCurrentPrice()) + "\n"
-        + "You save:       Rs. " + money(n.getSavings()) + " (" + n.getSavingsPercent() + "%)\n\n"
+        + "Previous price: Rs. " + money(prev) + "\n"
+        + "Current price:  Rs. " + money(curr) + "\n"
+        + "You save:       Rs. " + money(sav) + " (" + savPct + "%)\n\n"
         + "View your alerts: " + shopUrl + "/notifications\n\n"
         + "— NextGen Shop";
 
@@ -84,6 +86,19 @@ public class NotificationEmailService {
       log.warn("Price-drop email failed for user {} product {}: {}", n.getUserId(), n.getProductId(), e.getMessage());
       return "FAILED";
     }
+  }
+
+  public String sendPriceDrop(UserSnapshot user, PriceDropNotification n) {
+    if (n == null) return "DISABLED";
+    Notification notif = new Notification();
+    notif.setUserId(n.getUserId());
+    notif.setProductId(n.getProductId());
+    notif.setProductName(n.getProductName());
+    notif.setPreviousPrice(n.getPreviousPrice());
+    notif.setCurrentPrice(n.getCurrentPrice());
+    notif.setSavings(n.getSavings());
+    notif.setSavingsPercent(n.getSavingsPercent());
+    return sendPriceDrop(user, notif);
   }
 
   private String money(double value) {

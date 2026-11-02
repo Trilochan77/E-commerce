@@ -10,6 +10,7 @@ public record CheckoutRequest(
     @NotBlank String userId,
     @NotBlank String paymentMethod,
     @Min(0) int pointsToUse,
+    String couponCode,
     String addressId,
     @Valid @NotNull ShippingAddressRequest shippingAddress) {
 

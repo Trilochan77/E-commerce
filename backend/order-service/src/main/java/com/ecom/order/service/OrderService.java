@@ -17,9 +17,12 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -28,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class OrderService {
+  private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
   private final OrderRepository orders;
   private final CartRefRepository carts;
@@ -48,6 +52,47 @@ public class OrderService {
 
   @Value("${reward.max-redeem-percent:20}")
   private int maxRedeemPercent;
+
+  @Value("${reward-service.url:http://localhost:8087}")
+  private String rewardUrl;
+
+  @Value("${notification-service.url:http://localhost:8088}")
+  private String notificationUrl;
+
+  private void sendNotification(String userId, String type, String category, String title, String message, String link, String icon, Map<String, Object> metadata) {
+    if (userId == null || userId.isBlank()) return;
+    try {
+      Map<String, Object> req = new HashMap<>();
+      req.put("userId", userId);
+      req.put("type", type);
+      req.put("category", category);
+      req.put("title", title);
+      req.put("message", message);
+      req.put("link", link);
+      req.put("icon", icon);
+      if (metadata != null) req.put("metadata", metadata);
+      rest.postForObject(notificationUrl + "/api/notifications", req, Map.class);
+    } catch (Exception ex) {
+      log.warn("Could not dispatch notification: {}", ex.getMessage());
+    }
+  }
+
+  private void notifyOrderStatusChange(Order o, String status) {
+    if (o == null || o.getUserId() == null || status == null) return;
+    switch (status) {
+      case "CONFIRMED" -> sendNotification(o.getUserId(), "ORDER_CONFIRMED", "ORDERS", "Order Confirmed",
+          "Order #" + o.getId() + " is confirmed and being prepared.", "/orders", "📦", Map.of("orderId", o.getId()));
+      case "SHIPPED" -> sendNotification(o.getUserId(), "ORDER_SHIPPED", "DELIVERY", "Order Shipped! 📦",
+          "Order #" + o.getId() + " has been dispatched and is on its way to you.", "/orders", "📦", Map.of("orderId", o.getId()));
+      case "OUT_FOR_DELIVERY" -> sendNotification(o.getUserId(), "OUT_FOR_DELIVERY", "DELIVERY", "Out for Delivery! 🚚",
+          "Your package for Order #" + o.getId() + " is out for delivery today. Delivery agent is arriving soon!", "/orders", "🚚", Map.of("orderId", o.getId()));
+      case "DELIVERED" -> sendNotification(o.getUserId(), "ORDER_DELIVERED", "DELIVERY", "Delivered Successfully! 🎉",
+          "Package for Order #" + o.getId() + " has been delivered. Thank you for shopping with us!", "/orders", "🎉", Map.of("orderId", o.getId()));
+      case "CANCELLED" -> sendNotification(o.getUserId(), "ORDER_CANCELLED", "ORDERS", "Order Cancelled",
+          "Order #" + o.getId() + " was cancelled.", "/orders", "❌", Map.of("orderId", o.getId()));
+      default -> {}
+    }
+  }
 
   public OrderService(OrderRepository orders, CartRefRepository carts, RewardWalletRepository wallets,
       RewardTransactionRepository transactions, RestTemplate rest, PaymentService payments) {
@@ -129,12 +174,39 @@ public class OrderService {
             "Points exceed max " + maxRedeemPercent + "% cap (max discount " + maxDiscount + ")");
       }
     }
-    double payable = subTotal - discount;
+
+    // 2.1 Coupon validation & reservation
+    String reservationId = null;
+    double couponDiscount = 0;
+    if (req.couponCode() != null && !req.couponCode().isBlank()) {
+      try {
+        Map<String, Object> reserveReq = Map.of(
+            "userId", req.userId(),
+            "code", req.couponCode().trim(),
+            "subTotal", subTotal
+        );
+        @SuppressWarnings("unchecked")
+        Map<String, Object> res = rest.postForObject(rewardUrl + "/api/rewards/coupons/reserve", reserveReq, Map.class);
+        if (res != null) {
+          reservationId = (String) res.get("reservationId");
+          couponDiscount = ((Number) res.getOrDefault("discount", 0.0)).doubleValue();
+        }
+      } catch (Exception ex) {
+        throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Coupon invalid, expired or already used: " + req.couponCode());
+      }
+    }
+
+    double payable = Math.max(0, subTotal - couponDiscount - discount);
 
     // 3. Mock payment — order is NOT created on failure (SRS 3.1.28).
     try {
       payments.charge(req.paymentMethod(), payable);
     } catch (PaymentService.PaymentFailedException e) {
+      if (reservationId != null) {
+        try {
+          rest.postForObject(rewardUrl + "/api/rewards/coupons/" + reservationId + "/release", Map.of(), Map.class);
+        } catch (Exception ignored) {}
+      }
       Order failed = new Order();
       failed.setId("ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
       failed.setUserId(req.userId());
@@ -146,11 +218,16 @@ public class OrderService {
       failed.setPaymentStatus("FAILED");
       failed.setOrderStatus("CANCELLED");
       failed.setSubTotal(subTotal);
+      failed.setCouponCode(req.couponCode());
+      failed.setCouponDiscount(couponDiscount);
       failed.setPayableAmount(payable);
       failed.setAddressId(req.addressId());
       failed.setShippingAddress(snapshot(req));
       failed.setOrderDate(Instant.now());
       orders.save(failed);
+      sendNotification(req.userId(), "PAYMENT_FAILED", "ORDERS", "Payment Failed",
+          "Payment of ₹" + Math.round(payable) + " failed: " + e.getMessage() + ". Please retry or use another payment method.",
+          "/checkout", "❌", Map.of("reason", e.getMessage(), "amount", payable));
       throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, e.getMessage());
     }
 
@@ -170,6 +247,8 @@ public class OrderService {
     order.setSubTotal(subTotal);
     order.setPointsUsed(pointsToUse);
     order.setDiscountValue(discount);
+    order.setCouponCode(req.couponCode());
+    order.setCouponDiscount(couponDiscount);
     order.setPayableAmount(payable);
     order.setPaymentMethod(PaymentService.normalize(req.paymentMethod()));
     order.setPaymentStatus(payments.paymentStatusFor(req.paymentMethod()));
@@ -179,6 +258,22 @@ public class OrderService {
     order.setOrderDate(Instant.now());
     order.setDeliveryTracking(buildTracking(order));
     orders.save(order);
+
+    sendNotification(order.getUserId(), "ORDER_CONFIRMED", "ORDERS", "Order Confirmed! 📦",
+        "Order #" + order.getId() + " placed successfully for ₹" + Math.round(order.getPayableAmount()) + ".",
+        "/orders", "📦", Map.of("orderId", order.getId(), "amount", order.getPayableAmount()));
+    if (!"COD".equalsIgnoreCase(order.getPaymentMethod())) {
+      sendNotification(order.getUserId(), "PAYMENT_SUCCESS", "ORDERS", "Payment Confirmed 💳",
+          "Payment of ₹" + Math.round(order.getPayableAmount()) + " via " + order.getPaymentMethod() + " confirmed for Order #" + order.getId() + ".",
+          "/orders", "💳", Map.of("orderId", order.getId(), "amount", order.getPayableAmount()));
+    }
+
+    if (reservationId != null) {
+      try {
+        rest.postForObject(rewardUrl + "/api/rewards/coupons/" + reservationId + "/confirm",
+            Map.of("orderId", order.getId()), Map.class);
+      } catch (Exception ignored) {}
+    }
 
     // 5. Decrement stock (best-effort per item; failures surface as 502).
     for (CartRef.Item ci : cart.getItems()) {
@@ -263,6 +358,7 @@ public class OrderService {
       syncTrackingState(dt, next, o.getOrderDate(), o.getDeliveredDate());
     }
     o.setDeliveryTracking(dt);
+    notifyOrderStatusChange(o, next);
     return orders.save(o);
   }
 
@@ -309,6 +405,7 @@ public class OrderService {
           if ("COD".equals(o.getPaymentMethod())) o.setPaymentStatus("PAID");
         }
         syncTrackingState(dt, next, o.getOrderDate(), o.getDeliveredDate());
+        notifyOrderStatusChange(o, next);
       }
     }
     o.setDeliveryTracking(dt);
@@ -502,6 +599,11 @@ public class OrderService {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Failed payments cannot be marked paid");
     }
     o.setPaymentStatus(next);
+    if ("PAID".equals(next)) {
+      sendNotification(o.getUserId(), "PAYMENT_SUCCESS", "ORDERS", "Payment Received 💳",
+          "Payment of ₹" + Math.round(o.getPayableAmount()) + " received for Order #" + o.getId() + ".",
+          "/orders", "💳", Map.of("orderId", o.getId(), "amount", o.getPayableAmount()));
+    }
     return orders.save(o);
   }
 }

@@ -33,6 +33,29 @@ public class AuthService {
   @Value("${jwt.ttl-millis:86400000}")
   private long jwtTtl;
 
+  @Value("${notification-service.url:http://localhost:8088}")
+  private String notificationUrl;
+
+  private final java.net.http.HttpClient httpClient = java.net.http.HttpClient.newBuilder()
+      .connectTimeout(java.time.Duration.ofSeconds(2))
+      .build();
+
+  private void notifyUser(String userId, String type, String category, String title, String message, String link, String icon) {
+    if (userId == null || userId.isBlank()) return;
+    try {
+      String json = String.format(
+          "{\"userId\":\"%s\",\"type\":\"%s\",\"category\":\"%s\",\"title\":\"%s\",\"message\":\"%s\",\"link\":\"%s\",\"icon\":\"%s\"}",
+          userId, type, category, title, message, link, icon);
+      java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+          .uri(java.net.URI.create(notificationUrl + "/api/notifications"))
+          .header("Content-Type", "application/json")
+          .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json))
+          .timeout(java.time.Duration.ofSeconds(2))
+          .build();
+      httpClient.sendAsync(request, java.net.http.HttpResponse.BodyHandlers.discarding());
+    } catch (Exception ignored) {}
+  }
+
   public AuthService(UserRepository users, RewardWalletRepository wallets, PasswordEncoder encoder) {
     this.users = users;
     this.wallets = wallets;
@@ -100,6 +123,7 @@ public class AuthService {
     }
     ensureWallet(u.getId());
     String token = JwtUtil.generateToken(u.getId(), u.getEmail(), u.getRole(), jwtSecret, jwtTtl);
+    notifyUser(u.getId(), "LOGIN_SUCCESS", "SECURITY", "Successful Login 🛡️", "Successful login to your NextGen Shop account.", "/profile", "🛡️");
     return new AuthResponse(token, u.getId(), u.getEmail(), u.getRole(), u.getName());
   }
 
@@ -132,6 +156,7 @@ public class AuthService {
     wallets.save(w);
 
     String token = JwtUtil.generateToken(u.getId(), u.getEmail(), u.getRole(), jwtSecret, jwtTtl);
+    notifyUser(u.getId(), "OTP_VERIFIED", "SECURITY", "OTP Verification Successful 🔐", "Your email OTP was verified and account registered.", "/profile", "🔐");
     return new AuthResponse(token, u.getId(), u.getEmail(), u.getRole(), u.getName());
   }
 
@@ -165,6 +190,8 @@ public class AuthService {
     }
     ensureWallet(u.getId());
     String token = JwtUtil.generateToken(u.getId(), u.getEmail(), u.getRole(), jwtSecret, jwtTtl);
+    notifyUser(u.getId(), "OTP_VERIFIED", "SECURITY", "OTP Verification Successful 🔐", "Your one-time passcode was verified and you logged in.", "/profile", "🔐");
+    notifyUser(u.getId(), "LOGIN_SUCCESS", "SECURITY", "Successful Login 🛡️", "Successful login to your NextGen Shop account.", "/profile", "🛡️");
     return new AuthResponse(token, u.getId(), u.getEmail(), u.getRole(), u.getName());
   }
 
@@ -185,8 +212,10 @@ public class AuthService {
     }
     u.setPasswordHash(encoder.encode(req.newPassword()));
     users.save(u);
+    notifyUser(u.getId(), "OTP_VERIFIED", "SECURITY", "Password Reset Verified 🔐", "Your password was reset successfully using OTP verification.", "/profile", "🔐");
     ensureWallet(u.getId());
     String token = JwtUtil.generateToken(u.getId(), u.getEmail(), u.getRole(), jwtSecret, jwtTtl);
+    notifyUser(u.getId(), "OTP_VERIFIED", "SECURITY", "OTP Verification Successful 🔐", "Your email OTP was verified and account registered.", "/profile", "🔐");
     return new AuthResponse(token, u.getId(), u.getEmail(), u.getRole(), u.getName());
   }
 

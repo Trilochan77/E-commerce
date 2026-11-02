@@ -14,6 +14,7 @@ public class RewardTransaction {
   private int points;
   private String relatedOrderId;
   private String relatedReturnId;
+  private String source; // SPIN | RETURN | CHECKOUT (optional, older records omit it)
   private Instant createdAt = Instant.now();
 
   public String getId() { return id; }
@@ -30,6 +31,8 @@ public class RewardTransaction {
   public void setRelatedOrderId(String relatedOrderId) { this.relatedOrderId = relatedOrderId; }
   public String getRelatedReturnId() { return relatedReturnId; }
   public void setRelatedReturnId(String relatedReturnId) { this.relatedReturnId = relatedReturnId; }
+  public String getSource() { return source; }
+  public void setSource(String source) { this.source = source; }
   public Instant getCreatedAt() { return createdAt; }
   public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }
