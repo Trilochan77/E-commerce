@@ -45,6 +45,33 @@ export class Shop {
     return this.http.get(`${GATEWAY}/api/recommendations/${userId}?limit=${limit}`);
   }
 
+  /** Content-based "similar products" for a product page. */
+  similarProducts(productId: string, limit = 6): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/recommendations/similar/${productId}?limit=${limit}`);
+  }
+
+  /** Time-decayed popularity rail (recent orders + views). */
+  trending(limit = 8): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/recommendations/trending?limit=${limit}`);
+  }
+
+  /** All-time best sellers by order volume. */
+  popularProducts(limit = 8): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/recommendations/popular?limit=${limit}`);
+  }
+
+  /** Category-based rail, optionally personalized with the user's own views. */
+  categoryRecommendations(categoryId: string, userId = '', limit = 8): Observable<any> {
+    let params = new HttpParams().set('limit', limit);
+    if (userId) params = params.set('userId', userId);
+    return this.http.get(`${GATEWAY}/api/recommendations/category/${categoryId}`, { params });
+  }
+
+  /** Recommendations derived from the products the user most recently viewed. */
+  recentlyViewedRecommendations(userId: string, limit = 6): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/recommendations/recently-viewed/${userId}?limit=${limit}`);
+  }
+
   logView(userId: string, productId: string): Observable<any> {
     return this.http.post(`${GATEWAY}/api/activity`, { userId, type: 'VIEW', productId });
   }

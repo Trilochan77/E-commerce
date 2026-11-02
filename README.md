@@ -163,37 +163,57 @@ stateDiagram-v2
 
 ---
 
-## 🧮 Recommendation Engine Scoring Model
+## 🧮 Recommendation Engine — Smart Recommendation System
 
-The recommendation service continuously calculates affinity weights for each active user without complex external dependencies:
+The recommendation service is a **deterministic, explainable hybrid**. Every score is arithmetic over stored fields and activity events. **No machine learning, no deep learning, no embeddings and no LLM are used.**
 
 ```mermaid
 flowchart LR
-    subgraph Inputs ["Behavioral Signals"]
-        P["Purchase History<br/>(Weight: 3x)"]
-        V["Product Views<br/>(Weight: 2x)"]
-        S["Search Queries<br/>(Weight: 2x)"]
-        Pop["Global Popularity<br/>(Weight: 1x)"]
+    subgraph Inputs ["Signals"]
+        CB["Content similarity<br/>(viewed + purchased items)"]
+        CA["Category affinity<br/>(views + purchases)"]
+        SK["Search keywords"]
+        TR["Trending<br/>(time-decayed orders + views)"]
+        RT["Rating<br/>(review count > 0 only)"]
     end
 
-    subgraph Formula ["Dynamic Scoring Engine"]
-        Calc["Score = (3 × CatMatch) + (2 × ViewCount)<br/>+ (2 × KeywordMatch) + (1 × PopScore)"]
+    subgraph Formula ["Hybrid score (normalized 0–1)"]
+        Calc["3.2×content + 2.4×category<br/>+ 1.6×trending + 1.4×search<br/>+ 0.5×rating + 0.4×views"]
     end
 
-    subgraph Output ["Recommendation Rails"]
-        ActiveUser{"Activity Found?"}
-        Ranked["Personalized Rail<br/>'Recommended for You'"]
-        ColdStart["Cold Start Fallback<br/>'Top Trending & Best Sellers'"]
+    subgraph Output ["Rails"]
+        Active{"Activity exists?"}
+        Ranked["Recommended for You<br/>(hybrid)"]
+        Cold["Trending fallback<br/>(cold start)"]
     end
 
-    P --> Calc
-    V --> Calc
-    S --> Calc
-    Pop --> Calc
-    Calc --> ActiveUser
-    ActiveUser -->|Yes| Ranked
-    ActiveUser -->|No / Guest| ColdStart
+    CB --> Calc
+    CA --> Calc
+    SK --> Calc
+    TR --> Calc
+    RT --> Calc
+    Calc --> Active
+    Active -->|Yes| Ranked
+    Active -->|No / Guest| Cold
 ```
+
+### Algorithms actually implemented
+
+| Rail | Endpoint | Algorithm | Honest description |
+|---|---|---|---|
+| Personalized | `GET /api/recommendations/{userId}` | **Hybrid** (content-based + category affinity + search match + time-decayed trending + rating) | Weighted linear blend of normalized signals. Deterministic. |
+| Similar products | `GET /api/recommendations/similar/{productId}` | **Content-based item/item similarity** | Same category (0.50) + Jaccard overlap of name/description words (≤0.30) + price proximity (≤0.20). |
+| Recently viewed | `GET /api/recommendations/recently-viewed/{userId}` | **Content-based from recent views** | Item/item similarity to the last 8 distinct viewed products, recency-weighted, already-viewed items excluded. |
+| Trending | `GET /api/recommendations/trending` | **Time-decayed popularity** | `Σ quantity × e^(−age/halfLife)` over paid/pending orders, plus smaller weight for views. Half-life = window/3. |
+| Popular / best sellers | `GET /api/recommendations/popular` | **All-time order popularity** | Lifetime paid/pending order units per product. |
+| Category-based | `GET /api/recommendations/category/{categoryId}` | **Category affinity** | In-stock products in one category, ranked by trending + rating; optional per-user view boost. |
+
+Each item in every response carries a `reasons[]` list (and the hybrid rail also carries a `components{}` breakdown), so the ranking can be explained without a black box.
+
+**Cold start:** when a user has no views, searches or purchases, the hybrid rail collapses to trending + rating and returns `"strategy": "trending-fallback"` with `"coldStart": true`. It never fabricates behaviour.
+
+**UI rails:** home shows *Recommended for You*, *Because You Viewed …*, *Trending Now* and *Best Sellers*; product pages show *Similar Products*, *More in {category}* and *Recommended for You*.
+
 
 ---
 

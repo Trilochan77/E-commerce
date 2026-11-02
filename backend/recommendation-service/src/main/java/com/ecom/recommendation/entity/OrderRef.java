@@ -1,5 +1,6 @@
 package com.ecom.recommendation.entity;
 
+import java.time.Instant;
 import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -11,6 +12,8 @@ public class OrderRef {
   private String userId;
   private List<Item> items;
   private String paymentStatus;
+  private String orderStatus;
+  private Instant orderDate;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -20,6 +23,10 @@ public class OrderRef {
   public void setItems(List<Item> items) { this.items = items; }
   public String getPaymentStatus() { return paymentStatus; }
   public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+  public String getOrderStatus() { return orderStatus; }
+  public void setOrderStatus(String orderStatus) { this.orderStatus = orderStatus; }
+  public Instant getOrderDate() { return orderDate; }
+  public void setOrderDate(Instant orderDate) { this.orderDate = orderDate; }
 
   public static class Item {
     private String productId;

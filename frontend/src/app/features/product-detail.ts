@@ -28,7 +28,13 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
       </div>
       <div class="card" style="margin:0">
         <h1 style="font-size:26px">{{ product.name }}</h1>
-        <div class="row"><span class="stars">★★★★☆</span><span class="muted">4.2 · 380 ratings · AI-matched to your taste</span></div>
+        <div class="row" *ngIf="product.reviewCount > 0">
+          <span class="stars">★ {{ product.averageRating | number:'1.1-1' }}</span>
+          <span class="muted">{{ product.reviewCount }} customer rating{{ product.reviewCount === 1 ? '' : 's' }} · deterministic recommendations (no ML)</span>
+        </div>
+        <div class="row" *ngIf="!(product.reviewCount > 0)">
+          <span class="stars">☆</span><span class="muted">No customer ratings yet</span>
+        </div>
         <div class="price-row" style="margin:8px 0"><span class="price" style="font-size:28px">₹{{ product.price | number }}</span><span class="price-note">inclusive of taxes</span></div>
         <p class="muted">{{ product.description }}</p>
         <div class="reward-box" *ngIf="product.eligibleForReturn">
@@ -78,10 +84,18 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         </div>
         <p *ngIf="!hasPointsTrack()" class="muted">Return window for this product is 7 days from delivery for full money refund.</p>
       </div>
-      <p *ngIf="tab==='reco'" class="muted">Scored as 3× purchase-category + 2× views + 2× search-match + 1× popularity. Viewing this item logged a VIEW event to improve your rail.</p>
+      <p *ngIf="tab==='reco'" class="muted">Hybrid score = 3.2×content-similarity + 2.4×category-affinity + 1.6×trending + 1.4×search-match + 0.5×rating. Viewing this item logs a VIEW event that feeds the content signal and your “Because you viewed…” rail. No machine learning is used.</p>
+    </div>
+    <div class="card" *ngIf="similar.length">
+      <div class="section-title"><h2>Similar Products</h2><span class="badge violet">Content-based similarity</span></div>
+      <div class="rail"><app-product-card *ngFor="let p of similar" [product]="p"></app-product-card></div>
+    </div>
+    <div class="card" *ngIf="moreInCategory.length">
+      <div class="section-title"><h2>More in {{ categoryLabel() }}</h2><span class="badge violet">Category-based</span></div>
+      <div class="rail"><app-product-card *ngFor="let p of moreInCategory" [product]="p"></app-product-card></div>
     </div>
     <div class="card" *ngIf="related.length">
-      <div class="section-title"><h2>Based on Your Activity</h2><a routerLink="/products">More →</a></div>
+      <div class="section-title"><h2>Recommended for You</h2><span class="badge violet">Hybrid personalization</span><a routerLink="/products">More →</a></div>
       <div class="rail"><app-product-card *ngFor="let p of related" [product]="p"></app-product-card></div>
     </div>
   `
@@ -95,6 +109,9 @@ export class ProductDetail implements OnInit {
   inWishlist = false;
   wishBusy = false;
   related: any[] = [];
+  similar: any[] = [];
+  moreInCategory: any[] = [];
+  categoryLabelText = '';
   tab: 'desc' | 'returns' | 'reco' = 'desc';
   MULT = MULT;
 
@@ -106,6 +123,21 @@ export class ProductDetail implements OnInit {
     this.shop.product(id).subscribe({
       next: (p: any) => {
         this.product = p;
+        this.shop.similarProducts(id, 6).subscribe({
+          next: (r: any) => (this.similar = r.items || []),
+          error: () => undefined
+        });
+        const catId = p.categoryId || p.category || '';
+        if (catId) {
+          this.shop.categoryRecommendations(catId, this.auth.isLoggedIn() ? this.auth.userId() : '', 8).subscribe({
+            next: (r: any) => {
+              this.categoryLabelText = r.categoryName || '';
+              this.moreInCategory = (r.items || [])
+                .filter((x: any) => (x.productId || x.id) !== id).slice(0, 6);
+            },
+            error: () => undefined
+          });
+        }
         if (this.auth.isLoggedIn()) {
           this.shop.logView(this.auth.userId(), id).subscribe({ error: () => undefined });
           this.shop.recommendations(this.auth.userId(), 6).subscribe({
@@ -118,6 +150,10 @@ export class ProductDetail implements OnInit {
       },
       error: () => this.router.navigate(['/products'])
     });
+  }
+
+  categoryLabel(): string {
+    return this.categoryLabelText || this.product?.categoryName || this.product?.categoryId || 'this category';
   }
 
   checkWishlist(id: string): void {
