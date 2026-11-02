@@ -124,6 +124,11 @@ a:hover { text-decoration: none; color: var(--brand-2); }
 .nav-link { padding: 8px 11px; border-radius: 9px; color: var(--ink-2); font-weight: 600; font-size: 13px; white-space: nowrap; }
 .nav-link:hover { background: var(--surface-2); color: var(--ink); text-decoration: none; }
 .nav-link.active { color: var(--ink); background: linear-gradient(135deg, rgba(139, 92, 246, .25), rgba(217, 70, 239, .18)); box-shadow: inset 0 0 0 1px rgba(139, 92, 246, .4); }
+.nav-count {
+  display: inline-grid; place-items: center; min-width: 17px; height: 17px; padding: 0 5px;
+  margin-left: 5px; border-radius: 999px; background: var(--grad); color: #fff;
+  font-size: 10px; font-weight: 800; vertical-align: 1px;
+}
 .wallet-pill {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(16, 185, 129, .12); border: 1px solid rgba(52, 211, 153, .35);
@@ -286,6 +291,15 @@ a:hover { text-decoration: none; color: var(--brand-2); }
 }
 .wishlist-btn:hover { transform: scale(1.1); }
 .wishlist-btn.on { color: #ef4444; background: rgba(239, 68, 68, .18); border-color: rgba(239, 68, 68, .5); }
+.compare-btn {
+  position: absolute; left: 8px; bottom: 8px; z-index: 2;
+  border: 1px solid rgba(167, 139, 250, .4); border-radius: 999px;
+  background: rgba(6, 9, 20, .72); color: #e2e8f0;
+  padding: 4px 9px; font-size: 11px; font-weight: 700; cursor: pointer;
+  backdrop-filter: blur(6px); transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.compare-btn:hover { border-color: var(--brand); background: var(--brand-soft); color: #fff; }
+.compare-btn.on { background: var(--brand); border-color: transparent; color: #fff; box-shadow: 0 4px 14px rgba(139, 92, 246, .4); }
 .flag { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(6, 9, 20, .72); border: 1px solid rgba(167, 139, 250, .4); color: #e2e8f0; backdrop-filter: blur(6px); }
 .flag.green { background: rgba(16, 185, 129, .9); border-color: transparent; color: #052e1c; }
 .flag.amber { background: rgba(251, 191, 36, .9); border-color: transparent; color: #452c03; }

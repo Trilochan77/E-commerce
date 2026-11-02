@@ -31,6 +31,14 @@ import { EmptyState } from '../shared/empty-state';
           <button class="chip" *ngFor="let c of categories" [class.on]="category===(c.id||c._id)" (click)="category=(c.id||c._id); load()">{{ c.name }}</button>
         </div>
         <div class="divider"></div>
+        <h3>Trending Gadgets</h3>
+        <div class="cat-row" style="gap:6px">
+          <button class="chip" [class.on]="q==='mobile'" (click)="quickSearch('mobile')">📱 Mobiles</button>
+          <button class="chip" [class.on]="q==='laptop'" (click)="quickSearch('laptop')">💻 Laptops</button>
+          <button class="chip" [class.on]="q==='bluetooth'" (click)="quickSearch('bluetooth')">🎧 Bluetooth</button>
+          <button class="chip" [class.on]="q==='neckband'" (click)="quickSearch('neckband')">📿 Neckbands</button>
+        </div>
+        <div class="divider"></div>
         <div class="row" style="justify-content:space-between">
           <h3 style="margin:0">Price</h3><span class="muted">₹{{ minPrice || 0 }} – ₹{{ maxPrice || '∞' }}</span>
         </div>
@@ -109,6 +117,11 @@ export class ProductList implements OnInit {
     this.q = ''; this.category = ''; this.sort = '';
     this.minPrice = ''; this.maxPrice = '';
     this.inStockOnly = false; this.returnableOnly = false;
+    this.load();
+  }
+
+  quickSearch(tag: string): void {
+    this.q = this.q === tag ? '' : tag;
     this.load();
   }
 

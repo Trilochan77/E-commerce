@@ -34,6 +34,11 @@ export class Shop {
     return this.http.get(`${GATEWAY}/api/categories`);
   }
 
+  /** Side-by-side comparison payload (stored fields + parsed specifications/features). */
+  compareProducts(ids: string[]): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/products/compare?ids=${encodeURIComponent(ids.join(','))}`);
+  }
+
   search(q: string, category = '', sort = ''): Observable<any> {
     let params = new HttpParams().set('q', q);
     if (category) params = params.set('category', category);

@@ -71,6 +71,7 @@ public class ProductService {
   private void apply(Product p, ProductRequest req) {
     p.setName(req.name());
     p.setDescription(req.description());
+    p.setBrand(trimToNull(req.brand()));
     p.setPrice(req.price());
     p.setCategoryId(req.categoryId());
     p.setImages(req.images());
@@ -78,5 +79,11 @@ public class ProductService {
     p.setAvailability(req.stockQuantity() > 0);
     p.setEligibleForReturn(req.eligibleForReturn());
     p.setUpdatedAt(Instant.now());
+  }
+
+  private String trimToNull(String value) {
+    if (value == null) return null;
+    String trimmed = value.trim();
+    return trimmed.isEmpty() ? null : trimmed;
   }
 }

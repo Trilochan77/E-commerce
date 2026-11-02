@@ -2,6 +2,7 @@ package com.ecom.product.controller;
 
 import com.ecom.product.dto.ProductRequest;
 import com.ecom.product.entity.Product;
+import com.ecom.product.service.ProductComparisonService;
 import com.ecom.product.service.ProductService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -14,9 +15,11 @@ import org.springframework.web.server.ResponseStatusException;
 public class ProductController {
 
   private final ProductService svc;
+  private final ProductComparisonService comparison;
 
-  public ProductController(ProductService svc) {
+  public ProductController(ProductService svc, ProductComparisonService comparison) {
     this.svc = svc;
+    this.comparison = comparison;
   }
 
   private void requireAdmin(String role) {
@@ -26,6 +29,12 @@ public class ProductController {
   @GetMapping("/api/products")
   public List<Product> list(@RequestParam(required = false) String category) {
     return svc.list(category);
+  }
+
+  /** Side-by-side comparison of 1–4 products (2+ recommended; the UI enforces it). */
+  @GetMapping("/api/products/compare")
+  public Map<String, Object> compare(@RequestParam String ids) {
+    return comparison.compare(ids);
   }
 
   @GetMapping("/api/products/{id}")

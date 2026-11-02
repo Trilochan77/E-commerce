@@ -23,6 +23,7 @@ import { ProductVisual } from '../shared/product-visual';
         <h2>{{ editId ? 'Edit product' : 'Add product' }}</h2>
         <div class="form-grid" style="max-width:none">
           <label>Name<input [(ngModel)]="form.name" placeholder="Bluetooth Headphones X"></label>
+          <label>Brand (optional)<input [(ngModel)]="form.brand" placeholder="Leave blank if unknown"></label>
           <label>Category
             <select [(ngModel)]="form.categoryId">
               <option *ngFor="let c of categories" [value]="c.id || c._id">{{ c.name }} ({{ c.id || c._id }})</option>
@@ -50,7 +51,7 @@ import { ProductVisual } from '../shared/product-visual';
           <tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th>Return?</th><th></th></tr>
           <tr *ngFor="let p of filtered()">
             <td><app-product-visual [product]="p" size="xs"></app-product-visual></td>
-            <td><strong>{{ p.name }}</strong><div class="muted">{{ p.id || p._id }} · {{ p.categoryId }}</div></td>
+            <td><strong>{{ p.name }}</strong><div class="muted">{{ p.id || p._id }} · {{ p.categoryId }}<span *ngIf="p.brand"> · {{ p.brand }}</span></div></td>
             <td>Rs.{{ p.price }}</td>
             <td><span class="badge" [ngClass]="(p.stockQuantity??0)>5 ? 'ok' : 'warn'">{{ p.stockQuantity }}</span></td>
             <td>{{ p.eligibleForReturn ? 'Yes' : '—' }}</td>
@@ -72,7 +73,7 @@ export class AdminProducts implements OnInit {
   error = '';
   loading = true;
   saving = false;
-  form: any = { name: '', description: '', price: 0, categoryId: '', stockQuantity: 10, imageUrl: '', eligibleForReturn: true };
+  form: any = { name: '', description: '', brand: '', price: 0, categoryId: '', stockQuantity: 10, imageUrl: '', eligibleForReturn: true };
   imgError = '';
 
   constructor(private shop: Shop, private toast: Toast) {}
@@ -103,7 +104,7 @@ export class AdminProducts implements OnInit {
   resetForm(): void {
     this.editId = '';
     const firstCat = this.categories.length ? (this.categories[0].id || this.categories[0]._id) : '';
-    this.form = { name: '', description: '', price: 0, categoryId: firstCat, stockQuantity: 10, imageUrl: '', eligibleForReturn: true };
+    this.form = { name: '', description: '', brand: '', price: 0, categoryId: firstCat, stockQuantity: 10, imageUrl: '', eligibleForReturn: true };
     this.imgError = '';
   }
 
@@ -111,7 +112,7 @@ export class AdminProducts implements OnInit {
     this.editId = p.id || p._id;
     this.imgError = '';
     this.form = {
-      name: p.name, description: p.description, price: p.price,
+      name: p.name, description: p.description, brand: p.brand || '', price: p.price,
       categoryId: p.categoryId, stockQuantity: p.stockQuantity,
       imageUrl: p.imageUrl || (p.images && p.images[0]) || '',
       eligibleForReturn: !!p.eligibleForReturn

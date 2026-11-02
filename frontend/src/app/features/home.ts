@@ -35,6 +35,45 @@ import { EmptyState } from '../shared/empty-state';
       </div>
     </section>
 
+    <div class="quick-category-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0">
+      <a [routerLink]="['/products']" [queryParams]="{ q: 'mobile' }" style="text-decoration:none">
+        <div class="card tight" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+          <span style="font-size:30px">📱</span>
+          <div>
+            <strong style="color:#f8fafc;font-size:14px">Smartphones</strong>
+            <p class="muted" style="margin:2px 0 0;font-size:11px">Galaxy, iPhone, OnePlus &amp; more</p>
+          </div>
+        </div>
+      </a>
+      <a [routerLink]="['/products']" [queryParams]="{ q: 'laptop' }" style="text-decoration:none">
+        <div class="card tight" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+          <span style="font-size:30px">💻</span>
+          <div>
+            <strong style="color:#f8fafc;font-size:14px">Laptops</strong>
+            <p class="muted" style="margin:2px 0 0;font-size:11px">MacBook, Dell XPS, Gaming rigs</p>
+          </div>
+        </div>
+      </a>
+      <a [routerLink]="['/products']" [queryParams]="{ q: 'bluetooth' }" style="text-decoration:none">
+        <div class="card tight" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+          <span style="font-size:30px">🎧</span>
+          <div>
+            <strong style="color:#f8fafc;font-size:14px">Bluetooth &amp; Audio</strong>
+            <p class="muted" style="margin:2px 0 0;font-size:11px">Sony, AirPods, JBL &amp; Bose</p>
+          </div>
+        </div>
+      </a>
+      <a [routerLink]="['/products']" [queryParams]="{ q: 'neckband' }" style="text-decoration:none">
+        <div class="card tight" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+          <span style="font-size:30px">📿</span>
+          <div>
+            <strong style="color:#f8fafc;font-size:14px">Wireless Neckbands</strong>
+            <p class="muted" style="margin:2px 0 0;font-size:11px">OnePlus, Realme &amp; boAt</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
     <div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;background:linear-gradient(120deg, rgba(139,92,246,.18), rgba(34,211,238,.07));border-color:rgba(139,92,246,.35)">
       <div>
         <span class="badge violet">✦ AI SHOPPING ASSISTANT</span>

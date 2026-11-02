@@ -28,7 +28,8 @@ public class EsSyncService {
   public void upsert(Product p) {
     try {
       String body = "{\"product_id\":\"" + esc(p.getId()) + "\",\"name\":\"" + esc(p.getName())
-          + "\",\"description\":\"" + esc(p.getDescription()) + "\",\"category\":\"" + esc(p.getCategoryId())
+          + "\",\"description\":\"" + esc(p.getDescription()) + "\",\"brand\":\"" + esc(p.getBrand())
+          + "\",\"category\":\"" + esc(p.getCategoryId())
           + "\",\"price\":" + p.getPrice() + ",\"availability\":" + p.isAvailability() + "}";
       HttpRequest req = HttpRequest.newBuilder()
           .uri(URI.create(esUris + "/products/_doc/" + p.getId()))

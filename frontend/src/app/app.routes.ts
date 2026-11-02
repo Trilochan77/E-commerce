@@ -7,6 +7,7 @@ import { Home } from './features/home';
 import { ProductList } from './features/product-list';
 import { ProductDetail } from './features/product-detail';
 import { Assistant } from './features/assistant';
+import { Compare } from './features/compare';
 import { Cart } from './features/cart';
 import { Checkout } from './features/checkout';
 import { Orders } from './features/orders';
@@ -32,6 +33,7 @@ export const routes: Routes = [
   { path: 'products', component: ProductList },
   { path: 'products/:id', component: ProductDetail },
   { path: 'assistant', component: Assistant },
+  { path: 'compare', component: Compare },
   { path: 'cart', component: Cart, canActivate: [authGuard] },
   { path: 'checkout', component: Checkout, canActivate: [authGuard] },
   { path: 'orders', component: Orders, canActivate: [authGuard] },

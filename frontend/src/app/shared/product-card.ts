@@ -1,8 +1,10 @@
-import { Component, ChangeDetectionStrategy, Input, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Auth } from '../core/auth';
 import { Shop } from '../core/shop';
+import { CompareStore } from '../core/compare';
 import { Toast } from './toast';
 import { ProductVisual } from './product-visual';
 
@@ -21,6 +23,10 @@ import { ProductVisual } from './product-visual';
         </div>
         <button class="wishlist-btn" (click)="toggleWishlist($event)" [class.on]="inWishlist" [title]="inWishlist ? 'Remove from wishlist' : 'Save to wishlist'" aria-label="Toggle wishlist">
           {{ inWishlist ? '❤️' : '🤍' }}
+        </button>
+        <button class="compare-btn" (click)="toggleCompare($event)" [class.on]="inCompare"
+          [title]="inCompare ? 'Remove from comparison' : 'Add to comparison'" [attr.aria-pressed]="inCompare">
+          ⇄ {{ inCompare ? 'Comparing' : 'Compare' }}
         </button>
       </div>
       <div class="product-body">
@@ -43,15 +49,23 @@ import { ProductVisual } from './product-visual';
     </article>
   `
 })
-export class ProductCard implements OnInit {
+export class ProductCard implements OnInit, OnDestroy {
   @Input() product: any;
   inWishlist = false;
+  inCompare = false;
+  private compareSub?: Subscription;
 
-  constructor(public auth: Auth, private shop: Shop, private toast: Toast) {}
+  constructor(public auth: Auth, private shop: Shop, private toast: Toast, private compare: CompareStore) {}
 
   ngOnInit(): void {
     this.checkWishlist();
+    this.inCompare = this.compare.has(this.id());
     this.shop.wishlistChanged.subscribe(() => this.checkWishlist());
+    this.compareSub = this.compare.changed.subscribe((ids) => (this.inCompare = ids.includes(this.id())));
+  }
+
+  ngOnDestroy(): void {
+    this.compareSub?.unsubscribe();
   }
 
   checkWishlist(): void {
@@ -82,6 +96,15 @@ export class ProductCard implements OnInit {
       next: () => this.toast.ok('Added to cart'),
       error: (e) => this.toast.err(e.error?.message || 'Could not add to cart')
     });
+  }
+  toggleCompare(e: Event): void {
+    e.preventDefault();
+    e.stopPropagation();
+    const result = this.compare.toggle(this.id());
+    if (!result.ok) { this.toast.err(result.message || 'Could not update comparison'); return; }
+    this.toast.show(result.added
+      ? 'Added to comparison — open Compare in the menu'
+      : 'Removed from comparison');
   }
   toggleWishlist(e: Event): void {
     e.preventDefault();

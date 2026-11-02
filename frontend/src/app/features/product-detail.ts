@@ -1,9 +1,11 @@
-import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Shop } from '../core/shop';
 import { Auth } from '../core/auth';
+import { CompareStore } from '../core/compare';
 import { ProductCard } from '../shared/product-card';
 import { ProductVisual } from '../shared/product-visual';
 import { Toast } from '../shared/toast';
@@ -37,6 +39,12 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         </div>
         <div class="price-row" style="margin:8px 0"><span class="price" style="font-size:28px">₹{{ product.price | number }}</span><span class="price-note">inclusive of taxes</span></div>
         <p class="muted">{{ product.description }}</p>
+        <div class="row" style="margin:4px 0 8px">
+          <button class="btn-ghost btn-sm" (click)="toggleCompare()" [attr.aria-pressed]="inCompare">
+            ⇄ {{ inCompare ? 'Comparing' : 'Add to compare' }}
+          </button>
+          <a routerLink="/compare" style="font-size:12px;font-weight:600">View comparison →</a>
+        </div>
         <div class="reward-box" *ngIf="product.eligibleForReturn">
           <strong> Easy returns</strong>
           <div class="muted" *ngIf="hasPointsTrack()">≤7 days: 100% money back · after 7d: LIKE_NEW 80% · GOOD 60% · FAIR 40% · POOR 10% → wallet pts</div>
@@ -100,7 +108,7 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
     </div>
   `
 })
-export class ProductDetail implements OnInit {
+export class ProductDetail implements OnInit, OnDestroy {
   product: any = null;
   qty = 1;
   error = '';
@@ -108,18 +116,23 @@ export class ProductDetail implements OnInit {
   adding = false;
   inWishlist = false;
   wishBusy = false;
+  inCompare = false;
   related: any[] = [];
   similar: any[] = [];
   moreInCategory: any[] = [];
   categoryLabelText = '';
   tab: 'desc' | 'returns' | 'reco' = 'desc';
   MULT = MULT;
+  private compareSub?: Subscription;
 
   constructor(private shop: Shop, public auth: Auth,
-    private route: ActivatedRoute, private router: Router, private toast: Toast) {}
+    private route: ActivatedRoute, private router: Router, private toast: Toast,
+    private compare: CompareStore) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') || '';
+    this.inCompare = this.compare.has(id);
+    this.compareSub = this.compare.changed.subscribe((ids) => (this.inCompare = ids.includes(id)));
     this.shop.product(id).subscribe({
       next: (p: any) => {
         this.product = p;
@@ -152,6 +165,10 @@ export class ProductDetail implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.compareSub?.unsubscribe();
+  }
+
   categoryLabel(): string {
     return this.categoryLabelText || this.product?.categoryName || this.product?.categoryId || 'this category';
   }
@@ -179,6 +196,13 @@ export class ProductDetail implements OnInit {
         error: () => { this.wishBusy = false; this.toast.err('Could not save to wishlist'); }
       });
     }
+  }
+
+  toggleCompare(): void {
+    const id = this.product.id || this.product._id;
+    const result = this.compare.toggle(id);
+    if (!result.ok) { this.toast.err(result.message || 'Could not update comparison'); return; }
+    this.toast.show(result.added ? 'Added to comparison' : 'Removed from comparison');
   }
 
   hasPointsTrack(): boolean {

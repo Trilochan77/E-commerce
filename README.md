@@ -18,7 +18,9 @@ An enterprise-grade, microservices-driven e-commerce platform featuring **real-t
 - [System Architecture](#-system-architecture)
 - [Service Communication & Data Flow](#-service-communication--data-flow)
 - [Return & Reward Lifecycle Flow](#-return--reward-lifecycle-flow)
-- [Recommendation Engine Scoring Model](#-recommendation-engine-scoring-model)
+- [Recommendation Engine — Smart Recommendation System](#-recommendation-engine--smart-recommendation-system)
+- [AI Shopping Assistant (Deterministic, Grounded)](#-ai-shopping-assistant-deterministic-grounded)
+- [Product Comparison](#-product-comparison)
 - [Repository Structure](#-repository-structure)
 - [Microservices Catalog & Port Allocation](#-microservices-catalog--port-allocation)
 - [Key Business Rules & Formulas](#-key-business-rules--formulas)
@@ -247,6 +249,48 @@ Content-Type: application/json
 Response: `reply`, `intent`, `products[]` (cards), `compare[]` (side-by-side fields), `followUps[]`, `grounded: true`, `strategy: "rules+retrieval"`.
 
 UI: `/assistant` (navbar **✦ Ask AI**) with chat bubbles, product cards, a comparison table, follow-up chips and add-to-cart.
+
+---
+
+## 🆚 Product Comparison
+
+Users can compare **2–4 products side by side**. Selection is stored in `localStorage` (`ecom_compare`), so it survives navigation and refresh, and the navbar shows a live count.
+
+### What is compared
+
+| Row | Source |
+|---|---|
+| Price | Stored `price` |
+| Rating | Stored `averageRating` + `reviewCount` (shows "No ratings yet" when `reviewCount = 0`) |
+| Brand | Stored `brand` — **"Not specified"** when absent, never guessed |
+| Category | Category name resolved from the categories collection |
+| Availability / stock | Stored `availability` + `stockQuantity` |
+| Return policy | Stored `eligibleForReturn` |
+| Specifications | Comma-separated stored `description` fragments that contain a number (`"Bluetooth 5.3"`, `"16GB RAM"`, `"40h battery"`) |
+| Features | Remaining stored `description` fragments (`"ANC"`, `"USB-C"`, `"compact body"`) |
+
+### Difference highlighting
+
+- Any row whose normalized values differ is tinted and tagged **differs**.
+- In those rows, a value that appears in only one product is highlighted as **unique** (spec/feature chips are compared individually).
+- Best price and top-rated columns get green badges; out-of-stock products are flagged.
+- A **Show only differences** toggle collapses the table to differing rows.
+
+### API
+
+```http
+GET /api/products/compare?ids=P-1001,P-1003,P-1005
+```
+
+Returns the stored product fields plus derived `specifications[]` and `features[]`, `minProducts: 2`, `maxProducts: 4`, `unknownIds[]` and `readyToCompare`.
+
+### UI
+
+- `/compare` — sticky attribute column, horizontally scrollable product columns, per-product **Add to cart**, remove buttons and a searchable product picker.
+- Every product card has a **⇄ Compare** toggle; the product page has **Add to compare**.
+- Adding to cart from the comparison page uses the existing cart service and respects stock; guests are sent to login.
+
+**Honesty note:** the catalogue stores no structured specification table, so specifications/features are a transparent split of the stored description text. Missing brands are reported as "Not specified" instead of being fabricated.
 
 ---
 

@@ -4,6 +4,7 @@ import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Auth } from './core/auth';
 import { Shop } from './core/shop';
+import { CompareStore } from './core/compare';
 import { Toast } from './shared/toast';
 import { filter } from 'rxjs';
 
@@ -29,6 +30,7 @@ import { filter } from 'rxjs';
         <div class="nav-actions">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link hide-m">Home</a>
           <a routerLink="/products" routerLinkActive="active" class="nav-link hide-m">Shop</a>
+          <a routerLink="/compare" routerLinkActive="active" class="nav-link hide-m">⇄ Compare<span class="nav-count" *ngIf="compareCount>0">{{ compareCount }}</span></a>
           <a routerLink="/assistant" routerLinkActive="active" class="nav-link hide-m">✦ Ask AI</a>
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Returns</a>
@@ -74,6 +76,7 @@ import { filter } from 'rxjs';
         <nav>
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
           <a routerLink="/products" routerLinkActive="active">Shop all</a>
+          <a routerLink="/compare" routerLinkActive="active">⇄ Compare ({{ compareCount }})</a>
           <a routerLink="/assistant" routerLinkActive="active">✦ Ask AI Assistant</a>
           <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Cart ({{ cartCount }})</a>
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active">❤️ Wishlist ({{ wishlistCount }})</a>
@@ -98,6 +101,7 @@ import { filter } from 'rxjs';
         <div>
           <h4>Shop</h4>
           <a routerLink="/products">All products</a>
+          <a routerLink="/compare">Compare products</a>
           <a routerLink="/assistant">✦ Ask AI assistant</a>
           <a routerLink="/cart">Cart</a>
           <a routerLink="/orders">Track orders</a>
@@ -125,12 +129,16 @@ export class App {
   acctOpen = false;
   cartCount = 0;
   wishlistCount = 0;
+  compareCount = 0;
   walletBal: number | null = null;
   toasts: any[] = [];
   isAdminPage = false;
 
-  constructor(public auth: Auth, private shop: Shop, private router: Router, private toast: Toast) {
+  constructor(public auth: Auth, private shop: Shop, private router: Router, private toast: Toast,
+    private compare: CompareStore) {
     this.toast.toasts$.subscribe((t) => (this.toasts = t));
+    this.compareCount = this.compare.count();
+    this.compare.changed.subscribe((ids) => (this.compareCount = ids.length));
     this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((e: any) => {
       this.menuOpen = false;
       this.acctOpen = false;
