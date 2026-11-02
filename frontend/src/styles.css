@@ -2691,6 +2691,50 @@ th {
   border-color: transparent;
 }
 
+/* ------------------------------------------------ custom scrollbar & micro-interactions */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(6, 9, 20, 0.65);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 255, 0.22);
+  border-radius: 999px;
+  transition: background .2s ease;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.55);
+}
+
+/* smooth button & link interactions */
+button, a {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .rail {
+    grid-auto-columns: minmax(165px, 200px);
+    gap: 10px;
+  }
+  .announce-bar {
+    font-size: 10.5px;
+    padding: 4px 8px;
+  }
+  .ticker-sep {
+    display: none;
+  }
+  .card {
+    padding: 12px;
+    border-radius: 14px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

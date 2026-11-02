@@ -1,46 +1,80 @@
-import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 const CATEGORY_STYLE: Record<string, { label: string; short: string; hue: number }> = {
-  'C-01': { label: 'Electronics', short: 'E', hue: 220 },
-  'C-02': { label: 'Fashion', short: 'F', hue: 300 },
-  'C-03': { label: 'Home & Kitchen', short: 'H', hue: 150 },
-  'C-04': { label: 'Books', short: 'B', hue: 35 },
-  'C-05': { label: 'Sports', short: 'S', hue: 130 }
+  'C-01': { label: 'Electronics', short: '⚡', hue: 220 },
+  'C-02': { label: 'Fashion', short: '✨', hue: 300 },
+  'C-03': { label: 'Home & Kitchen', short: '🏠', hue: 150 },
+  'C-04': { label: 'Books', short: '📖', hue: 35 },
+  'C-05': { label: 'Sports', short: '🏆', hue: 130 }
 };
 
 /**
- * Product visual: shows the product photo when the admin attached one
- * (images[0] as URL or uploaded data-URL), otherwise falls back to a
- * category initial + type label on a tinted tile. No stock photos.
+ * Product visual: shows the product photo when available.
+ * If image fails or is missing, gracefully falls back to a sleek dark-mode
+ * neon-tinted tile with category monogram so there are never any broken images.
  */
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-product-visual',
   imports: [CommonModule],
   template: `
-    <div class="pvisual pvisual-photo" [ngClass]="size" *ngIf="photo(); else tile">
-      <img [src]="photo()" [alt]="alt()">
+    <div class="pvisual pvisual-photo" [ngClass]="size" *ngIf="photo() && !imgFailed; else tile">
+      <img [src]="photo()" [alt]="alt()" (error)="onImgError()" loading="lazy">
     </div>
     <ng-template #tile>
-      <div class="pvisual" [ngClass]="size" [style.background]="bg()" [style.border-color]="border()" [attr.aria-label]="label()">
+      <div class="pvisual tile-fallback" [ngClass]="size" [style.background]="bg()" [style.border-color]="border()" [attr.aria-label]="label()">
         <span class="pv-letter" [style.color]="ink()">{{ short() }}</span>
-        <span class="pv-type">{{ label() }}</span>
+        <span class="pv-type" [style.color]="ink()">{{ label() }}</span>
       </div>
     </ng-template>
-  `
+  `,
+  styles: [`
+    .tile-fallback {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      backdrop-filter: blur(10px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .tile-fallback .pv-letter {
+      font-weight: 800;
+      line-height: 1;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+    }
+    .tile-fallback .pv-type {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+  `]
 })
-export class ProductVisual {
+export class ProductVisual implements OnChanges {
   @Input() product: any = null;
   @Input() categoryId = '';
   @Input() categoryName = '';
   @Input() size: 'xs' | 'sm' | 'md' | 'lg' = 'md';
 
-  /** First admin-attached photo (URL or uploaded data-URL), else null. */
+  imgFailed = false;
+
+  ngOnChanges(): void {
+    this.imgFailed = false;
+  }
+
+  onImgError(): void {
+    this.imgFailed = true;
+  }
+
+  /** First photo (URL or data-URL), else null. */
   photo(): string | null {
+    if (this.imgFailed) return null;
     const cands = [
-      this.product?.images?.[0],
       this.product?.image,
+      this.product?.images?.[0],
       this.product?.imageUrl
     ];
     for (const c of cands) {
@@ -80,7 +114,7 @@ export class ProductVisual {
   label(): string {
     const k = this.known();
     if (k) return k.label;
-    return (this.product?.categoryName || this.product?.categoryId || this.categoryName || 'General').toString();
+    return (this.product?.categoryName || this.product?.categoryId || this.categoryName || 'Flagship').toString();
   }
 
   private hue(): number {
@@ -93,14 +127,14 @@ export class ProductVisual {
   }
 
   bg(): string {
-    return `linear-gradient(135deg, hsl(${this.hue()} 60% 92%), hsl(${this.hue()} 55% 82%))`;
+    return `radial-gradient(circle at 35% 30%, hsl(${this.hue()} 45% 18%), hsl(${this.hue()} 40% 8%))`;
   }
 
   border(): string {
-    return `hsl(${this.hue()} 40% 70%)`;
+    return `hsl(${this.hue()} 45% 26%)`;
   }
 
   ink(): string {
-    return `hsl(${this.hue()} 60% 28%)`;
+    return `hsl(${this.hue()} 80% 75%)`;
   }
 }
