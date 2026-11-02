@@ -6,6 +6,32 @@ spring:
     name: wishlist-service
   mongodb:
     uri: ${SPRING_MONGODB_URI:mongodb://localhost:27017/ecom}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+ecom:
+  notifications:
+    scan:
+      enabled: ${NOTIFICATIONS_SCAN_ENABLED:true}
+      interval-ms: ${NOTIFICATIONS_SCAN_INTERVAL_MS:60000}
+      initial-delay-ms: ${NOTIFICATIONS_SCAN_INITIAL_DELAY_MS:15000}
+    email:
+      # Email is only attempted when this flag is on AND SMTP credentials are set.
+      enabled: ${NOTIFICATIONS_EMAIL_ENABLED:false}
+      from: ${NOTIFICATIONS_EMAIL_FROM:}
+      shop-url: ${SHOP_URL:http://localhost:4200}
 
 eureka:
   instance:
@@ -16,6 +42,10 @@ eureka:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
 
 management:
+  health:
+    mail:
+      # Optional email must not make the service unhealthy when SMTP is unreachable.
+      enabled: false
   endpoints:
     web:
       exposure:

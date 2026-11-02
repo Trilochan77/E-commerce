@@ -43,7 +43,7 @@ spring:
               uri: lb://wishlist-service
               order: 6
               predicates:
-                - Path=/api/wishlist, /api/wishlist/**
+                - Path=/api/wishlist, /api/wishlist/**, /api/notifications, /api/notifications/**
             - id: order-service
               uri: lb://order-service
               order: 7

@@ -35,6 +35,11 @@ import { filter } from 'rxjs';
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" class="wallet-pill" title="Reward wallet">{{ walletBal ?? 0 }} pts</a>
+          <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Price drop alerts" title="Price drop alerts">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span class="hide-m">Alerts</span>
+            <span class="cart-count" *ngIf="notificationCount>0">{{ notificationCount }}</span>
+          </a>
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Wishlist" title="View Wishlist">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
             <span class="hide-m">Wishlist</span>
@@ -56,6 +61,7 @@ import { filter } from 'rxjs';
               <a routerLink="/profile" (click)="acctOpen=false">Profile</a>
               <a routerLink="/wallet" (click)="acctOpen=false">Wallet</a>
               <a routerLink="/wishlist" (click)="acctOpen=false">Wishlist</a>
+              <a routerLink="/notifications" (click)="acctOpen=false">Price alerts</a>
               <a routerLink="/admin" *ngIf="auth.isAdmin()" (click)="acctOpen=false">Admin</a>
               <button (click)="logout()">Log out</button>
             </div>
@@ -80,6 +86,7 @@ import { filter } from 'rxjs';
           <a routerLink="/assistant" routerLinkActive="active">✦ Ask AI Assistant</a>
           <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Cart ({{ cartCount }})</a>
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active">❤️ Wishlist ({{ wishlistCount }})</a>
+          <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active">🔔 Price alerts ({{ notificationCount }})</a>
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Wallet ({{ walletBal ?? 0 }} pts)</a>
@@ -110,6 +117,7 @@ import { filter } from 'rxjs';
         <div>
           <h4>Account</h4>
           <a routerLink="/wallet">Reward wallet</a>
+          <a routerLink="/notifications">Price alerts</a>
           <a routerLink="/profile">Profile</a>
           <a routerLink="/login">Login</a>
           <a routerLink="/admin" *ngIf="auth.isAdmin()">Admin</a>
@@ -129,6 +137,8 @@ export class App {
   acctOpen = false;
   cartCount = 0;
   wishlistCount = 0;
+  notificationCount = 0;
+  private notificationBaselineLoaded = false;
   compareCount = 0;
   walletBal: number | null = null;
   toasts: any[] = [];
@@ -148,11 +158,14 @@ export class App {
     this.isAdminPage = this.router.url.split('?')[0].startsWith('/admin');
     this.shop.cartChanged.subscribe(() => this.refreshBadges());
     this.shop.wishlistChanged.subscribe(() => this.refreshBadges());
+    this.shop.notificationsChanged.subscribe(() => this.refreshNotificationCount());
   }
 
   ngOnInit(): void {
     this.refreshBadges();
     this.ensureNameStored();
+    // Keep the alert badge fresh even when the user leaves the notifications page open.
+    setInterval(() => { if (this.auth.isLoggedIn()) this.refreshNotificationCount(); }, 30000);
   }
 
   /** Backfill ecom_name for sessions created before the name field was added. */
@@ -171,6 +184,8 @@ export class App {
     if (!this.auth.isLoggedIn()) {
       this.cartCount = 0;
       this.wishlistCount = 0;
+      this.notificationCount = 0;
+      this.notificationBaselineLoaded = false;
       this.walletBal = null;
       return;
     }
@@ -181,10 +196,31 @@ export class App {
       }, error: () => undefined
     });
     this.shop.wishlist(uid).subscribe({ next: (w: any) => { this.wishlistCount = (w?.items || []).length; }, error: () => { this.wishlistCount = 0; } });
+    this.refreshNotificationCount();
     this.shop.wallet(uid).subscribe({
       next: (w: any) => {
         this.walletBal = w.balance ?? w.pointBalance ?? 0;
       }, error: () => (this.walletBal = null)
+    });
+  }
+
+  /** Refresh the navbar alert badge; also surfaces a toast when new drops arrive. */
+  refreshNotificationCount(): void {
+    if (!this.auth.isLoggedIn()) {
+      this.notificationCount = 0;
+      this.notificationBaselineLoaded = false;
+      return;
+    }
+    this.shop.notificationUnreadCount(this.auth.userId()).subscribe({
+      next: (r: any) => {
+        const nextCount = +r?.unread || 0;
+        if (this.notificationBaselineLoaded && nextCount > this.notificationCount) {
+          this.toast.ok(`🔥 ${nextCount - this.notificationCount} new price drop alert${nextCount - this.notificationCount === 1 ? '' : 's'} on your wishlist`);
+        }
+        this.notificationCount = nextCount;
+        this.notificationBaselineLoaded = true;
+      },
+      error: () => undefined
     });
   }
 

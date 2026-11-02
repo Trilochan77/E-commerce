@@ -21,6 +21,7 @@ An enterprise-grade, microservices-driven e-commerce platform featuring **real-t
 - [Recommendation Engine — Smart Recommendation System](#-recommendation-engine--smart-recommendation-system)
 - [AI Shopping Assistant (Deterministic, Grounded)](#-ai-shopping-assistant-deterministic-grounded)
 - [Product Comparison](#-product-comparison)
+- [Price Drop Notifications](#-price-drop-notifications)
 - [Repository Structure](#-repository-structure)
 - [Microservices Catalog & Port Allocation](#-microservices-catalog--port-allocation)
 - [Key Business Rules & Formulas](#-key-business-rules--formulas)
@@ -294,6 +295,73 @@ Returns the stored product fields plus derived `specifications[]` and `features[
 
 ---
 
+## 🔔 Price Drop Notifications
+
+Wishlist-service tracks the **catalog price** of every wishlisted product and records a notification whenever the price decreases.
+
+### How tracking works
+
+- Each wishlist item stores `priceAtAdd` plus a tracker baseline, `lastKnownPrice`, and `lastCheckedAt`.
+- A scheduled scan (every 60 seconds by default) reads the shared `products` collection and compares stored `price` values. Product data is never invented.
+- If the current price is **lower** than the baseline, a notification is written with `previousPrice`, `currentPrice` and `savings`; the baseline then advances.
+- If the price **rises**, the baseline advances silently — no notification is sent for increases.
+- `POST /api/notifications/{userId}/scan` runs the same comparison on demand (the **Check prices now** button).
+
+### In-app notifications
+
+- Navbar bell with an unread badge, refreshed after scans/reads and polled every 30 seconds.
+- `/notifications` lists each drop with the product, previous price, current price, savings amount/percent, detection time and read state.
+- Actions: mark one read, mark all read, clear alerts, and open the product page.
+
+### Optional email
+
+Email is **off by default**. It is only attempted when `NOTIFICATIONS_EMAIL_ENABLED=true` **and** SMTP credentials are configured. Every notification records an honest `emailStatus`:
+
+| Status | Meaning |
+|---|---|
+| `DISABLED` | Email flag is off; no email attempted |
+| `NOT_CONFIGURED` | Flag is on but SMTP host/username/password is missing |
+| `SENT` | SMTP accepted the message |
+| `FAILED` | SMTP send threw an error (logged) |
+
+The email contains the stored product name and the same previous/current prices shown in the app.
+
+### API
+
+```http
+GET    /api/notifications/{userId}?unreadOnly=false
+GET    /api/notifications/{userId}/unread-count
+PUT    /api/notifications/{userId}/{notificationId}/read
+PUT    /api/notifications/{userId}/read-all
+DELETE /api/notifications/{userId}
+POST   /api/notifications/{userId}/scan
+```
+
+### Configuration
+
+```yaml
+ecom:
+  notifications:
+    scan:
+      enabled: true
+      interval-ms: 60000
+      initial-delay-ms: 15000
+    email:
+      enabled: false            # NOTIFICATIONS_EMAIL_ENABLED
+      from: ""                  # NOTIFICATIONS_EMAIL_FROM
+      shop-url: http://localhost:4200
+spring:
+  mail:
+    host: smtp.gmail.com        # MAIL_HOST
+    port: 587                   # MAIL_PORT
+    username: ""                # MAIL_USERNAME
+    password: ""                # MAIL_PASSWORD
+```
+
+**Honesty note:** in-app alerts are always real records derived from stored catalog prices. The UI never shows a "sent" email unless SMTP actually accepted it; with the default configuration it shows **Email alerts off**.
+
+---
+
 ## 📁 Repository Structure
 
 ```
@@ -341,6 +409,7 @@ Returns the stored product fields plus derived `specifications[]` and `features[
 | **Recommendation Service** | `8084` | MongoDB (`user_activities`) | Aggregates VIEW/SEARCH/PURCHASE events, computes weighted affinity scores |
 | **Cart Service** | `8085` | MongoDB (`carts`) | Real-time cart synchronization, stock availability checks, points deduction preview |
 | **Order Service** | `8086` | MongoDB (`orders`) | Checkout orchestration, payment simulation, stock decrement, purchase events |
+| **Wishlist Service** | `8088` | MongoDB (`wishlists`, `price_drop_notifications`) | Wishlist CRUD, catalog price tracking, in-app alerts, optional price-drop email |
 | **Return & Reward Service** | `8087` | MongoDB (`returns`, `wallets`, `tx`) | Return eligibility verification, admin condition grading, reward wallet ledger |
 | **Eureka Server** | `8761` | In-Memory Registry | Centralized service discovery and instance health monitoring |
 | **MongoDB** | `27017` | Persistent Volume | Primary document store for operational collections |
@@ -389,6 +458,7 @@ All external requests pass through `http://localhost:8080`:
 | `/api/recommendations/**` | `recommendation-service:8084` | Contextual (Public / User ID) |
 | `/api/assistant/**` | `recommendation-service:8084` | Public (optional `userId` for personalization) |
 | `/api/cart/**` | `cart-service:8085` | Authenticated (JWT) |
+| `/api/wishlist/**`, `/api/notifications/**` | `wishlist-service:8088` | Authenticated (JWT) |
 | `/api/orders/**` | `order-service:8086` | Authenticated (JWT) |
 | `/api/returns/**` | `return-reward-service:8087` | Customer (Own) / `ADMIN` (Evaluate) |
 | `/api/wallet/**`, `/api/rewards/**` | `return-reward-service:8087` | Authenticated (JWT) |
@@ -426,6 +496,17 @@ $env:JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"
 
 # Linux / macOS Bash
 export JWT_SECRET="ecom-secure-secret-key-production-min-32-chars"
+```
+
+Optional price-drop email (leave unset to keep email disabled; in-app alerts still work):
+
+```powershell
+$env:NOTIFICATIONS_EMAIL_ENABLED="true"
+$env:MAIL_HOST="smtp.gmail.com"
+$env:MAIL_PORT="587"
+$env:MAIL_USERNAME="your-smtp-user"
+$env:MAIL_PASSWORD="your-smtp-password"
+# Optional: $env:NOTIFICATIONS_EMAIL_FROM="alerts@yourdomain.com"
 ```
 
 ### 3. Start Infrastructure

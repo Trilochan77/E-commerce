@@ -66,7 +66,7 @@ import { ProductVisual } from '../shared/product-visual';
       <div class="page-head">
         <div>
           <h1>❤️ Wishlist</h1>
-          <p>Saved items with real-time stock availability and price drop alerts.</p>
+          <p>Saved items with live stock availability. Price drops are tracked automatically and saved to your alerts.</p>
         </div>
         <div class="row" style="margin:0">
           <button *ngIf="items.length && inStockItems().length" class="primary btn-sm" (click)="moveAllToCart()" [disabled]="movingAll">
@@ -75,6 +75,7 @@ import { ProductVisual } from '../shared/product-visual';
           <button *ngIf="items.length" class="btn-ghost btn-sm" (click)="clearWishlist()" [disabled]="clearing">
             {{ clearing ? 'Clearing…' : 'Clear Wishlist' }}
           </button>
+          <a routerLink="/notifications"><button class="btn-ghost btn-sm">🔔 Price Alerts</button></a>
           <a routerLink="/products"><button class="btn-ghost btn-sm">Continue Shopping</button></a>
         </div>
       </div>
@@ -84,7 +85,7 @@ import { ProductVisual } from '../shared/product-visual';
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:24px">🎉</span>
           <div>
-            <strong style="font-size:15px">Price Drop Alert! {{ priceDropItems().length }} product{{ priceDropItems().length === 1 ? '' : 's' }} are now cheaper!</strong>
+            <strong style="font-size:15px">Price Drop Alert! {{ priceDropItems().length }} product{{ priceDropItems().length === 1 ? '' : 's' }} {{ priceDropItems().length === 1 ? 'is' : 'are' }} now cheaper!</strong>
             <p style="margin:2px 0 0;font-size:13px">You save a total of <strong>₹{{ totalSavings() | number }}</strong> if you buy now.</p>
           </div>
         </div>
@@ -92,6 +93,7 @@ import { ProductVisual } from '../shared/product-visual';
           <button class="primary btn-sm" style="background:#059669" (click)="filter = 'DROPPED'">
             View Cheaper Items ({{ priceDropItems().length }})
           </button>
+          <a routerLink="/notifications"><button class="btn-ghost btn-sm">🔔 View Alerts</button></a>
         </div>
       </div>
 
@@ -213,11 +215,14 @@ import { ProductVisual } from '../shared/product-visual';
               </button>
             </div>
 
-            <!-- Interactive Demo Tool: Simulate Price Drop for quick testing -->
-            <div style="margin-top:8px;padding-top:6px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;align-items:center">
-              <span class="muted" style="font-size:10px">Saved at: ₹{{ w.priceAtAdd | number }}</span>
-              <button class="demo-pill" (click)="simulatePriceDrop(w)" title="Simulate a price drop to test notification and badges">
-                {{ priceDropped(w) ? '↻ Reset Price' : '⚡ Simulate ₹500 Drop' }}
+            <!-- Interactive: compare wishlist prices with the live catalog now -->
+            <div style="margin-top:8px;padding-top:6px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <span class="muted" style="font-size:10px">
+                Saved at: ₹{{ w.priceAtAdd | number }}
+                <ng-container *ngIf="w.lastCheckedAt"> · checked {{ w.lastCheckedAt | date:'shortTime' }}</ng-container>
+              </span>
+              <button class="demo-pill" (click)="checkPrices()" [disabled]="checkingPrices" title="Compare every wishlist item with the current catalog price">
+                {{ checkingPrices ? 'Checking…' : '↻ Check price' }}
               </button>
             </div>
           </div>
@@ -233,6 +238,7 @@ export class Wishlist implements OnInit {
   movingAll = false;
   removing = '';
   clearing = false;
+  checkingPrices = false;
   error = '';
   filter: 'ALL' | 'DROPPED' | 'INSTOCK' | 'OUTOFSTOCK' = 'ALL';
   sortBy: 'NEWEST' | 'SAVINGS' | 'PRICE_LOW' | 'PRICE_HIGH' = 'NEWEST';
@@ -268,6 +274,8 @@ export class Wishlist implements OnInit {
         this.items = rawItems.map((i: any) => ({
           productId: i.productId,
           priceAtAdd: i.priceAtAdd || 0,
+          lastKnownPrice: i.lastKnownPrice ?? null,
+          lastCheckedAt: i.lastCheckedAt || null,
           addedAt: i.addedAt,
           product: null
         }));
@@ -447,19 +455,24 @@ export class Wishlist implements OnInit {
     });
   }
 
-  simulatePriceDrop(w: any): void {
-    const curPrice = w.product?.price || 1000;
-    const newPriceAtAdd = this.priceDropped(w) ? curPrice : curPrice + 500;
-    this.shop.wishlistUpdatePrice(this.auth.userId(), w.productId, newPriceAtAdd).subscribe({
-      next: () => {
-        w.priceAtAdd = newPriceAtAdd;
-        if (newPriceAtAdd > curPrice) {
-          this.toast.ok(`🔥 Price Drop detected! ${w.product?.name || 'Item'} is now ₹500 cheaper!`);
+  checkPrices(): void {
+    if (this.checkingPrices) return;
+    this.checkingPrices = true;
+    this.shop.notificationsScan(this.auth.userId()).subscribe({
+      next: (r: any) => {
+        this.checkingPrices = false;
+        const created = r?.notificationsCreated ?? 0;
+        if (created > 0) {
+          this.toast.ok(`🔥 ${created} new price drop${created === 1 ? '' : 's'} found — see Price Alerts`);
         } else {
-          this.toast.show(`Price reference reset to ₹${curPrice}`);
+          this.toast.show('Prices checked — no new drops');
         }
+        this.loadSilently();
       },
-      error: () => this.toast.err('Could not update price reference')
+      error: () => {
+        this.checkingPrices = false;
+        this.toast.err('Could not check prices right now');
+      }
     });
   }
 }

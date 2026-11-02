@@ -38,6 +38,8 @@ public class WishlistService {
       Wishlist.WishlistItem item = new Wishlist.WishlistItem();
       item.setProductId(req.productId());
       item.setPriceAtAdd(req.priceAtAdd() == null ? 0 : req.priceAtAdd());
+      item.setLastKnownPrice(req.priceAtAdd() == null ? null : req.priceAtAdd());
+      item.setLastCheckedAt(Instant.now());
       item.setAddedAt(Instant.now());
       w.getItems().add(item);
       w.setUpdatedAt(Instant.now());
@@ -65,7 +67,12 @@ public class WishlistService {
     w.getItems().stream()
         .filter(i -> i.getProductId().equals(productId))
         .findFirst()
-        .ifPresent(i -> i.setPriceAtAdd(newPriceAtAdd));
+        .ifPresent(i -> {
+          i.setPriceAtAdd(newPriceAtAdd);
+          // Re-baseline tracking too, otherwise a manual reference change would look like a price drop.
+          if (newPriceAtAdd > 0) i.setLastKnownPrice(newPriceAtAdd);
+          i.setLastCheckedAt(Instant.now());
+        });
     w.setUpdatedAt(Instant.now());
     return repo.save(w);
   }

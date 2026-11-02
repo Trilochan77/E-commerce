@@ -26,12 +26,19 @@ public class Wishlist {
   public static class WishlistItem {
     private String productId;
     private double priceAtAdd;
+    /** Most recent catalog price observed by the tracker; null on items saved before tracking. */
+    private Double lastKnownPrice;
+    private Instant lastCheckedAt;
     private Instant addedAt = Instant.now();
 
     public String getProductId() { return productId; }
     public void setProductId(String productId) { this.productId = productId; }
     public double getPriceAtAdd() { return priceAtAdd; }
     public void setPriceAtAdd(double priceAtAdd) { this.priceAtAdd = priceAtAdd; }
+    public Double getLastKnownPrice() { return lastKnownPrice; }
+    public void setLastKnownPrice(Double lastKnownPrice) { this.lastKnownPrice = lastKnownPrice; }
+    public Instant getLastCheckedAt() { return lastCheckedAt; }
+    public void setLastCheckedAt(Instant lastCheckedAt) { this.lastCheckedAt = lastCheckedAt; }
     public Instant getAddedAt() { return addedAt; }
     public void setAddedAt(Instant addedAt) { this.addedAt = addedAt; }
   }

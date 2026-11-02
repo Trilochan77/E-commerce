@@ -10,6 +10,8 @@ export class Shop {
   readonly cartChanged = new Subject<void>();
   /** Emits after every wishlist mutation so navbar badges and product cards update instantly. */
   readonly wishlistChanged = new Subject<void>();
+  /** Emits after notification reads/scans so the navbar unread badge refreshes. */
+  readonly notificationsChanged = new Subject<void>();
   constructor(private http: HttpClient) {}
 
   private adminHeaders(): HttpHeaders {
@@ -136,6 +138,39 @@ export class Shop {
 
   wishlistContains(userId: string, productId: string): Observable<any> {
     return this.http.get(`${GATEWAY}/api/wishlist/${userId}/contains/${productId}`);
+  }
+
+  /* ---- price-drop notifications ---- */
+  notifications(userId: string, unreadOnly = false): Observable<any> {
+    const url = unreadOnly
+      ? `${GATEWAY}/api/notifications/${userId}?unreadOnly=true`
+      : `${GATEWAY}/api/notifications/${userId}`;
+    return this.http.get(url);
+  }
+
+  notificationUnreadCount(userId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/notifications/${userId}/unread-count`);
+  }
+
+  notificationRead(userId: string, notificationId: string): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/notifications/${userId}/${notificationId}/read`, {})
+      .pipe(tap(() => this.notificationsChanged.next()));
+  }
+
+  notificationsReadAll(userId: string): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/notifications/${userId}/read-all`, {})
+      .pipe(tap(() => this.notificationsChanged.next()));
+  }
+
+  notificationsClear(userId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/notifications/${userId}`)
+      .pipe(tap(() => this.notificationsChanged.next()));
+  }
+
+  /** Compare wishlist prices against the catalog now (also runs automatically every minute). */
+  notificationsScan(userId: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/notifications/${userId}/scan`, {})
+      .pipe(tap(() => this.notificationsChanged.next()));
   }
 
   checkout(userId: string, paymentMethod: string, pointsToUse: number, addressId = '', shippingAddress: any = null): Observable<any> {
