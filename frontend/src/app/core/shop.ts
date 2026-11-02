@@ -171,8 +171,17 @@ export class Shop {
       .pipe(tap(() => this.cartChanged.next()));
   }
 
+  cartUpdate(userId: string, productId: string, quantity: number): Observable<any> {
+    return this.cartQty(userId, productId, quantity);
+  }
+
   cartRemove(userId: string, productId: string): Observable<any> {
     return this.http.delete(`${GATEWAY}/api/cart/${userId}/items/${productId}`)
+      .pipe(tap(() => this.cartChanged.next()));
+  }
+
+  cartClear(userId: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/cart/${userId}`)
       .pipe(tap(() => this.cartChanged.next()));
   }
 

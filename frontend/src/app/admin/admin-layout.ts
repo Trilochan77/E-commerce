@@ -2,29 +2,30 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Auth } from '../core/auth';
+import { AppLogo } from '../shared/app-logo';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-admin-layout',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AppLogo],
   template: `
     <div class="admin-shell">
       <aside class="admin-side">
-        <a routerLink="/admin" class="admin-brand">
-          <span class="brand-mark">N</span>
-          <span>Admin Console<small>NextGen Shop</small></span>
-        </a>
+        <div style="padding:4px 6px 14px 6px">
+          <app-logo size="sm" link="/admin"></app-logo>
+          <div class="muted" style="font-size:10.5px;letter-spacing:0.08em;margin-top:6px;font-weight:700">ADMIN COCKPIT</div>
+        </div>
         <nav class="admin-nav" aria-label="Admin">
-          <a routerLink="/admin/dashboard" routerLinkActive="active">Dashboard</a>
-          <a routerLink="/admin/products" routerLinkActive="active">Products</a>
-          <a routerLink="/admin/categories" routerLinkActive="active">Categories</a>
-          <a routerLink="/admin/orders" routerLinkActive="active">Orders</a>
-          <a routerLink="/admin/returns" routerLinkActive="active">Returns</a>
-          <a routerLink="/admin/users" routerLinkActive="active">Users</a>
+          <a routerLink="/admin/dashboard" routerLinkActive="active">📊 Overview</a>
+          <a routerLink="/admin/products" routerLinkActive="active">📦 Product Catalog</a>
+          <a routerLink="/admin/categories" routerLinkActive="active">🏷️ Categories</a>
+          <a routerLink="/admin/orders" routerLinkActive="active">🛍️ Orders &amp; Logistics</a>
+          <a routerLink="/admin/returns" routerLinkActive="active">🔄 Return Inspections</a>
+          <a routerLink="/admin/users" routerLinkActive="active">👥 User Accounts</a>
         </nav>
         <div class="admin-side-foot">
-          <a routerLink="/">Back to shop</a>
-          <button class="btn-ghost btn-sm" (click)="logout()">Logout</button>
+          <a routerLink="/" style="color:var(--brand-3);font-weight:600">← Back to Store</a>
+          <button class="btn-ghost btn-sm" (click)="logout()">Sign out</button>
         </div>
       </aside>
       <div class="admin-main">
@@ -33,7 +34,7 @@ import { Auth } from '../core/auth';
             <div class="breadcrumb">Admin / {{ section() }}</div>
             <strong>{{ email() }}</strong>
           </div>
-          <span class="badge violet">ADMIN</span>
+          <span class="badge violet">ADMIN CLEARANCE</span>
         </header>
         <div class="admin-content">
           <router-outlet></router-outlet>

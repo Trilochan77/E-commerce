@@ -6,27 +6,40 @@ import { Auth } from './core/auth';
 import { Shop } from './core/shop';
 import { CompareStore } from './core/compare';
 import { Toast } from './shared/toast';
+import { AppLogo } from './shared/app-logo';
 import { filter } from 'rxjs';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-root',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, AppLogo],
   template: `
     <header class="topbar" *ngIf="!isAdminPage">
-      <div class="announce">Free delivery over Rs.999 &nbsp;·&nbsp; 7-day full refunds &nbsp;·&nbsp; <strong>Reward points on Electronics & Mixer Grinder</strong></div>
+      <!-- Announcement Banner -->
+      <div class="announce-bar">
+        <div class="announce-ticker">
+          <span class="ticker-item"><span class="dot-live"></span> ⚡ Free Express Delivery on orders over ₹999</span>
+          <span class="ticker-sep">·</span>
+          <span class="ticker-item">🛡️ 7-Day Hassle-Free Returns &amp; Instant Wallet Cashback</span>
+          <span class="ticker-sep">·</span>
+          <span class="ticker-item"><a routerLink="/spin" style="color:#f472b6;font-weight:700">🎡 Spin &amp; Win up to 30% Off Today</a></span>
+        </div>
+      </div>
+
       <div class="topbar-inner">
-        <a routerLink="/" class="brand" aria-label="NextGen Shop home">
-          <span class="brand-mark">N</span>
-          <span>NextGen Shop<small>Value shopping, honest returns</small></span>
-        </a>
+        <!-- Professional Brand Logo -->
+        <app-logo size="md" link="/"></app-logo>
+
+        <!-- Search Bar with Live Suggestions & Voice Search -->
         <form class="nav-search" (ngSubmit)="goSearch()" role="search" style="position:relative">
           <div class="search-box" style="width:100%">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.6">
+              <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+            </svg>
             <input
               [(ngModel)]="q"
               name="q"
-              placeholder="Search products, brands, categories…"
+              placeholder="Search flagship tech, brands, audio…"
               aria-label="Search products"
               (input)="onNavSearchInput()"
               (focus)="showSuggestions = navSuggestions.length > 0"
@@ -50,7 +63,7 @@ import { filter } from 'rxjs';
             <button type="submit">Search</button>
           </div>
 
-          <!-- Topbar Search Suggestions Dropdown -->
+          <!-- Autocomplete Suggestions Dropdown -->
           <div class="search-suggestions" *ngIf="showSuggestions && navSuggestions.length > 0" (mouseleave)="showSuggestions=false">
             <div class="suggestion-header">Suggestions</div>
             <div
@@ -69,57 +82,88 @@ import { filter } from 'rxjs';
           </div>
         </form>
 
+        <!-- Navigation Links & Interactive Action Pills -->
         <div class="nav-actions">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link hide-m">Home</a>
           <a routerLink="/products" routerLinkActive="active" class="nav-link hide-m">Shop</a>
-          <a routerLink="/compare" routerLinkActive="active" class="nav-link hide-m">⇄ Compare<span class="nav-count" *ngIf="compareCount>0">{{ compareCount }}</span></a>
-          <a routerLink="/assistant" routerLinkActive="active" class="nav-link hide-m">✦ Ask AI</a>
-          <a routerLink="/spin" routerLinkActive="active" class="nav-link hide-m" style="color:#f472b6;font-weight:700">🎡 Spin &amp; Win</a>
-          <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Orders</a>
-          <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Returns</a>
-          <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" class="wallet-pill" title="Reward wallet">{{ walletBal ?? 0 }} pts</a>
+          <a routerLink="/compare" routerLinkActive="active" class="nav-link hide-m" title="Side-by-side comparison">
+            ⇄ Compare<span class="nav-count" *ngIf="compareCount>0">{{ compareCount }}</span>
+          </a>
+          <a routerLink="/assistant" routerLinkActive="active" class="nav-link ai-nav-pill hide-m">
+            <span class="ai-sparkle">✦</span> Ask AI
+          </a>
+          <a routerLink="/spin" routerLinkActive="active" class="nav-link spin-nav-pill hide-m">
+            🎡 Spin &amp; Win
+          </a>
+
+          <!-- Wallet Points -->
+          <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" class="wallet-pill" title="Reward wallet balance">
+            <span class="coin-icon">🪙</span> {{ walletBal ?? 0 }} pts
+          </a>
+
+          <!-- Notifications Center Pill -->
           <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Notifications" title="Notifications">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-            <span class="hide-m">Notifications</span>
-            <span class="cart-count" *ngIf="notificationCount>0">{{ notificationCount }}</span>
+            <span class="hide-m">Alerts</span>
+            <span class="cart-count bell-pulse" *ngIf="notificationCount>0">{{ notificationCount }}</span>
           </a>
+
+          <!-- Wishlist -->
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Wishlist" title="View Wishlist">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
             <span class="hide-m">Wishlist</span>
             <span class="cart-count" *ngIf="wishlistCount>0">{{ wishlistCount }}</span>
           </a>
-          <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Cart">
+
+          <!-- Cart -->
+          <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn primary-cart" aria-label="Cart">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 7h15l-1.5 9h-12z"/><path d="M6 7 5 4H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
             <span class="hide-m">Cart</span>
             <span class="cart-count" *ngIf="cartCount>0">{{ cartCount }}</span>
           </a>
+
+          <!-- Guest Auth CTA -->
           <ng-container *ngIf="!auth.isLoggedIn()">
             <a routerLink="/login" class="btn-login hide-m">Log in</a>
-            <a routerLink="/register" class="btn-signup">Sign up</a>
+            <a routerLink="/register" class="btn-signup">Join NEXGEN</a>
           </ng-container>
+
+          <!-- User Account Dropdown -->
           <div class="acct" *ngIf="auth.isLoggedIn()">
-            <button class="avatar-btn" (click)="acctOpen = !acctOpen" [attr.aria-expanded]="acctOpen" aria-label="Account menu">{{ initial() }}</button>
+            <button class="avatar-btn" (click)="acctOpen = !acctOpen" [attr.aria-expanded]="acctOpen" aria-label="Account menu">
+              {{ initial() }}
+            </button>
             <div class="dropdown" *ngIf="acctOpen">
-              <div class="dd-head"><strong style="font-size:13px">{{ displayEmail() }}</strong><div class="muted">{{ walletBal ?? 0 }} pts balance</div></div>
-              <a routerLink="/profile" (click)="acctOpen=false">Profile</a>
-              <a routerLink="/wallet" (click)="acctOpen=false">Wallet</a>
-              <a routerLink="/spin" (click)="acctOpen=false">🎡 Spin &amp; Win</a>
-              <a routerLink="/wishlist" (click)="acctOpen=false">Wishlist</a>
-              <a routerLink="/notifications" (click)="acctOpen=false">Notifications</a>
-              <a routerLink="/admin" *ngIf="auth.isAdmin()" (click)="acctOpen=false">Admin</a>
-              <button (click)="logout()">Log out</button>
+              <div class="dd-head">
+                <strong style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ displayEmail() }}</strong>
+                <div class="muted" style="font-size:11px">🪙 {{ walletBal ?? 0 }} pts available</div>
+              </div>
+              <a routerLink="/profile" (click)="acctOpen=false">👤 Profile &amp; Settings</a>
+              <a routerLink="/orders" (click)="acctOpen=false">📦 Order History &amp; Tracking</a>
+              <a routerLink="/returns" (click)="acctOpen=false">🔄 Return Center</a>
+              <a routerLink="/wallet" (click)="acctOpen=false">🪙 Reward Wallet</a>
+              <a routerLink="/spin" (click)="acctOpen=false">🎡 Spin &amp; Win Rewards</a>
+              <a routerLink="/wishlist" (click)="acctOpen=false">❤️ My Saved Wishlist</a>
+              <a routerLink="/notifications" (click)="acctOpen=false">🔔 Notification Center</a>
+              <a routerLink="/admin" *ngIf="auth.isAdmin()" (click)="acctOpen=false" style="color:var(--brand-3)">⚡ Admin Cockpit</a>
+              <div class="divider" style="margin:4px 0"></div>
+              <button (click)="logout()" style="color:var(--bad)">Sign out</button>
             </div>
           </div>
+
+          <!-- Mobile Hamburger Toggle -->
           <button class="icon-btn" (click)="menuOpen = !menuOpen" aria-label="Toggle menu">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
           </button>
         </div>
       </div>
+
+      <!-- Mobile Navigation Drawer -->
       <div class="mobile-panel" [class.open]="menuOpen">
         <form class="m-search" (ngSubmit)="goSearch()">
           <div class="search-box">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input [(ngModel)]="q" name="m-q" placeholder="Search products" aria-label="Search products">
+            <input [(ngModel)]="q" name="m-q" placeholder="Search NEXGEN catalog" aria-label="Search products">
             <button
               type="button"
               class="voice-btn"
@@ -138,52 +182,76 @@ import { filter } from 'rxjs';
           </div>
         </form>
         <nav>
-          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Home</a>
-          <a routerLink="/products" routerLinkActive="active">Shop all</a>
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">🏠 Home</a>
+          <a routerLink="/products" routerLinkActive="active">🛍️ Shop All Products</a>
           <a routerLink="/compare" routerLinkActive="active">⇄ Compare ({{ compareCount }})</a>
-          <a routerLink="/assistant" routerLinkActive="active">✦ Ask AI Assistant</a>
-          <a routerLink="/spin" routerLinkActive="active">🎡 Spin &amp; Win</a>
-          <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Cart ({{ cartCount }})</a>
+          <a routerLink="/assistant" routerLinkActive="active" style="color:var(--brand-3)">✦ Ask AI Assistant</a>
+          <a routerLink="/spin" routerLinkActive="active" style="color:#f472b6">🎡 Spin &amp; Win Rewards</a>
+          <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active">🛒 Cart ({{ cartCount }})</a>
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active">❤️ Wishlist ({{ wishlistCount }})</a>
           <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active">🔔 Notifications ({{ notificationCount }})</a>
-          <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Orders</a>
-          <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Returns</a>
-          <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Wallet ({{ walletBal ?? 0 }} pts)</a>
-          <a routerLink="/profile" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Profile</a>
+          <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active">📦 Track Orders</a>
+          <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active">🔄 Returns &amp; Refunds</a>
+          <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" routerLinkActive="active">🪙 Wallet ({{ walletBal ?? 0 }} pts)</a>
+          <a routerLink="/profile" *ngIf="auth.isLoggedIn()" routerLinkActive="active">👤 Profile &amp; Settings</a>
+          <a routerLink="/admin" *ngIf="auth.isAdmin()" routerLinkActive="active">⚡ Admin Dashboard</a>
           <a routerLink="/login" *ngIf="!auth.isLoggedIn()">Log in</a>
-          <button class="m-link" *ngIf="auth.isLoggedIn()" (click)="logout()">Log out</button>
+          <a routerLink="/register" *ngIf="!auth.isLoggedIn()" style="color:var(--brand)">Create Account</a>
+          <button class="m-link" *ngIf="auth.isLoggedIn()" (click)="logout()">Sign out</button>
         </nav>
       </div>
     </header>
+
     <main [class.admin-page]="isAdminPage" [class.container]="!isAdminPage">
       <router-outlet></router-outlet>
     </main>
+
+    <!-- Professional Footer -->
     <footer class="footer" *ngIf="!isAdminPage">
       <div class="footer-inner">
         <div>
-          <div class="brand" style="margin-bottom:8px"><span class="brand-mark">N</span><span>NextGen Shop</span></div>
-          <p class="muted">Simple catalog, clear prices, transparent returns and a reward wallet (1 pt = Rs.1, up to 20% off).</p>
+          <app-logo size="md" link="/"></app-logo>
+          <p class="muted" style="max-width:320px;margin-top:10px;font-size:13px;line-height:1.6">
+            The next-generation marketplace for premium consumer electronics, lifestyle tech, transparent condition-based returns, and instant reward wallet credits.
+          </p>
+          <div class="trust-pill-row" style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+            <span class="badge ok">✓ 100% Verified</span>
+            <span class="badge info">⚡ Express Delivery</span>
+            <span class="badge violet">🪙 1 Pt = ₹1</span>
+          </div>
         </div>
+
         <div>
-          <h4>Shop</h4>
-          <a routerLink="/products">All products</a>
-          <a routerLink="/compare">Compare products</a>
-          <a routerLink="/assistant">✦ Ask AI assistant</a>
-          <a routerLink="/spin">🎡 Spin &amp; Win</a>
-          <a routerLink="/cart">Cart</a>
-          <a routerLink="/orders">Track orders</a>
-          <a routerLink="/returns">Returns</a>
+          <h4>Ecosystem</h4>
+          <a routerLink="/products">All Products</a>
+          <a routerLink="/compare">Product Comparison</a>
+          <a routerLink="/assistant">✦ AI Shopping Assistant</a>
+          <a routerLink="/spin">🎡 Spin &amp; Win Rewards</a>
+          <a routerLink="/cart">Shopping Cart</a>
         </div>
+
         <div>
-          <h4>Account</h4>
-          <a routerLink="/wallet">Reward wallet</a>
-          <a routerLink="/notifications">Price alerts</a>
-          <a routerLink="/profile">Profile</a>
-          <a routerLink="/login">Login</a>
-          <a routerLink="/admin" *ngIf="auth.isAdmin()">Admin</a>
+          <h4>Orders &amp; Policy</h4>
+          <a routerLink="/orders">Track Live Orders</a>
+          <a routerLink="/returns">Condition-Based Returns</a>
+          <a routerLink="/wallet">Reward Wallet Credits</a>
+          <a routerLink="/notifications">Price Drop Alerts</a>
+          <a routerLink="/profile">Account Settings</a>
+        </div>
+
+        <div>
+          <h4>Company</h4>
+          <span class="muted" style="display:block;margin-bottom:6px">NEXGEN Global Commerce</span>
+          <span class="muted" style="display:block;margin-bottom:6px">24/7 Priority Support</span>
+          <a routerLink="/admin" *ngIf="auth.isAdmin()" style="color:var(--brand-3)">Admin Portal</a>
+          <div style="margin-top:16px;color:#64748b;font-size:12px">
+            © 2026 NEXGEN Inc. All rights reserved.
+          </div>
         </div>
       </div>
     </footer>
+
+    <!-- Toast Notification Wrapper -->
     <div class="toast-wrap" aria-live="polite">
       <div class="toast" *ngFor="let t of toasts" [ngClass]="t.kind">
         <span>{{ t.msg }}</span>
@@ -236,7 +304,6 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.refreshBadges();
     this.ensureNameStored();
-    // Keep the alert badge fresh even when the user leaves the notifications page open.
     setInterval(() => { if (this.auth.isLoggedIn()) this.refreshNotificationCount(); }, 30000);
   }
 

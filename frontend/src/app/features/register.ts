@@ -5,16 +5,18 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Auth } from '../core/auth';
 import { Toast } from '../shared/toast';
 
+import { AppLogo } from '../shared/app-logo';
+
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-register',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AppLogo],
   template: `
     <div class="auth-page">
       <div class="auth-card">
         <div class="auth-side">
-          <span class="hero-eyebrow">JOIN IN 30 SECONDS</span>
-          <h1>Earn from day one</h1>
+          <app-logo size="md" style="margin-bottom:14px"></app-logo>
+          <h1>Join NEXGEN</h1>
           <p class="auth-sub">Wallet auto-created on signup. Returns earn up to 80% back.</p>
           <ul class="auth-points">
             <li><strong>No card required</strong><span>mock COD / UPI / Card checkout</span></li>

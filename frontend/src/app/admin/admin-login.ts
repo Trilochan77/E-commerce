@@ -4,23 +4,24 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Auth } from '../core/auth';
 import { Toast } from '../shared/toast';
+import { AppLogo } from '../shared/app-logo';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-admin-login',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AppLogo],
   template: `
     <div class="admin-login-page">
       <form class="admin-login-card" (ngSubmit)="submit()" novalidate>
-        <div class="admin-login-brand">
-          <span class="brand-mark">N</span>
-          <div><strong>Admin Console</strong><span>Restricted access · NextGen Shop</span></div>
+        <div class="admin-login-brand" style="margin-bottom:12px">
+          <app-logo size="md" link="/admin"></app-logo>
+          <div class="muted" style="font-size:11px;font-weight:700;letter-spacing:0.06em;margin-top:4px">RESTRICTED ADMIN CONSOLE</div>
         </div>
-        <h1>Admin sign in</h1>
-        <p class="muted">Customer accounts are rejected here. Use <a routerLink="/login">shop login</a> for shopping.</p>
+        <h1>Admin Sign In</h1>
+        <p class="muted">Customer accounts are rejected here. Use <a routerLink="/login">customer login</a> for shopping.</p>
         <label>Admin email
           <input [(ngModel)]="email" name="email" type="email" autocomplete="username"
-            placeholder="trilochan@nextgen.com" required autofocus>
+            placeholder="admin@shop.com" required autofocus>
         </label>
         <div class="field-err" *ngIf="email && !validEmail()">Enter a valid email address.</div>
         <label>Password
@@ -34,7 +35,6 @@ import { Toast } from '../shared/toast';
           <span class="spinner" *ngIf="busy"></span> {{ busy ? 'Verifying…' : 'Sign in to console' }}
         </button>
         <p class="error" *ngIf="error">{{ error }}</p>
-        <!-- Demo admin removed -->
         <p class="auth-switch"><a routerLink="/">Back to shop</a> · <a routerLink="/login">Customer login</a></p>
       </form>
     </div>
@@ -56,36 +56,31 @@ export class AdminLogin implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/admin/dashboard';
-    if (this.auth.isLoggedIn() && this.auth.isAdmin()) {
-      this.router.navigateByUrl(this.returnUrl);
-    }
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/admin/dashboard';
   }
 
-  validEmail(): boolean { return /.+@.+\..+/.test(this.email); }
-  fill(): void { this.error = ''; }
+  validEmail(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim());
+  }
 
   submit(): void {
-    if (!this.email || !this.password || !this.validEmail() || this.busy) return;
-    this.error = '';
+    if (!this.validEmail() || !this.password || this.busy) return;
     this.busy = true;
+    this.error = '';
     this.auth.login(this.email.trim(), this.password).subscribe({
-      next: () => {
-        if (!this.auth.isAdmin()) {
+      next: (u: any) => {
+        this.busy = false;
+        if (u.role !== 'ADMIN') {
           this.auth.logout();
-          this.busy = false;
-          this.error = 'This account is CUSTOMER — admin access required. Use shop login.';
+          this.error = 'Access denied: not an admin account. Use customer login instead.';
           return;
         }
-        this.toast.ok('Welcome, Admin!');
-        const target = this.returnUrl.startsWith('/admin') ? this.returnUrl : '/admin/dashboard';
-        this.router.navigateByUrl(target);
+        this.toast.ok('Welcome, admin');
+        this.router.navigateByUrl(this.returnUrl);
       },
       error: (e) => {
         this.busy = false;
-        this.error = e?.status === 401
-          ? 'Invalid admin credentials.'
-          : (e.error?.message || 'Admin login failed');
+        this.error = e.error?.message || 'Invalid admin credentials';
       }
     });
   }

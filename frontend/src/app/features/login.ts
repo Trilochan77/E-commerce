@@ -5,15 +5,17 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Auth } from '../core/auth';
 import { Toast } from '../shared/toast';
 
+import { AppLogo } from '../shared/app-logo';
+
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-login',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AppLogo],
   template: `
     <div class="auth-page">
       <div class="auth-card">
         <div class="auth-side">
-          <span class="hero-eyebrow">NEXTGEN SHOP</span>
+          <app-logo size="md" style="margin-bottom:14px"></app-logo>
           <h1>Welcome back</h1>
           <p class="auth-sub">AI rails and wallet rewards pick up where you left off.</p>
           <ul class="auth-points">

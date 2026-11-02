@@ -13,8 +13,8 @@ import { ProductVisual } from '../shared/product-visual';
   imports: [CommonModule, FormsModule, RouterModule, ProductVisual],
   styles: [`
     .wishlist-hero {
-      background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(99,102,241,.08));
-      border: 1px solid rgba(124,58,237,.25);
+      background: linear-gradient(135deg, rgba(124,58,237,.2), rgba(99,102,241,.12));
+      border: 1px solid rgba(124,58,237,.35);
       border-radius: var(--radius);
       padding: 20px 24px;
       margin-bottom: 20px;
@@ -25,9 +25,9 @@ import { ProductVisual } from '../shared/product-visual';
       flex-wrap: wrap;
     }
     .price-drop-banner {
-      background: #ecfdf5;
-      border: 1px solid #a7f3d0;
-      color: #065f46;
+      background: rgba(16, 185, 129, .15);
+      border: 1px solid rgba(52, 211, 153, .4);
+      color: #34d399;
       border-radius: var(--radius);
       padding: 14px 18px;
       margin-bottom: 18px;
@@ -39,27 +39,27 @@ import { ProductVisual } from '../shared/product-visual';
     }
     .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
     .tab-pill {
-      padding: 7px 14px; border: 1px solid var(--line); background: #fff;
+      padding: 7px 14px; border: 1px solid var(--line); background: var(--surface-2);
       border-radius: 999px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--ink-2);
       transition: all .15s;
     }
     .tab-pill.active { background: var(--brand); color: #fff; border-color: var(--brand); }
     .price-savings {
       display: inline-flex; align-items: center; gap: 4px;
-      background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700;
+      background: rgba(16, 185, 129, .2); color: #34d399; font-size: 11px; font-weight: 700;
       padding: 2px 7px; border-radius: 4px;
     }
     .price-up {
       display: inline-flex; align-items: center; gap: 4px;
-      background: #fee2e2; color: #b91c1c; font-size: 11px; font-weight: 700;
+      background: rgba(239, 68, 68, .2); color: #f87171; font-size: 11px; font-weight: 700;
       padding: 2px 7px; border-radius: 4px;
     }
     .demo-pill {
       font-size: 11px; font-weight: 600; padding: 3px 8px;
-      border-radius: 4px; border: 1px dashed #cbd5e1;
-      background: #f8fafc; color: #64748b; cursor: pointer;
+      border-radius: 4px; border: 1px dashed rgba(148, 163, 255, .3);
+      background: var(--surface-3); color: #cbd5e1; cursor: pointer;
     }
-    .demo-pill:hover { background: #ede9fe; color: #7c3aed; border-color: #7c3aed; }
+    .demo-pill:hover { background: rgba(139, 92, 246, .2); color: #fff; border-color: var(--brand); }
   `],
   template: `
     <div class="container">
