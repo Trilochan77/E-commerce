@@ -40,6 +40,17 @@ public class NotificationController {
     return notifications.create(req);
   }
 
+  @PostMapping("/broadcast")
+  public Notification broadcast(@RequestBody Notification req) {
+    req.setUserId("ALL");
+    return notifications.create(req);
+  }
+
+  @GetMapping("/admin/all")
+  public List<Notification> adminAll() {
+    return notifications.listAll();
+  }
+
   @PutMapping("/{userId}/{notificationId}/read")
   public Notification markRead(
       @PathVariable String userId,

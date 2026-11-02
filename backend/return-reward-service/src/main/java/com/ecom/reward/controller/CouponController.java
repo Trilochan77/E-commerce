@@ -47,4 +47,24 @@ public class CouponController {
   public List<Map<String, Object>> mine(@PathVariable String userId) {
     return svc.couponsForUser(userId);
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Admin Coupon Management                                            */
+  /* ------------------------------------------------------------------ */
+
+  @GetMapping("/admin/all")
+  public List<com.ecom.reward.entity.Coupon> adminAll() {
+    return svc.allCoupons();
+  }
+
+  @PostMapping("/admin/create")
+  public com.ecom.reward.entity.Coupon adminCreate(@RequestBody com.ecom.reward.entity.Coupon c) {
+    return svc.createAdminCoupon(c);
+  }
+
+  @DeleteMapping("/admin/{id}")
+  public Map<String, Object> adminDelete(@PathVariable String id) {
+    svc.deleteCoupon(id);
+    return Map.of("status", "DELETED", "id", id);
+  }
 }

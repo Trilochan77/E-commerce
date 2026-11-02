@@ -382,4 +382,39 @@ public class CouponService {
   private static String money(double v) {
     return BigDecimal.valueOf(v).stripTrailingZeros().toPlainString();
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Admin management                                                    */
+  /* ------------------------------------------------------------------ */
+
+  public List<Coupon> allCoupons() {
+    return coupons.findAllByOrderByCreatedAtDesc();
+  }
+
+  public Coupon createAdminCoupon(Coupon c) {
+    if (c.getCode() == null || c.getCode().isBlank()) {
+      c.setCode("PROMO-" + token(6));
+    } else {
+      c.setCode(c.getCode().trim().toUpperCase());
+    }
+    if (coupons.findByCode(c.getCode()).isPresent()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "Coupon code already exists");
+    }
+    c.setSource("PROMO");
+    if (c.getStatus() == null || c.getStatus().isBlank()) {
+      c.setStatus("ACTIVE");
+    }
+    if (c.getType() == null || c.getType().isBlank()) {
+      c.setType("PERCENT");
+    }
+    Instant now = Instant.now();
+    if (c.getCreatedAt() == null) c.setCreatedAt(now);
+    if (c.getValidFrom() == null) c.setValidFrom(now);
+    if (c.getValidUntil() == null) c.setValidUntil(now.plus(Duration.ofDays(30)));
+    return coupons.save(c);
+  }
+
+  public void deleteCoupon(String id) {
+    coupons.deleteById(id);
+  }
 }

@@ -27,6 +27,10 @@ import { AdminCategories } from './admin/admin-categories';
 import { AdminOrders } from './admin/admin-orders';
 import { AdminReturns } from './admin/admin-returns';
 import { AdminUsers } from './admin/admin-users';
+import { AdminReviews } from './admin/admin-reviews';
+import { AdminCoupons } from './admin/admin-coupons';
+import { AdminReports } from './admin/admin-reports';
+import { AdminNotifications } from './admin/admin-notifications';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -58,6 +62,10 @@ export const routes: Routes = [
       { path: 'products', component: AdminProducts },
       { path: 'categories', component: AdminCategories },
       { path: 'orders', component: AdminOrders },
+      { path: 'reviews', component: AdminReviews },
+      { path: 'coupons', component: AdminCoupons },
+      { path: 'reports', component: AdminReports },
+      { path: 'notifications', component: AdminNotifications },
       { path: 'returns', component: AdminReturns },
       { path: 'users', component: AdminUsers }
     ]

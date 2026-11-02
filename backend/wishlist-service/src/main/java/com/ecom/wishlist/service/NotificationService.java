@@ -25,16 +25,24 @@ public class NotificationService {
   }
 
   public List<Notification> list(String userId, String category, boolean unreadOnly) {
+    Criteria crit = new Criteria().orOperator(
+        Criteria.where("userId").is(userId),
+        Criteria.where("userId").is("ALL")
+    );
     boolean hasCategory = StringUtils.hasText(category) && !category.equalsIgnoreCase("ALL");
     if (hasCategory) {
-      String cat = category.toUpperCase().trim();
-      return unreadOnly
-          ? repo.findByUserIdAndCategoryAndReadFalseOrderByCreatedAtDesc(userId, cat)
-          : repo.findByUserIdAndCategoryOrderByCreatedAtDesc(userId, cat);
+      crit = new Criteria().andOperator(crit, Criteria.where("category").is(category.toUpperCase().trim()));
     }
-    return unreadOnly
-        ? repo.findByUserIdAndReadFalseOrderByCreatedAtDesc(userId)
-        : repo.findByUserIdOrderByCreatedAtDesc(userId);
+    if (unreadOnly) {
+      crit = new Criteria().andOperator(crit, Criteria.where("read").is(false));
+    }
+    Query query = Query.query(crit).with(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+    return mongo.find(query, Notification.class);
+  }
+
+  public List<Notification> listAll() {
+    Query query = new Query().with(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt")).limit(100);
+    return mongo.find(query, Notification.class);
   }
 
   public long unreadCount(String userId) {

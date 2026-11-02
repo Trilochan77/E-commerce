@@ -20,6 +20,10 @@ import { AppLogo } from '../shared/app-logo';
           <a routerLink="/admin/products" routerLinkActive="active">📦 Product Catalog</a>
           <a routerLink="/admin/categories" routerLinkActive="active">🏷️ Categories</a>
           <a routerLink="/admin/orders" routerLinkActive="active">🛍️ Orders &amp; Logistics</a>
+          <a routerLink="/admin/reviews" routerLinkActive="active">⭐ Review Moderation</a>
+          <a routerLink="/admin/coupons" routerLinkActive="active">🎟️ Coupons &amp; Rewards</a>
+          <a routerLink="/admin/reports" routerLinkActive="active">📈 Sales &amp; Stock Reports</a>
+          <a routerLink="/admin/notifications" routerLinkActive="active">📢 Broadcast Alerts</a>
           <a routerLink="/admin/returns" routerLinkActive="active">🔄 Return Inspections</a>
           <a routerLink="/admin/users" routerLinkActive="active">👥 User Accounts</a>
         </nav>

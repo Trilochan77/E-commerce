@@ -434,4 +434,28 @@ export class Shop {
   myCoupons(userId: string): Observable<any> {
     return this.http.get(`${GATEWAY}/api/rewards/coupons/user/${userId}`, { headers: this.userHeader() });
   }
+
+  adminCoupons(): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/rewards/coupons/admin/all`, { headers: this.adminHeaders() });
+  }
+
+  adminCouponCreate(coupon: any): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/rewards/coupons/admin/create`, coupon, { headers: this.adminHeaders() });
+  }
+
+  adminCouponDelete(id: string): Observable<any> {
+    return this.http.delete(`${GATEWAY}/api/rewards/coupons/admin/${id}`, { headers: this.adminHeaders() });
+  }
+
+  adminBroadcastNotification(body: any): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/notifications/broadcast`, body, { headers: this.adminHeaders() });
+  }
+
+  adminAllNotifications(): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/notifications/admin/all`, { headers: this.adminHeaders() });
+  }
+
+  adminAllOrders(): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/orders`, { headers: this.adminHeaders() });
+  }
 }
