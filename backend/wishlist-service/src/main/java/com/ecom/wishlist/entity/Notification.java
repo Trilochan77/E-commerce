@@ -104,3 +104,4 @@ public class Notification {
   public Integer getSavingsPercent() { return savingsPercent; }
   public void setSavingsPercent(Integer savingsPercent) { this.savingsPercent = savingsPercent; }
 }
+

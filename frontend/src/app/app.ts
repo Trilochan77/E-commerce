@@ -36,9 +36,9 @@ import { filter } from 'rxjs';
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" class="wallet-pill" title="Reward wallet">{{ walletBal ?? 0 }} pts</a>
-          <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Price drop alerts" title="Price drop alerts">
+          <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Notifications" title="Notifications">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-            <span class="hide-m">Alerts</span>
+            <span class="hide-m">Notifications</span>
             <span class="cart-count" *ngIf="notificationCount>0">{{ notificationCount }}</span>
           </a>
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="cart-btn" aria-label="Wishlist" title="View Wishlist">
@@ -63,7 +63,7 @@ import { filter } from 'rxjs';
               <a routerLink="/wallet" (click)="acctOpen=false">Wallet</a>
               <a routerLink="/spin" (click)="acctOpen=false">🎡 Spin &amp; Win</a>
               <a routerLink="/wishlist" (click)="acctOpen=false">Wishlist</a>
-              <a routerLink="/notifications" (click)="acctOpen=false">Price alerts</a>
+              <a routerLink="/notifications" (click)="acctOpen=false">Notifications</a>
               <a routerLink="/admin" *ngIf="auth.isAdmin()" (click)="acctOpen=false">Admin</a>
               <button (click)="logout()">Log out</button>
             </div>
@@ -88,7 +88,7 @@ import { filter } from 'rxjs';
           <a routerLink="/assistant" routerLinkActive="active">✦ Ask AI Assistant</a>
           <a routerLink="/cart" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Cart ({{ cartCount }})</a>
           <a routerLink="/wishlist" *ngIf="auth.isLoggedIn()" routerLinkActive="active">❤️ Wishlist ({{ wishlistCount }})</a>
-          <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active">🔔 Price alerts ({{ notificationCount }})</a>
+          <a routerLink="/notifications" *ngIf="auth.isLoggedIn()" routerLinkActive="active">🔔 Notifications ({{ notificationCount }})</a>
           <a routerLink="/orders" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Orders</a>
           <a routerLink="/returns" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Returns</a>
           <a routerLink="/wallet" *ngIf="auth.isLoggedIn()" routerLinkActive="active">Wallet ({{ walletBal ?? 0 }} pts)</a>
@@ -217,7 +217,7 @@ export class App {
       next: (r: any) => {
         const nextCount = +r?.unread || 0;
         if (this.notificationBaselineLoaded && nextCount > this.notificationCount) {
-          this.toast.ok(`🔥 ${nextCount - this.notificationCount} new price drop alert${nextCount - this.notificationCount === 1 ? '' : 's'} on your wishlist`);
+          this.toast.ok(`🔔 ${nextCount - this.notificationCount} new notification${nextCount - this.notificationCount === 1 ? '' : 's'}`);
         }
         this.notificationCount = nextCount;
         this.notificationBaselineLoaded = true;

@@ -24,3 +24,4 @@ public interface NotificationRepository extends MongoRepository<Notification, St
 
   long deleteByIdAndUserId(String id, String userId);
 }
+
