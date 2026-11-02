@@ -247,4 +247,17 @@ export class Shop {
   adminReviewDelete(reviewId: string): Observable<any> {
     return this.http.delete(`${GATEWAY}/api/products/reviews/admin/${reviewId}`, { headers: this.adminHeaders() });
   }
+
+  /* ---- delivery tracking ---- */
+  orderTracking(orderId: string): Observable<any> {
+    return this.http.get(`${GATEWAY}/api/orders/${orderId}/tracking`, { headers: this.userHeader() });
+  }
+
+  updateTrackingLocation(orderId: string, payload: any): Observable<any> {
+    return this.http.put(`${GATEWAY}/api/orders/${orderId}/tracking/location`, payload, { headers: this.userHeader() });
+  }
+
+  resetTracking(orderId: string): Observable<any> {
+    return this.http.post(`${GATEWAY}/api/orders/${orderId}/tracking/reset`, {}, { headers: this.userHeader() });
+  }
 }

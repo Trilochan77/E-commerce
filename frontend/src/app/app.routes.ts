@@ -9,6 +9,7 @@ import { ProductDetail } from './features/product-detail';
 import { Cart } from './features/cart';
 import { Checkout } from './features/checkout';
 import { Orders } from './features/orders';
+import { OrderTracking } from './features/order-tracking';
 import { ReturnRequest } from './features/return-request';
 import { ReturnStatus } from './features/return-status';
 import { Wallet } from './features/wallet';
@@ -32,6 +33,7 @@ export const routes: Routes = [
   { path: 'cart', component: Cart, canActivate: [authGuard] },
   { path: 'checkout', component: Checkout, canActivate: [authGuard] },
   { path: 'orders', component: Orders, canActivate: [authGuard] },
+  { path: 'orders/:id/track', component: OrderTracking, canActivate: [authGuard] },
   { path: 'returns/new', component: ReturnRequest, canActivate: [authGuard] },
   { path: 'returns', component: ReturnStatus, canActivate: [authGuard] },
   { path: 'wallet', component: Wallet, canActivate: [authGuard] },

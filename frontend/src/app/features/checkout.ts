@@ -293,8 +293,9 @@ import QRCode from 'qrcode';
           <p style="font-size:16px;font-weight:600;margin:6px 0">₹{{ payable() | number }} Paid via UPI</p>
           <p class="muted">Transaction Reference: <strong>UPI-{{ txnRef }}</strong></p>
           <span class="badge ok" style="font-size:13px;padding:6px 12px">Order Placed & Confirmed</span>
-          <div class="action-row" style="max-width:320px;margin:20px auto 0">
-            <button class="primary" style="width:100%" (click)="goToOrders()">View My Orders →</button>
+          <div class="action-row" style="max-width:320px;margin:20px auto 0;display:flex;flex-direction:column;gap:8px">
+            <button class="primary" style="width:100%" (click)="trackOrder()">📍 Track Delivery Live</button>
+            <button class="btn-ghost" style="width:100%" (click)="goToOrders()">View My Orders →</button>
           </div>
         </div>
 
@@ -403,8 +404,9 @@ import QRCode from 'qrcode';
           <p style="font-size:16px;font-weight:600;margin:6px 0">₹{{ payable() | number }} Charged to Card</p>
           <p class="muted">Authorization Code: <strong>AUTH-{{ txnRef }}</strong></p>
           <span class="badge ok" style="font-size:13px;padding:6px 12px">Order Placed & Confirmed</span>
-          <div class="action-row" style="max-width:320px;margin:20px auto 0">
-            <button class="primary" style="width:100%" (click)="goToOrders()">View My Orders →</button>
+          <div class="action-row" style="max-width:320px;margin:20px auto 0;display:flex;flex-direction:column;gap:8px">
+            <button class="primary" style="width:100%" (click)="trackOrder()">📍 Track Delivery Live</button>
+            <button class="btn-ghost" style="width:100%" (click)="goToOrders()">View My Orders →</button>
           </div>
         </div>
 
@@ -669,6 +671,14 @@ export class Checkout implements OnInit {
       },
       error: (e) => { this.error = e.error?.message || 'Order failed'; this.paying = false; this.toast.err(this.error); }
     });
+  }
+
+  trackOrder(): void {
+    if (this.orderId) {
+      this.router.navigate(['/orders', this.orderId, 'track']);
+    } else {
+      this.router.navigate(['/orders']);
+    }
   }
 
   goToOrders(): void {

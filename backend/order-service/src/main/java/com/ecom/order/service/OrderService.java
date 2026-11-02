@@ -2,6 +2,7 @@ package com.ecom.order.service;
 
 import com.ecom.order.dto.CheckoutRequest;
 import com.ecom.order.entity.CartRef;
+import com.ecom.order.entity.DeliveryTracking;
 import com.ecom.order.entity.Order;
 import com.ecom.order.entity.RewardTransaction;
 import com.ecom.order.entity.RewardWallet;
@@ -176,6 +177,7 @@ public class OrderService {
     order.setAddressId(req.addressId());
     order.setShippingAddress(snapshot(req));
     order.setOrderDate(Instant.now());
+    order.setDeliveryTracking(buildTracking(order));
     orders.save(order);
 
     // 5. Decrement stock (best-effort per item; failures surface as 502).
@@ -243,7 +245,7 @@ public class OrderService {
   public Order updateStatus(String orderId, String status) {
     Order o = get(orderId);
     String next = status == null ? "" : status.trim().toUpperCase();
-    if (!java.util.Set.of("PLACED", "SHIPPED", "DELIVERED", "CANCELLED").contains(next)) {
+    if (!java.util.Set.of("PLACED", "CONFIRMED", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED").contains(next)) {
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Invalid order status: " + status);
     }
     o.setOrderStatus(next);
@@ -254,7 +256,232 @@ public class OrderService {
     if (next.equals("DELIVERED") && "COD".equals(o.getPaymentMethod()) && "PENDING".equals(o.getPaymentStatus())) {
       o.setPaymentStatus("PAID");
     }
+    DeliveryTracking dt = o.getDeliveryTracking();
+    if (dt == null) {
+      dt = buildTracking(o);
+    } else {
+      syncTrackingState(dt, next, o.getOrderDate(), o.getDeliveredDate());
+    }
+    o.setDeliveryTracking(dt);
     return orders.save(o);
+  }
+
+  public DeliveryTracking getTracking(String orderId, String userId, String role) {
+    Order o = get(orderId);
+    if (!"ADMIN".equals(role) && userId != null && !userId.isBlank() && !userId.equals(o.getUserId())) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to tracking for order " + orderId);
+    }
+    DeliveryTracking dt = o.getDeliveryTracking();
+    if (dt == null) {
+      dt = buildTracking(o);
+      o.setDeliveryTracking(dt);
+      orders.save(o);
+    }
+    return dt;
+  }
+
+  public DeliveryTracking updateCourierLocation(String orderId, double lat, double lng, double heading, double distanceKm, int estimatedMinutes, String status) {
+    Order o = get(orderId);
+    DeliveryTracking dt = o.getDeliveryTracking();
+    if (dt == null) {
+      dt = buildTracking(o);
+    }
+    DeliveryTracking.Location loc = dt.getCourierLocation();
+    if (loc == null) loc = new DeliveryTracking.Location();
+    loc.setLat(Math.round(lat * 10000.0) / 10000.0);
+    loc.setLng(Math.round(lng * 10000.0) / 10000.0);
+    loc.setHeading(heading);
+    loc.setUpdatedAt(Instant.now());
+    dt.setCourierLocation(loc);
+
+    if (distanceKm >= 0) dt.setDistanceKm(Math.round(distanceKm * 10.0) / 10.0);
+    if (estimatedMinutes >= 0) {
+      dt.setEstimatedMinutes(estimatedMinutes);
+      dt.setEstimatedArrival(estimatedMinutes == 0 ? "Arrived" : "Arriving in ~" + estimatedMinutes + " mins");
+    }
+
+    if (status != null && !status.isBlank() && !status.equalsIgnoreCase(o.getOrderStatus())) {
+      String next = status.trim().toUpperCase();
+      if (java.util.Set.of("PLACED", "CONFIRMED", "PACKED", "SHIPPED", "OUT_FOR_DELIVERY", "DELIVERED").contains(next)) {
+        o.setOrderStatus(next);
+        if (next.equals("DELIVERED")) {
+          if (o.getDeliveredDate() == null) o.setDeliveredDate(Instant.now());
+          if ("COD".equals(o.getPaymentMethod())) o.setPaymentStatus("PAID");
+        }
+        syncTrackingState(dt, next, o.getOrderDate(), o.getDeliveredDate());
+      }
+    }
+    o.setDeliveryTracking(dt);
+    orders.save(o);
+    return dt;
+  }
+
+  public DeliveryTracking resetTracking(String orderId) {
+    Order o = get(orderId);
+    DeliveryTracking dt = buildTracking(o);
+    o.setDeliveryTracking(dt);
+    orders.save(o);
+    return dt;
+  }
+
+  public DeliveryTracking buildTracking(Order order) {
+    DeliveryTracking t = new DeliveryTracking();
+    String ordId = order.getId() != null ? order.getId() : "ORD-000000";
+    String cleanId = ordId.replace("ORD-", "");
+    t.setTrackingNumber("TRK-" + cleanId);
+    t.setCarrier("NextGen Express Logistics");
+    t.setDeliveryPersonName("Rahul Verma");
+    t.setDeliveryPersonPhone("+91 98765 43210");
+    t.setDeliveryPersonPhoneMasked("+91 98*** **210");
+    t.setVehicleNumber("OD-02-BA-1234 (Electric Bike)");
+    t.setCourierRating(4.9);
+    int otpNum = Math.abs((ordId + "SECURE").hashCode() % 9000) + 1000;
+    t.setDeliveryOtp(String.valueOf(otpNum));
+    t.setDemoMode(true);
+    t.setPrivacyProtected(true);
+
+    double destLat = 20.2961;
+    double destLng = 85.8245;
+    String city = "Bhubaneswar";
+    String state = "Odisha";
+    String pincode = "751024";
+    String addressLine = "KIIT Road, Patia";
+
+    if (order.getShippingAddress() != null) {
+      Order.ShippingAddress sa = order.getShippingAddress();
+      if (sa.getCity() != null && !sa.getCity().isBlank()) city = sa.getCity().trim();
+      if (sa.getState() != null && !sa.getState().isBlank()) state = sa.getState().trim();
+      if (sa.getPincode() != null && !sa.getPincode().isBlank()) pincode = sa.getPincode().trim();
+      if (sa.getAddressLine() != null && !sa.getAddressLine().isBlank()) addressLine = sa.getAddressLine().trim();
+    }
+
+    String cLower = city.toLowerCase();
+    if (cLower.contains("bangalore") || cLower.contains("bengaluru")) {
+      destLat = 12.9716; destLng = 77.5946;
+    } else if (cLower.contains("mumbai")) {
+      destLat = 19.0760; destLng = 72.8777;
+    } else if (cLower.contains("delhi")) {
+      destLat = 28.6139; destLng = 77.2090;
+    } else if (cLower.contains("hyderabad")) {
+      destLat = 17.3850; destLng = 78.4867;
+    } else if (cLower.contains("pune")) {
+      destLat = 18.5204; destLng = 73.8567;
+    } else if (cLower.contains("kolkata")) {
+      destLat = 22.5726; destLng = 88.3639;
+    } else if (cLower.contains("chennai")) {
+      destLat = 13.0827; destLng = 80.2707;
+    } else if (cLower.contains("ahmedabad")) {
+      destLat = 23.0225; destLng = 72.5714;
+    } else if (cLower.contains("cuttack")) {
+      destLat = 20.4625; destLng = 85.8828;
+    } else {
+      destLat = 20.2961; destLng = 85.8245;
+    }
+
+    double pinOffsetLat = ((Math.abs(pincode.hashCode()) % 100) - 50) * 0.0003;
+    double pinOffsetLng = ((Math.abs(addressLine.hashCode()) % 100) - 50) * 0.0003;
+    destLat = Math.round((destLat + pinOffsetLat) * 10000.0) / 10000.0;
+    destLng = Math.round((destLng + pinOffsetLng) * 10000.0) / 10000.0;
+
+    DeliveryTracking.Location destLoc = new DeliveryTracking.Location(destLat, destLng, "Delivery Address");
+    destLoc.setFormattedAddress(addressLine + ", " + city + ", " + state + " - " + pincode);
+    destLoc.setPrivacyMaskedAddress("🔒 Verified Delivery Point • " + city + ", " + state + " (Precise door details protected)");
+    t.setDestination(destLoc);
+
+    double whLat = Math.round((destLat - 0.032) * 10000.0) / 10000.0;
+    double whLng = Math.round((destLng - 0.026) * 10000.0) / 10000.0;
+    DeliveryTracking.Location whLoc = new DeliveryTracking.Location(whLat, whLng, "NextGen Hub (" + city + " South)");
+    whLoc.setFormattedAddress("Plot 42, Logistics Park, " + city);
+    t.setWarehouse(whLoc);
+
+    List<DeliveryTracking.Location> waypoints = new ArrayList<>();
+    waypoints.add(new DeliveryTracking.Location(whLat, whLng, "Fulfillment Hub"));
+    waypoints.add(new DeliveryTracking.Location(Math.round((whLat + 0.005) * 10000.0) / 10000.0, Math.round((whLng + 0.004) * 10000.0) / 10000.0, "Hub Exit Checkpost"));
+    waypoints.add(new DeliveryTracking.Location(Math.round((whLat + 0.011) * 10000.0) / 10000.0, Math.round((whLng + 0.009) * 10000.0) / 10000.0, "Express Ring Highway"));
+    waypoints.add(new DeliveryTracking.Location(Math.round((whLat + 0.017) * 10000.0) / 10000.0, Math.round((whLng + 0.014) * 10000.0) / 10000.0, "Central Junction Flyover"));
+    waypoints.add(new DeliveryTracking.Location(Math.round((whLat + 0.023) * 10000.0) / 10000.0, Math.round((whLng + 0.019) * 10000.0) / 10000.0, "Sector Boulevard"));
+    waypoints.add(new DeliveryTracking.Location(Math.round((whLat + 0.028) * 10000.0) / 10000.0, Math.round((whLng + 0.023) * 10000.0) / 10000.0, "Neighborhood Gate 2"));
+    waypoints.add(new DeliveryTracking.Location(destLat, destLng, "Customer Doorstep"));
+    t.setRouteWaypoints(waypoints);
+
+    syncTrackingState(t, order.getOrderStatus(), order.getOrderDate(), order.getDeliveredDate());
+    return t;
+  }
+
+  private void syncTrackingState(DeliveryTracking t, String status, Instant orderDate, Instant deliveredDate) {
+    if (orderDate == null) orderDate = Instant.now();
+    List<DeliveryTracking.Location> wps = t.getRouteWaypoints();
+    List<DeliveryTracking.StatusUpdate> updates = new ArrayList<>();
+
+    updates.add(new DeliveryTracking.StatusUpdate("PLACED", "Order Placed",
+        "Your order has been received and logged into our fulfillment queue.", "NextGen Order Management", orderDate));
+
+    String cur = status != null ? status.trim().toUpperCase() : "PLACED";
+    Instant now = Instant.now();
+
+    if ("CANCELLED".equals(cur)) {
+      t.setEstimatedArrival("Cancelled");
+      t.setEstimatedMinutes(0);
+      t.setDistanceKm(0);
+      updates.add(new DeliveryTracking.StatusUpdate("CANCELLED", "Order Cancelled",
+          "This order has been cancelled.", "Customer Support", now));
+      t.setCourierLocation(t.getWarehouse());
+    } else if ("DELIVERED".equals(cur)) {
+      Instant dDate = deliveredDate != null ? deliveredDate : now;
+      updates.add(new DeliveryTracking.StatusUpdate("CONFIRMED", "Order Confirmed", "Payment verified and inventory allocated.", "Fulfillment Hub", orderDate.plusSeconds(300)));
+      updates.add(new DeliveryTracking.StatusUpdate("PACKED", "Packed & Inspected", "Order packaged securely with tamper-evident seal.", "Fulfillment Hub", orderDate.plusSeconds(900)));
+      updates.add(new DeliveryTracking.StatusUpdate("SHIPPED", "Dispatched to Courier", "Package handed over to NextGen Express.", "Sorting Center", orderDate.plusSeconds(1800)));
+      updates.add(new DeliveryTracking.StatusUpdate("OUT_FOR_DELIVERY", "Out for Delivery", t.getDeliveryPersonName() + " departed for your delivery address.", "Local Station", orderDate.plusSeconds(2700)));
+      updates.add(new DeliveryTracking.StatusUpdate("DELIVERED", "Package Delivered", "Delivered safely. Verified with delivery handover PIN.", t.getDestination().getName(), dDate));
+      t.setEstimatedArrival("Delivered");
+      t.setEstimatedMinutes(0);
+      t.setDistanceKm(0.0);
+      DeliveryTracking.Location curLoc = new DeliveryTracking.Location(t.getDestination().getLat(), t.getDestination().getLng(), "Delivered at Destination");
+      curLoc.setHeading(45);
+      t.setCourierLocation(curLoc);
+    } else if ("OUT_FOR_DELIVERY".equals(cur)) {
+      updates.add(new DeliveryTracking.StatusUpdate("CONFIRMED", "Order Confirmed", "Payment verified and inventory allocated.", "Fulfillment Hub", orderDate.plusSeconds(300)));
+      updates.add(new DeliveryTracking.StatusUpdate("PACKED", "Packed & Inspected", "Order packaged securely with tamper-evident seal.", "Fulfillment Hub", orderDate.plusSeconds(900)));
+      updates.add(new DeliveryTracking.StatusUpdate("SHIPPED", "Dispatched to Courier", "Package handed over to NextGen Express.", "Sorting Center", orderDate.plusSeconds(1800)));
+      updates.add(new DeliveryTracking.StatusUpdate("OUT_FOR_DELIVERY", "Out for Delivery", t.getDeliveryPersonName() + " is en route to your address on " + t.getVehicleNumber() + ".", "On the Way", now));
+      t.setEstimatedArrival("Arriving in ~15 mins");
+      t.setEstimatedMinutes(15);
+      t.setDistanceKm(1.8);
+      DeliveryTracking.Location mid = wps.size() > 4 ? wps.get(4) : wps.get(wps.size() - 1);
+      DeliveryTracking.Location curLoc = new DeliveryTracking.Location(mid.getLat(), mid.getLng(), "In Transit - " + mid.getName());
+      curLoc.setHeading(38);
+      t.setCourierLocation(curLoc);
+    } else if ("SHIPPED".equals(cur)) {
+      updates.add(new DeliveryTracking.StatusUpdate("CONFIRMED", "Order Confirmed", "Payment verified and inventory allocated.", "Fulfillment Hub", orderDate.plusSeconds(300)));
+      updates.add(new DeliveryTracking.StatusUpdate("PACKED", "Packed & Inspected", "Order packaged securely with tamper-evident seal.", "Fulfillment Hub", orderDate.plusSeconds(900)));
+      updates.add(new DeliveryTracking.StatusUpdate("SHIPPED", "In Transit", "Package moving between regional sorting hubs.", "Sorting Hub", now));
+      t.setEstimatedArrival("Today by 7:00 PM");
+      t.setEstimatedMinutes(45);
+      t.setDistanceKm(3.6);
+      DeliveryTracking.Location mid = wps.size() > 2 ? wps.get(2) : wps.get(0);
+      DeliveryTracking.Location curLoc = new DeliveryTracking.Location(mid.getLat(), mid.getLng(), mid.getName());
+      curLoc.setHeading(42);
+      t.setCourierLocation(curLoc);
+    } else if ("PACKED".equals(cur)) {
+      updates.add(new DeliveryTracking.StatusUpdate("CONFIRMED", "Order Confirmed", "Payment verified and inventory allocated.", "Fulfillment Hub", orderDate.plusSeconds(300)));
+      updates.add(new DeliveryTracking.StatusUpdate("PACKED", "Package Packed", "Items quality checked and boxed.", "Packaging Dept", now));
+      t.setEstimatedArrival("Today by 8:00 PM");
+      t.setEstimatedMinutes(75);
+      t.setDistanceKm(4.8);
+      t.setCourierLocation(t.getWarehouse());
+    } else if ("CONFIRMED".equals(cur)) {
+      updates.add(new DeliveryTracking.StatusUpdate("CONFIRMED", "Order Confirmed", "Payment verified and order allocated to warehouse.", "System", now));
+      t.setEstimatedArrival("Expected Tomorrow");
+      t.setEstimatedMinutes(120);
+      t.setDistanceKm(5.2);
+      t.setCourierLocation(t.getWarehouse());
+    } else { // PLACED
+      t.setEstimatedArrival("Expected in 1-2 days");
+      t.setEstimatedMinutes(180);
+      t.setDistanceKm(5.2);
+      t.setCourierLocation(t.getWarehouse());
+    }
+    t.setUpdates(updates);
   }
 
   /**

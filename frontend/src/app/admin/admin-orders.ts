@@ -1,19 +1,27 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { Shop } from '../core/shop';
 import { Toast } from '../shared/toast';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   selector: 'app-admin-orders',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   template: `
     <div class="page-head">
       <div><h1>Orders</h1><p>{{ filtered().length }} of {{ orders.length }} · DELIVERED unlocks returns.</p></div>
       <div class="row" style="margin:0">
         <select [(ngModel)]="statusFilter" style="max-width:180px">
-          <option value="">All statuses</option><option>PLACED</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELLED</option>
+          <option value="">All statuses</option>
+          <option>PLACED</option>
+          <option>CONFIRMED</option>
+          <option>PACKED</option>
+          <option>SHIPPED</option>
+          <option>OUT_FOR_DELIVERY</option>
+          <option>DELIVERED</option>
+          <option>CANCELLED</option>
         </select>
         <button class="btn-ghost btn-sm" (click)="load()">Refresh</button>
       </div>
@@ -21,7 +29,7 @@ import { Toast } from '../shared/toast';
     <p class="error" *ngIf="error">{{ error }}</p>
     <div class="card">
       <div class="table-wrap"><table>
-        <tr><th>Order</th><th>Deliver to</th><th>Items</th><th>Payable</th><th>Payment</th><th>Status</th><th>Advance</th></tr>
+        <tr><th>Order</th><th>Deliver to</th><th>Items</th><th>Payable</th><th>Payment</th><th>Status</th><th>Track</th><th>Advance</th></tr>
         <tr *ngFor="let o of filtered()">
           <td><strong>{{ o.id || o._id }}</strong><div class="muted">{{ o.userId }} · {{ o.orderDate || o.createdAt || '' }}</div></td>
           <td class="muted" style="max-width:220px">{{ o.shippingAddress ? (o.shippingAddress.fullName + ', ' + o.shippingAddress.addressLine + ', ' + o.shippingAddress.city + ' — ' + o.shippingAddress.pincode) : '—' }}</td>
@@ -30,8 +38,19 @@ import { Toast } from '../shared/toast';
           <td><span class="badge" [ngClass]="o.paymentStatus==='PAID' ? 'ok' : (o.paymentStatus==='PENDING' ? 'info' : 'warn')">{{ o.paymentMethod || '' }} · {{ o.paymentStatus }}</span>
             <div><button class="btn-ghost btn-sm" *ngIf="o.paymentMethod==='COD' && o.paymentStatus==='PENDING'" (click)="collect(o)">Mark cash collected</button></div></td>
           <td><span class="badge info">{{ o.orderStatus }}</span></td>
+          <td>
+            <a [routerLink]="['/orders', o.id || o._id, 'track']" target="_blank">
+              <button class="btn-ghost btn-sm">📍 Track</button>
+            </a>
+          </td>
           <td><select [ngModel]="o.orderStatus" (ngModelChange)="setStatus(o, $event)" style="max-width:150px">
-            <option>PLACED</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELLED</option>
+            <option>PLACED</option>
+            <option>CONFIRMED</option>
+            <option>PACKED</option>
+            <option>SHIPPED</option>
+            <option>OUT_FOR_DELIVERY</option>
+            <option>DELIVERED</option>
+            <option>CANCELLED</option>
           </select></td>
         </tr>
       </table></div>

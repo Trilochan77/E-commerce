@@ -15,20 +15,35 @@ import { EmptyState } from '../shared/empty-state';
     <div class="page-head">
       <div><h1 style="font-size:28px">Order History</h1><p>Track, reorder, or start a reward return on delivered items.</p></div>
       <select [(ngModel)]="filter" aria-label="Filter orders" style="max-width:220px">
-        <option value="">All statuses</option><option>PLACED</option><option>SHIPPED</option><option>DELIVERED</option><option>CANCELLED</option>
+        <option value="">All statuses</option>
+        <option>PLACED</option>
+        <option>CONFIRMED</option>
+        <option>PACKED</option>
+        <option>SHIPPED</option>
+        <option>OUT_FOR_DELIVERY</option>
+        <option>DELIVERED</option>
+        <option>CANCELLED</option>
       </select>
     </div>
     <div class="stack" *ngIf="filtered().length; else noOrders">
       <div class="card" style="margin:0" *ngFor="let o of filtered()">
-        <div class="row" style="justify-content:space-between">
-          <div class="row"><strong>{{ o.id || o._id }}</strong>
-            <span class="badge info">{{ o.orderStatus }}</span>
+        <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+          <div class="row" style="gap:8px;margin:0;align-items:center">
+            <strong>{{ o.id || o._id }}</strong>
+            <span class="badge info">{{ statusLabel(o.orderStatus) }}</span>
             <span class="badge" [ngClass]="payClass(o.paymentStatus)">{{ o.paymentMethod || '' }} · {{ o.paymentStatus }}</span>
           </div>
-          <span class="muted">{{ o.orderDate }}</span>
+          <div class="row" style="gap:8px;margin:0;align-items:center">
+            <a [routerLink]="['/orders', o.id || o._id, 'track']">
+              <button class="primary btn-sm" style="display:flex;align-items:center;gap:4px">
+                <span>📍</span> Track Delivery
+              </button>
+            </a>
+            <span class="muted">{{ o.orderDate | date:'mediumDate' }}</span>
+          </div>
         </div>
-        <div class="timeline">
-          <span class="t" *ngFor="let s of ['PLACED','SHIPPED','DELIVERED']" [ngClass]="tlClass(o.orderStatus, s)">● {{ s }}</span>
+        <div class="timeline" style="margin:12px 0">
+          <span class="t" *ngFor="let s of stages" [ngClass]="tlClass(o.orderStatus, s.key)">{{ s.icon }} {{ s.label }}</span>
         </div>
         <div class="table-wrap"><table>
           <tr><th>Product</th><th>Qty</th><th>Price</th><th></th></tr>
@@ -62,6 +77,14 @@ import { EmptyState } from '../shared/empty-state';
 export class Orders implements OnInit {
   orders: any[] = [];
   filter = '';
+  stages = [
+    { key: 'PLACED', label: 'Placed', icon: '📝' },
+    { key: 'CONFIRMED', label: 'Confirmed', icon: '✓' },
+    { key: 'PACKED', label: 'Packed', icon: '📦' },
+    { key: 'SHIPPED', label: 'Shipped', icon: '🚚' },
+    { key: 'OUT_FOR_DELIVERY', label: 'Out for Delivery', icon: '🚴' },
+    { key: 'DELIVERED', label: 'Delivered', icon: '🎉' }
+  ];
 
   constructor(private shop: Shop, private auth: Auth) {}
 
@@ -93,8 +116,13 @@ export class Orders implements OnInit {
     if (isNaN(t)) return 0;
     return Math.floor((Date.now() - t) / 86400000);
   }
+  statusLabel(s: string): string {
+    const f = this.stages.find(x => x.key === s);
+    return f ? f.label : (s || '').replace(/_/g, ' ');
+  }
+
   tlClass(cur: string, s: string): string {
-    const order = ['PLACED', 'SHIPPED', 'DELIVERED'];
+    const order = ['PLACED', 'CONFIRMED', 'PACKED', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED'];
     if (cur === 'CANCELLED') return s === 'PLACED' ? 'bad' : '';
     const ci = order.indexOf(cur), si = order.indexOf(s);
     if (si < ci) return 'done';

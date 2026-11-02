@@ -1,6 +1,7 @@
 package com.ecom.order.controller;
 
 import com.ecom.order.dto.CheckoutRequest;
+import com.ecom.order.entity.DeliveryTracking;
 import com.ecom.order.entity.Order;
 import com.ecom.order.service.OrderService;
 import jakarta.validation.Valid;
@@ -49,5 +50,28 @@ public class OrderController {
   @PutMapping("/api/orders/{orderId}/payment")
   public Order payment(@PathVariable String orderId, @RequestBody Map<String, String> body) {
     return svc.updatePayment(orderId, body.getOrDefault("paymentStatus", "PAID"));
+  }
+
+  @GetMapping("/api/orders/{orderId}/tracking")
+  public DeliveryTracking tracking(@PathVariable String orderId,
+      @RequestHeader(value = "X-User-Id", required = false) String userId,
+      @RequestHeader(value = "X-Role", required = false) String role) {
+    return svc.getTracking(orderId, userId, role);
+  }
+
+  @PutMapping("/api/orders/{orderId}/tracking/location")
+  public DeliveryTracking updateLocation(@PathVariable String orderId, @RequestBody Map<String, Object> body) {
+    double lat = ((Number) body.getOrDefault("lat", 0.0)).doubleValue();
+    double lng = ((Number) body.getOrDefault("lng", 0.0)).doubleValue();
+    double heading = ((Number) body.getOrDefault("heading", 0.0)).doubleValue();
+    double distanceKm = ((Number) body.getOrDefault("distanceKm", -1.0)).doubleValue();
+    int estMins = ((Number) body.getOrDefault("estimatedMinutes", -1)).intValue();
+    String status = (String) body.get("status");
+    return svc.updateCourierLocation(orderId, lat, lng, heading, distanceKm, estMins, status);
+  }
+
+  @PostMapping("/api/orders/{orderId}/tracking/reset")
+  public DeliveryTracking resetTracking(@PathVariable String orderId) {
+    return svc.resetTracking(orderId);
   }
 }

@@ -22,6 +22,7 @@ public class Order {
   private ShippingAddress shippingAddress; // snapshot at checkout — never auto-updated
   private Instant orderDate = Instant.now();
   private Instant deliveredDate;
+  private DeliveryTracking deliveryTracking;
 
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
@@ -51,6 +52,8 @@ public class Order {
   public void setAddressId(String addressId) { this.addressId = addressId; }
   public ShippingAddress getShippingAddress() { return shippingAddress; }
   public void setShippingAddress(ShippingAddress shippingAddress) { this.shippingAddress = shippingAddress; }
+  public DeliveryTracking getDeliveryTracking() { return deliveryTracking; }
+  public void setDeliveryTracking(DeliveryTracking deliveryTracking) { this.deliveryTracking = deliveryTracking; }
 
   public static class OrderItem {
     private String productId;
