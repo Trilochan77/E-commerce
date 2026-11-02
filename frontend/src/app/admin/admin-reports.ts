@@ -217,3 +217,4 @@ export class AdminReports implements OnInit {
     return this.orders.filter(o => (o.paymentMethod || '').toUpperCase() === method).length;
   }
 }
+
