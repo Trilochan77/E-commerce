@@ -151,6 +151,7 @@ export class ProductDetail implements OnInit, OnDestroy {
             error: () => undefined
           });
         }
+        this.shop.recordRecentlyViewed(p);
         if (this.auth.isLoggedIn()) {
           this.shop.logView(this.auth.userId(), id).subscribe({ error: () => undefined });
           this.shop.recommendations(this.auth.userId(), 6).subscribe({

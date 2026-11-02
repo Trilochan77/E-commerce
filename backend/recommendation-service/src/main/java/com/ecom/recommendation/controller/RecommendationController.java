@@ -74,4 +74,10 @@ public class RecommendationController {
       @RequestParam(defaultValue = "20") int limit) {
     return svc.browsingHistory(userId, limit);
   }
+
+  @DeleteMapping("/api/activity/history/{userId}")
+  public Map<String, Object> clearHistory(@PathVariable String userId) {
+    long deleted = svc.clearBrowsingHistory(userId);
+    return Map.of("deleted", deleted, "userId", userId);
+  }
 }

@@ -41,11 +41,43 @@ export class Shop {
     return this.http.get(`${GATEWAY}/api/products/compare?ids=${encodeURIComponent(ids.join(','))}`);
   }
 
-  search(q: string, category = '', sort = ''): Observable<any> {
-    let params = new HttpParams().set('q', q);
-    if (category) params = params.set('category', category);
-    if (sort) params = params.set('sort', sort);
+  search(
+    optsOrQ: {
+      q?: string;
+      category?: string;
+      brand?: string;
+      minPrice?: number | null;
+      maxPrice?: number | null;
+      minRating?: number | null;
+      sort?: string;
+      page?: number;
+      size?: number;
+    } | string,
+    legacyCategory = '',
+    legacySort = ''
+  ): Observable<any> {
+    let params = new HttpParams();
+    if (typeof optsOrQ === 'string') {
+      if (optsOrQ) params = params.set('q', optsOrQ);
+      if (legacyCategory) params = params.set('category', legacyCategory);
+      if (legacySort) params = params.set('sort', legacySort);
+    } else if (optsOrQ) {
+      if (optsOrQ.q) params = params.set('q', optsOrQ.q);
+      if (optsOrQ.category) params = params.set('category', optsOrQ.category);
+      if (optsOrQ.brand) params = params.set('brand', optsOrQ.brand);
+      if (optsOrQ.minPrice != null && optsOrQ.minPrice > 0) params = params.set('minPrice', optsOrQ.minPrice.toString());
+      if (optsOrQ.maxPrice != null && optsOrQ.maxPrice > 0) params = params.set('maxPrice', optsOrQ.maxPrice.toString());
+      if (optsOrQ.minRating != null && optsOrQ.minRating > 0) params = params.set('minRating', optsOrQ.minRating.toString());
+      if (optsOrQ.sort) params = params.set('sort', optsOrQ.sort);
+      if (optsOrQ.page != null) params = params.set('page', optsOrQ.page.toString());
+      if (optsOrQ.size != null) params = params.set('size', optsOrQ.size.toString());
+    }
     return this.http.get(`${GATEWAY}/api/search`, { params, headers: this.userHeader() });
+  }
+
+  searchSuggestions(q: string): Observable<Array<{ type: string; text: string; title: string; id?: string; price?: string; image?: string; brand?: string }>> {
+    const params = new HttpParams().set('q', q || '');
+    return this.http.get<any[]>(`${GATEWAY}/api/search/suggestions`, { params });
   }
 
   recommendations(userId: string, limit = 8): Observable<any> {
@@ -85,6 +117,39 @@ export class Shop {
 
   history(userId: string): Observable<any> {
     return this.http.get(`${GATEWAY}/api/activity/history/${userId}?limit=20`);
+  }
+
+  clearHistory(userId: string): Observable<any> {
+    this.clearLocalRecentlyViewed();
+    return this.http.delete(`${GATEWAY}/api/activity/history/${userId}`);
+  }
+
+  /* ---- Local recently viewed tracking (guest + zero-latency caching) ---- */
+  recordRecentlyViewed(product: any): void {
+    if (!product) return;
+    const pid = product.productId || product.id || product._id;
+    if (!pid) return;
+    try {
+      const existing = this.getLocalRecentlyViewed();
+      const filtered = existing.filter((p: any) => (p.productId || p.id || p._id) !== pid);
+      const updated = [product, ...filtered].slice(0, 15);
+      localStorage.setItem('ecom_recently_viewed', JSON.stringify(updated));
+    } catch (e) {}
+  }
+
+  getLocalRecentlyViewed(): any[] {
+    try {
+      const raw = localStorage.getItem('ecom_recently_viewed');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  clearLocalRecentlyViewed(): void {
+    try {
+      localStorage.removeItem('ecom_recently_viewed');
+    } catch {}
   }
 
   /** Grounded shopping assistant: deterministic rules + live catalog retrieval. */

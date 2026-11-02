@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -277,22 +278,42 @@ public class RecommendationService {
     return Math.round(value * 1000.0) / 1000.0;
   }
 
-  /** Browsing history (SRS 3.1.7): VIEW events enriched with product info, newest first. */
+  /** Browsing history (SRS 3.1.7): VIEW events enriched with product info, newest first, strictly deduplicated. */
   public Map<String, Object> browsingHistory(String userId, int limit) {
     List<UserActivity> views = activities.findByUserIdAndTypeOrderByTimestampDesc(userId, "VIEW");
     List<Map<String, Object>> items = new ArrayList<>();
-    for (UserActivity a : views.stream().limit(Math.min(Math.max(limit, 1), 100)).toList()) {
+    Set<String> seen = new LinkedHashSet<>();
+    int max = Math.min(Math.max(limit, 1), 50);
+
+    for (UserActivity a : views) {
+      String pid = a.getProductId();
+      if (pid == null || pid.isBlank()) continue;
+      if (!seen.add(pid)) continue; // Avoid duplicate entries
+
       Map<String, Object> m = new LinkedHashMap<>();
-      m.put("productId", a.getProductId());
+      m.put("productId", pid);
+      m.put("id", pid);
       m.put("viewedAt", a.getTimestamp());
-      products.findById(a.getProductId()).ifPresent(p -> {
+      products.findById(pid).ifPresent(p -> {
         m.put("name", p.getName());
         m.put("price", p.getPrice());
         m.put("category", p.getCategoryId());
+        m.put("categoryId", p.getCategoryId());
         m.put("image", p.getImages() == null || p.getImages().isEmpty() ? null : p.getImages().get(0));
+        m.put("images", p.getImages());
+        m.put("availability", p.isAvailability());
+        m.put("stockQuantity", p.getStockQuantity());
+        m.put("averageRating", p.getAverageRating());
+        m.put("reviewCount", p.getReviewCount());
+        m.put("eligibleForReturn", p.isEligibleForReturn());
       });
       items.add(m);
+      if (items.size() >= max) break;
     }
     return Map.of("userId", userId, "items", items, "count", items.size());
+  }
+
+  public long clearBrowsingHistory(String userId) {
+    return activities.deleteByUserIdAndType(userId, "VIEW");
   }
 }

@@ -95,6 +95,34 @@ import { EmptyState } from '../shared/empty-state';
       <p class="muted" *ngIf="!loadingRec && !recommendations.length">Browse or search to personalize this section. New accounts see trending items.</p>
     </div>
 
+    <!-- Recently Viewed Products -->
+    <div class="card" *ngIf="recentlyViewedProducts.length" style="border-color:rgba(168,85,247,0.3);background:linear-gradient(145deg,rgba(15,23,42,0.95),rgba(30,27,75,0.25))">
+      <div class="section-title">
+        <div style="display:flex;align-items:center;gap:10px">
+          <h2 style="display:flex;align-items:center;gap:8px"><span>🕒</span> Recently Viewed Products</h2>
+          <span class="badge violet">Browsing History ({{ recentlyViewedProducts.length }})</span>
+        </div>
+        <button class="btn-ghost btn-sm" (click)="clearRecentlyViewed()" style="font-size:12px;color:#94a3b8">Clear history</button>
+      </div>
+      <div class="rail">
+        <app-product-card *ngFor="let p of recentlyViewedProducts" [product]="p"></app-product-card>
+      </div>
+    </div>
+
+    <!-- Recommendations Based on Browsing History -->
+    <div class="card" *ngIf="browsingRecommendations.length">
+      <div class="section-title">
+        <div style="display:flex;align-items:center;gap:10px">
+          <h2 style="display:flex;align-items:center;gap:8px"><span>🎯</span> Inspired by Your Browsing History</h2>
+          <span class="badge violet">Relevant recommendations</span>
+        </div>
+        <span class="muted" style="font-size:12px" *ngIf="browsingSources.length">Based on: {{ browsingSources.slice(0, 2).join(', ') }}</span>
+      </div>
+      <div class="rail">
+        <app-product-card *ngFor="let p of browsingRecommendations" [product]="p"></app-product-card>
+      </div>
+    </div>
+
     <div class="card" *ngIf="becauseItems.length">
       <div class="section-title">
         <h2>Because You Viewed {{ becauseSource }}</h2>
@@ -161,6 +189,9 @@ export class Home implements OnInit {
   recommendations: any[] = [];
   trendingItems: any[] = [];
   popularItems: any[] = [];
+  recentlyViewedProducts: any[] = [];
+  browsingRecommendations: any[] = [];
+  browsingSources: string[] = [];
   becauseItems: any[] = [];
   becauseSource = '';
   strategy = '';
@@ -192,6 +223,9 @@ export class Home implements OnInit {
       error: () => (this.loadingPopular = false)
     });
 
+    // Initialize recently viewed products (local cache + server sync)
+    this.recentlyViewedProducts = this.shop.getLocalRecentlyViewed();
+
     if (this.auth.isLoggedIn()) {
       const userId = this.auth.userId();
       this.loadingRec = true;
@@ -204,13 +238,32 @@ export class Home implements OnInit {
         error: () => (this.loadingRec = false)
       });
       // "Because you viewed X" — content-based recommendations from recent views.
-      this.shop.recentlyViewedRecommendations(userId, 6).subscribe({
+      this.shop.history(userId).subscribe({
         next: (r: any) => {
+          if (r?.items && r.items.length) {
+            this.recentlyViewedProducts = r.items;
+          }
+        },
+        error: () => undefined
+      });
+      this.shop.recentlyViewedRecommendations(userId, 8).subscribe({
+        next: (r: any) => {
+          this.browsingRecommendations = r.coldStart ? [] : (r.items || []);
+          this.browsingSources = r.sources || [];
           this.becauseItems = r.coldStart ? [] : (r.items || []);
           this.becauseSource = (r.sources && r.sources.length) ? r.sources[0] : '';
         },
         error: () => undefined
       });
+    }
+  }
+
+  clearRecentlyViewed(): void {
+    this.recentlyViewedProducts = [];
+    this.browsingRecommendations = [];
+    this.shop.clearLocalRecentlyViewed();
+    if (this.auth.isLoggedIn()) {
+      this.shop.clearHistory(this.auth.userId()).subscribe({ error: () => undefined });
     }
   }
 

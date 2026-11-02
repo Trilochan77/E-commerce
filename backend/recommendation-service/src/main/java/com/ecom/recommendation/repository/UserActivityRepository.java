@@ -9,4 +9,5 @@ public interface UserActivityRepository extends MongoRepository<UserActivity, St
   List<UserActivity> findTop200ByUserIdOrderByTimestampDesc(String userId);
   List<UserActivity> findByUserIdAndTypeOrderByTimestampDesc(String userId, String type);
   List<UserActivity> findTop2000ByTimestampAfterOrderByTimestampDesc(Instant after);
+  long deleteByUserIdAndType(String userId, String type);
 }
