@@ -150,6 +150,9 @@ import { AppLogo } from '../shared/app-logo';
             {{ busy ? 'Logging in…' : 'Login' }}
           </button>
 
+          <p class="ok-msg" *ngIf="successMsg" style="color:#10b981;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);padding:10px 14px;border-radius:8px;margin:12px 0;font-size:14px;font-weight:500;">
+            ✓ {{ successMsg }}
+          </p>
           <p class="error" *ngIf="error">{{ error }}</p>
           <p class="auth-switch">No account? <a routerLink="/register" [queryParams]="returnUrl ? { returnUrl } : {}">Create one</a> · Admin? <a routerLink="/admin/login">Console sign in</a></p>
         </form>
@@ -168,6 +171,7 @@ export class Login implements OnInit {
   newPassword = '';
   confirmNew = '';
   error = '';
+  successMsg = '';
   busy = false;
   show = false;
   showNew = false;
@@ -210,6 +214,7 @@ export class Login implements OnInit {
     this.otpStep = 1;
     this.forgotStep = 1;
     this.error = '';
+    this.successMsg = '';
     this.email = '';
     this.password = '';
     this.otpCode = '';
@@ -379,15 +384,22 @@ export class Login implements OnInit {
       if (!this.newPassword || this.newPassword.length < 6 || this.confirmNew !== this.newPassword) return;
       this.busy = true;
       this.auth.resetPassword(this.otpToken, this.newPassword).subscribe({
-        next: (r: any) => {
+        next: () => {
           this.busy = false;
-          localStorage.setItem('ecom_token', r.token);
-          localStorage.setItem('ecom_userId', r.userId || '');
-          localStorage.setItem('ecom_role', r.role || 'CUSTOMER');
-          localStorage.setItem('ecom_email', r.email || '');
-          localStorage.setItem('ecom_name', r.name || '');
-          this.toast.ok('Password reset — welcome back!');
-          this.router.navigateByUrl(this.target());
+          // Clear any stored reset session so user enters credentials on login
+          this.auth.logout();
+
+          // Redirect to password login tab with preserved email
+          this.mode = 'password';
+          this.forgotStep = 1;
+          this.otpCode = '';
+          this.otpToken = '';
+          this.newPassword = '';
+          this.confirmNew = '';
+          this.password = '';
+          this.error = '';
+          this.successMsg = 'Password reset successfully! Please log in with your new password.';
+          this.toast.ok('Password reset successfully! Please log in with your new password.');
         },
         error: (e) => {
           this.busy = false;
