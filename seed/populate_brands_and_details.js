@@ -452,3 +452,4 @@ for (const u of updates) {
 }
 
 print("Successfully updated " + updatedCount + " products with brand, detailed description, highlights, and specifications.");
+
