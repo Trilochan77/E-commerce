@@ -360,6 +360,60 @@ spring:
 
 **Honesty note:** in-app alerts are always real records derived from stored catalog prices. The UI never shows a "sent" email unless SMTP actually accepted it; with the default configuration it shows **Email alerts off**.
 
+
+
+## 🎡 Spin & Win Rewards
+
+### How It Works
+- Users receive **one free spin per calendar day** (Asia/Kolkata timezone).
+- The server selects a weighted prize outcome; the browser only sees the winning segment index.
+- Prizes include **discount coupons** (single-use, with expiry, min-order, and per-user limits) and **reward points** (instant wallet credit).
+- Each spin result is recorded in the `spin_results` collection with a unique `(userId, spinDate)` index to prevent repeated-spin abuse.
+- Won coupons are bound to the winner, stored in the `coupons` collection, and can be applied during checkout.
+
+### Prize Table
+| Index | Emoji | Label | Type | Discount / Points | Min Order | Max Uses | Valid Until |
+|-------|-------|-------|------|-------------------|-----------|----------|-------------|
+| 0 | 🟣 | 5% OFF | PERCENT | 5% off (up to ₹500) | ₹200 | 5 total uses | 7 days |
+| 1 | ⭐ | 50 PTS | POINTS | 50 reward points | N/A | 1 per user | N/A |
+| 2 | 🟧 | 10% OFF | PERCENT | 10% off (up to ₹300) | ₹500 | 300 total uses | 7 days |
+| 3 | 🎁 | ₹100 OFF | FLAT | ₹100 off | ₹0 | 300 total uses | 7 days |
+| 4 | ⛔ | TRY AGAIN | NONE | — | — | — | — |
+| 5 | 🤩 | 15% OFF | PERCENT | 15% off (up to ₹750) | ₹750 | 150 total uses | 5 days |
+| 6 | ⚙️ | 100 PTS | POINTS | 100 reward points | N/A | 1 per user | N/A |
+| 7 | 🔴 | 20% OFF | PERCENT | 20% off (up to ₹1,000) | ₹1,000 | 75 total uses | 3 days |
+
+### API Endpoints
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/rewards/spin/prizes` | Return the full prize table (wheel layout, weights, labels). |
+| `GET` | `/api/rewards/spin/status?userId=UID` | Whether the user can spin today, next available spin time, and last result. |
+| `POST` | `/api/rewards/spin` | Server-authoritative spin — records the result, returns wheel index + prize. |
+| `POST` | `/api/rewards/coupons/validate` | Validate a coupon code against a cart subtotal (no usage consumed). |
+| `POST` | `/api/rewards/coupons/reserve` | Reserve a coupon during checkout (holds it while payment is in flight). |
+| `POST` | `/api/rewards/coupons/{reservationId}/confirm` | Confirm the coupon after the order is placed. |
+| `POST` | `/api/rewards/coupons/{reservationId}/release` | Release the hold after a failed payment / abandoned checkout. |
+| `GET` | `/api/rewards/coupons/user/{userId}` | List all coupons owned by a user with their current status. |
+
+### Anti-Abuse Rules
+- **Daily limit**: Exactly one spin per user per calendar day in Asia/Kolkata. A unique Mongo index on `(userId, spinDate)` blocks concurrent double spins.
+- **Coupon uniqueness**: Each code is unique across the system (`uniq_coupon_code` index).
+- **Per-user limit**: A user can use a specific coupon code only once (`perUserLimit`).
+- **Total usage**: Each coupon has a `maxUses` cap across all users.
+- **Reservation → confirmation**: A checkout first *reserves* a coupon, then *confirms* it only after the order exists, so failed payments never consume a coupon.
+
+### Configuration
+Spin properties are configured in `return-reward-service` `application.yml` under the `spin` prefix:
+- `spin.zone` — timezone for daily reset (default: `Asia/Kolkata`)
+- `spin.couponValidityDays` — default expiry for spin-won coupons (default: `7`)
+- `spin.reservationMinutes` — how long a reservation holds a coupon before it's released (default: `15`)
+
+### Frontend
+- `/spin` route opens the **Spin & Win** wheel UI.
+- Navbar link: **🎡 Spin & Win** (visible when logged in).
+- The wheel uses canvas rendering with smooth deceleration animation.
+- Won rewards appear in a celebration modal with coupon code copy-to-clipboard.
+
 ---
 
 ## 📁 Repository Structure

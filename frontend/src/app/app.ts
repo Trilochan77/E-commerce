@@ -236,6 +236,7 @@ import { filter } from 'rxjs';
           <a routerLink="/returns">Condition-Based Returns</a>
           <a routerLink="/wallet">Reward Wallet Credits</a>
           <a routerLink="/notifications">Price Drop Alerts</a>
+          <a routerLink="/spin" *ngIf="auth.isLoggedIn()" routerLinkActive="active" class="nav-link hide-m">🎡 Spin & Win</a>
           <a routerLink="/profile">Account Settings</a>
         </div>
 
