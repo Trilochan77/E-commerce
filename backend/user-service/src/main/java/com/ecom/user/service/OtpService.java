@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class OtpService {
 
+  private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OtpService.class);
   private static final long OTP_TTL_MILLIS = 5 * 60 * 1000;   // 5 minutes
   private static final long OTP_TOKEN_TTL_MILLIS = 5 * 60 * 1000; // 5 minutes
 
@@ -40,6 +41,7 @@ public class OtpService {
   public OtpSendResult sendOtp(String emailAddr) {
     String otp = String.format("%06d", new Random().nextInt(1_000_000));
     store.put(emailAddr.toLowerCase(), new OtpRecord(otp, System.currentTimeMillis(), false));
+    log.info("[OTP] Generated code for {}: {}", emailAddr, otp);
     boolean sent = email.sendOtp(emailAddr, otp);
     return new OtpSendResult(otp, sent);
   }

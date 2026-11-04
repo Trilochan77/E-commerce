@@ -164,6 +164,7 @@ export class Login implements OnInit {
   email = '';
   password = '';
   otpCode = '';
+  otpToken = '';
   newPassword = '';
   confirmNew = '';
   error = '';
@@ -322,8 +323,8 @@ export class Login implements OnInit {
     this.auth.verifyOtp(this.email.trim(), this.otpCode).subscribe({
       next: (r: any) => {
         this.busy = false;
-        const otpToken = r?.otpToken || '';
-        if (otpToken) {
+        this.otpToken = r?.otpToken || '';
+        if (this.otpToken) {
           this.forgotStep = 3;
         } else {
           this.error = 'Verification failed — try again.';
@@ -377,7 +378,7 @@ export class Login implements OnInit {
     if (this.mode === 'forgot') {
       if (!this.newPassword || this.newPassword.length < 6 || this.confirmNew !== this.newPassword) return;
       this.busy = true;
-      this.auth.resetPassword(this.otpCode, this.newPassword).subscribe({
+      this.auth.resetPassword(this.otpToken, this.newPassword).subscribe({
         next: (r: any) => {
           this.busy = false;
           localStorage.setItem('ecom_token', r.token);

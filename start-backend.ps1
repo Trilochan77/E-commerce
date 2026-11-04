@@ -103,8 +103,10 @@ foreach ($svc in $services) {
         $javaArgs = @("-Xmx256m", "-Djava.net.preferIPv4Stack=true")
         if ($env:MAIL_USERNAME) { $javaArgs += "-DMAIL_USERNAME=$($env:MAIL_USERNAME)" }
         if ($env:MAIL_PASSWORD) { $javaArgs += "-DMAIL_PASSWORD=$($env:MAIL_PASSWORD)" }
-        $javaArgs += @("-jar", "`"$jarFull`"")
-        Start-Process -FilePath "java" -ArgumentList $javaArgs -WorkingDirectory (Split-Path $jarFull) -RedirectStandardOutput $logFile -RedirectStandardError $errLog -WindowStyle Hidden
+        $jarLeaf = Split-Path $jarFull -Leaf
+        $jarDir = Split-Path $jarFull
+        $javaArgs += @("-jar", $jarLeaf)
+        Start-Process -FilePath "java" -ArgumentList $javaArgs -WorkingDirectory $jarDir -RedirectStandardOutput $logFile -RedirectStandardError $errLog -WindowStyle Hidden
     } else {
         Write-Host ("  [STARTING MAVEN]  {0,-25} (port {1})..." -f $name, $port)
         $cmdArgs = "/c start /b `"`" cmd /c `"set JWT_SECRET=$env:JWT_SECRET&& mvn -q -pl $name -am spring-boot:run > `"$logFile`" 2>&1`"`""
