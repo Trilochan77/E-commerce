@@ -1,15 +1,17 @@
 package com.ecom.product.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Map;
 
 public record ProductRequest(
-    @NotBlank String name,
+    String name,
     String description,
     String brand,
-    @Min(0) double price,
+    double price,
     String categoryId,
     List<String> images,
-    @Min(0) int stockQuantity,
-    boolean eligibleForReturn) {}
+    int stockQuantity,
+    boolean availability,
+    boolean eligibleForReturn,
+    List<String> highlights,
+    Map<String, String> specifications) {}

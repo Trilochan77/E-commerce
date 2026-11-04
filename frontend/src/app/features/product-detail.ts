@@ -187,13 +187,26 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
         <button [class.active]="tab==='reco'" (click)="tab='reco'">AI Recommender Score</button>
       </div>
 
-      <!-- Tab 1: Overview -->
+      <!-- Tab 1: Overview & Features -->
       <div *ngIf="tab==='desc'" style="padding:10px 4px">
-        <p class="muted" style="font-size:14px;line-height:1.7">{{ product.description }}</p>
-        <div class="specs-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:14px">
+        <p class="muted" style="font-size:14.5px;line-height:1.75;margin-bottom:18px">{{ product.description }}</p>
+
+        <!-- Highlights section if available -->
+        <div *ngIf="product.highlights && product.highlights.length" style="margin-bottom:20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:16px 20px">
+          <h4 style="margin:0 0 12px;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:var(--brand-3,#a78bfa);font-weight:700">Key Highlights &amp; Features</h4>
+          <ul style="margin:0;padding-left:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">
+            <li *ngFor="let h of product.highlights" style="display:flex;align-items:flex-start;gap:8px;font-size:13.5px;color:#e2e8f0">
+              <span style="color:#10b981;font-weight:700">✓</span>
+              <span>{{ h }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <h4 style="margin:18px 0 10px;font-size:13px;letter-spacing:0.04em;text-transform:uppercase;color:var(--brand-3,#a78bfa);font-weight:700">Product Details &amp; Specifications</h4>
+        <div class="specs-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
           <div class="spec-row">
             <span class="muted">Brand</span>
-            <strong>{{ brandName() || 'NEXGEN Premium' }}</strong>
+            <strong style="color:#a78bfa">{{ brandName() || 'NEXGEN Premium' }}</strong>
           </div>
           <div class="spec-row">
             <span class="muted">Category</span>
@@ -203,7 +216,11 @@ const MULT: Record<string, number> = { LIKE_NEW: 0.8, GOOD: 0.6, FAIR: 0.4, POOR
             <span class="muted">Stock Status</span>
             <strong>{{ inStock() ? 'Available' : 'Out of Stock' }} ({{ product.stockQuantity || 0 }} units)</strong>
           </div>
-          <div class="spec-row">
+          <div class="spec-row" *ngFor="let s of specEntries()">
+            <span class="muted">{{ s.key }}</span>
+            <strong>{{ s.value }}</strong>
+          </div>
+          <div class="spec-row" *ngIf="!hasWarrantyInSpecs()">
             <span class="muted">Warranty</span>
             <strong>1 Year Official Brand Warranty</strong>
           </div>
@@ -869,6 +886,21 @@ export class ProductDetail implements OnInit, OnDestroy {
       if (name.includes(b.toLowerCase())) return b;
     }
     return '';
+  }
+
+  specEntries(): { key: string; value: string }[] {
+    if (!this.product?.specifications) return [];
+    if (typeof this.product.specifications === 'object') {
+      return Object.entries(this.product.specifications)
+        .filter(([k]) => k !== 'Brand' && k !== 'Category')
+        .map(([key, value]) => ({ key, value: String(value) }));
+    }
+    return [];
+  }
+
+  hasWarrantyInSpecs(): boolean {
+    if (!this.product?.specifications) return false;
+    return Object.keys(this.product.specifications).some(k => k.toLowerCase().includes('warranty'));
   }
 
   categoryLabel(): string {

@@ -78,6 +78,8 @@ public class ProductService {
     p.setStockQuantity(req.stockQuantity());
     p.setAvailability(req.stockQuantity() > 0);
     p.setEligibleForReturn(req.eligibleForReturn());
+    if (req.highlights() != null) p.setHighlights(req.highlights());
+    if (req.specifications() != null) p.setSpecifications(req.specifications());
     p.setUpdatedAt(Instant.now());
   }
 

@@ -55,8 +55,10 @@ import { ProductVisual } from './product-visual';
 
       <div class="product-content">
         <div class="meta-header">
-          <span class="brand-pill" *ngIf="brandName()">{{ brandName() }}</span>
-          <span class="category-pill" *ngIf="!brandName()">{{ categoryName() }}</span>
+          <div style="display:flex;align-items:center;gap:5px;overflow:hidden">
+            <span class="brand-pill" *ngIf="brandName()">{{ brandName() }}</span>
+            <span class="category-pill" *ngIf="categoryName()" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">· {{ categoryName() }}</span>
+          </div>
 
           <div class="rating-badge" *ngIf="product?.reviewCount > 0">
             <span class="star-icon">★</span>
@@ -69,6 +71,10 @@ import { ProductVisual } from './product-visual';
         <h4 class="product-title">
           <a [routerLink]="['/products', id()]" [title]="product?.name">{{ product?.name }}</a>
         </h4>
+
+        <p class="product-snippet" *ngIf="product?.description" style="margin:2px 0 0;font-size:11.5px;color:#94a3b8;line-height:1.4;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden">
+          {{ product.description }}
+        </p>
 
         <div class="pricing-container">
           <div class="price-stack">

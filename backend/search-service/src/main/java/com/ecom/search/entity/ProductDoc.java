@@ -2,6 +2,7 @@ package com.ecom.search.entity;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -19,6 +20,8 @@ public class ProductDoc {
   private boolean eligibleForReturn;
   private double averageRating = 0.0;
   private int reviewCount = 0;
+  private List<String> highlights;
+  private Map<String, String> specifications;
   private Instant createdAt = Instant.now();
 
   public String getId() { return id; }
@@ -45,6 +48,10 @@ public class ProductDoc {
   public void setAverageRating(double averageRating) { this.averageRating = averageRating; }
   public int getReviewCount() { return reviewCount; }
   public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
+  public List<String> getHighlights() { return highlights; }
+  public void setHighlights(List<String> highlights) { this.highlights = highlights; }
+  public Map<String, String> getSpecifications() { return specifications; }
+  public void setSpecifications(Map<String, String> specifications) { this.specifications = specifications; }
   public Instant getCreatedAt() { return createdAt; }
   public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

@@ -346,8 +346,10 @@ export class ProductList implements OnInit, OnDestroy {
   items: any[] = [];
   categories: any[] = [];
   availableBrands: string[] = [
-    'Apple', 'Samsung', 'Sony', 'OnePlus', 'boAt', 'Realme', 'Boult', 'Noise',
-    'Dell', 'ASUS', 'HP', 'Lenovo', 'Acer', 'JBL', 'Bose', 'Marshall'
+    'Apple', 'Samsung', 'Sony', 'OnePlus', 'Dell', 'HP', 'Lenovo', 'ASUS', 'Acer',
+    'JBL', 'boAt', 'Bose', 'Marshall', 'Boult', 'Noise', 'Realme', 'Nike', "Levi's",
+    'Philips', 'Prestige', 'Havells', 'Bajaj', 'Decathlon', 'Yonex', 'Milton', 'Puma',
+    'Penguin Books', "O'Reilly Media"
   ];
   suggestions: any[] = [];
   showSuggestions = false;
