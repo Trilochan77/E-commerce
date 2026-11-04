@@ -29,16 +29,19 @@ public class OtpService {
   private String jwtSecret;
 
   public record OtpRecord(String otp, long createdAt, boolean verified) {}
+  public record OtpSendResult(String otp, boolean emailSent) {}
 
   public OtpService(EmailService email) {
     this.email = email;
   }
 
-  /** Generate + store a fresh OTP for the email and deliver it by email. */
-  public void sendOtp(String emailAddr) {
+  /** Generate + store a fresh OTP for the email and deliver it by email.
+   *  Returns the generated OTP and whether email delivery succeeded. */
+  public OtpSendResult sendOtp(String emailAddr) {
     String otp = String.format("%06d", new Random().nextInt(1_000_000));
     store.put(emailAddr.toLowerCase(), new OtpRecord(otp, System.currentTimeMillis(), false));
-    email.sendOtp(emailAddr, otp);
+    boolean sent = email.sendOtp(emailAddr, otp);
+    return new OtpSendResult(otp, sent);
   }
 
   /** Verify the OTP for the email. Returns an OtpVerifyResponse with a short-lived
@@ -86,8 +89,8 @@ public class OtpService {
   }
 
   /** Resend: invalidate any existing OTP for the email and issue a new one. */
-  public void resendOtp(String emailAddr) {
+  public OtpSendResult resendOtp(String emailAddr) {
     store.remove(emailAddr.toLowerCase());
-    sendOtp(emailAddr);
+    return sendOtp(emailAddr);
   }
 }

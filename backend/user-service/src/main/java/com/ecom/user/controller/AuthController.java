@@ -41,8 +41,12 @@ public class AuthController {
   @PostMapping("/api/users/otp/send")
   public OtpSendResponse sendOtp(@Valid @RequestBody OtpSendRequest req) {
     String email = req.email().trim().toLowerCase();
-    otp.sendOtp(email);
-    return new OtpSendResponse("OTP sent to " + email);
+    var res = otp.sendOtp(email);
+    if (res.emailSent()) {
+      return new OtpSendResponse("OTP sent to " + email, null, true);
+    } else {
+      return new OtpSendResponse("Email service offline or unreachable. Use demo verification code.", res.otp(), false);
+    }
   }
 
   @PostMapping("/api/users/otp/verify")
@@ -68,8 +72,12 @@ public class AuthController {
   @PostMapping("/api/users/forgot-password")
   public OtpSendResponse forgotPassword(@Valid @RequestBody ForgotPasswordRequest req) {
     String email = req.email().trim().toLowerCase();
-    otp.sendOtp(email);
-    return new OtpSendResponse("OTP sent to " + email);
+    var res = otp.sendOtp(email);
+    if (res.emailSent()) {
+      return new OtpSendResponse("OTP sent to " + email, null, true);
+    } else {
+      return new OtpSendResponse("Email service offline or unreachable. Use demo verification code.", res.otp(), false);
+    }
   }
 
   @PostMapping("/api/users/reset-password")

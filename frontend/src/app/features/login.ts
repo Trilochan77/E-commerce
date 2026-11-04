@@ -237,7 +237,16 @@ export class Login implements OnInit {
     this.error = '';
     this.busy = true;
     this.auth.sendOtp(this.email.trim()).subscribe({
-      next: () => { this.busy = false; this.otpStep = 2; },
+      next: (res: any) => {
+        this.busy = false;
+        this.otpStep = 2;
+        if (res?.devOtp) {
+          this.otpCode = res.devOtp;
+          this.toast.ok(`Offline mode: Demo OTP is ${res.devOtp}`);
+        } else {
+          this.toast.ok('Verification code sent to your email.');
+        }
+      },
       error: (e) => {
         this.busy = false;
         this.error = e?.status === 409
@@ -252,7 +261,15 @@ export class Login implements OnInit {
     this.error = '';
     this.busy = true;
     this.auth.sendOtp(this.email.trim()).subscribe({
-      next: () => { this.busy = false; this.toast.ok('A new OTP was sent.'); },
+      next: (res: any) => {
+        this.busy = false;
+        if (res?.devOtp) {
+          this.otpCode = res.devOtp;
+          this.toast.ok(`Offline mode: Demo OTP is ${res.devOtp}`);
+        } else {
+          this.toast.ok('A new OTP was sent to your email.');
+        }
+      },
       error: () => { this.busy = false; this.error = 'Could not resend OTP. Try again.'; }
     });
   }
@@ -263,7 +280,16 @@ export class Login implements OnInit {
     this.error = '';
     this.busy = true;
     this.auth.forgotPassword(this.email.trim()).subscribe({
-      next: () => { this.busy = false; this.forgotStep = 2; },
+      next: (res: any) => {
+        this.busy = false;
+        this.forgotStep = 2;
+        if (res?.devOtp) {
+          this.otpCode = res.devOtp;
+          this.toast.ok(`Offline mode: Demo OTP is ${res.devOtp}`);
+        } else {
+          this.toast.ok('Reset code sent to your email.');
+        }
+      },
       error: (e) => {
         this.busy = false;
         this.error = e.error?.message || 'Could not send OTP';
@@ -276,7 +302,15 @@ export class Login implements OnInit {
     this.error = '';
     this.busy = true;
     this.auth.forgotPassword(this.email.trim()).subscribe({
-      next: () => { this.busy = false; this.toast.ok('A new OTP was sent.'); },
+      next: (res: any) => {
+        this.busy = false;
+        if (res?.devOtp) {
+          this.otpCode = res.devOtp;
+          this.toast.ok(`Offline mode: Demo OTP is ${res.devOtp}`);
+        } else {
+          this.toast.ok('A new OTP was sent to your email.');
+        }
+      },
       error: () => { this.busy = false; this.error = 'Could not resend OTP. Try again.'; }
     });
   }

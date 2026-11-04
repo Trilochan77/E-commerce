@@ -18,6 +18,12 @@ if (-not (Test-Path $logsDir)) {
 }
 
 $env:JWT_SECRET = "change-me-dev-secret-min-32-chars-long"
+if (-not $env:MAIL_USERNAME) {
+    $env:MAIL_USERNAME = [System.Environment]::GetEnvironmentVariable('MAIL_USERNAME', 'User')
+}
+if (-not $env:MAIL_PASSWORD) {
+    $env:MAIL_PASSWORD = [System.Environment]::GetEnvironmentVariable('MAIL_PASSWORD', 'User')
+}
 
 Write-Host "`n========================================================" -ForegroundColor Cyan
 Write-Host "  Starting E-Commerce Microservices (Native / No-Docker)" -ForegroundColor Cyan
@@ -94,7 +100,11 @@ foreach ($svc in $services) {
     if ($Mode -eq "jar" -and (Test-Path $jarFull)) {
         Write-Host ("  [STARTING JAR]    {0,-25} (port {1})..." -f $name, $port)
         $errLog = Join-Path $logsDir "$name.err.log"
-        Start-Process -FilePath "java" -ArgumentList "-Xmx256m", "-jar", "`"$jarFull`"" -WorkingDirectory (Split-Path $jarFull) -RedirectStandardOutput $logFile -RedirectStandardError $errLog -WindowStyle Hidden
+        $javaArgs = @("-Xmx256m", "-Djava.net.preferIPv4Stack=true")
+        if ($env:MAIL_USERNAME) { $javaArgs += "-DMAIL_USERNAME=$($env:MAIL_USERNAME)" }
+        if ($env:MAIL_PASSWORD) { $javaArgs += "-DMAIL_PASSWORD=$($env:MAIL_PASSWORD)" }
+        $javaArgs += @("-jar", "`"$jarFull`"")
+        Start-Process -FilePath "java" -ArgumentList $javaArgs -WorkingDirectory (Split-Path $jarFull) -RedirectStandardOutput $logFile -RedirectStandardError $errLog -WindowStyle Hidden
     } else {
         Write-Host ("  [STARTING MAVEN]  {0,-25} (port {1})..." -f $name, $port)
         $cmdArgs = "/c start /b `"`" cmd /c `"set JWT_SECRET=$env:JWT_SECRET&& mvn -q -pl $name -am spring-boot:run > `"$logFile`" 2>&1`"`""
