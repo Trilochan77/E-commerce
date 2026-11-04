@@ -19,7 +19,8 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [],
             "styles": ["src/styles.css"],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": ["qrcode"]
           },
           "configurations": {
             "production": {

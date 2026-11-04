@@ -6,7 +6,6 @@ import { Shop } from '../core/shop';
 import { Auth } from '../core/auth';
 import { Toast } from '../shared/toast';
 import QRCode from 'qrcode';
-import { Spin } from '../core/spin';   // NEW
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -467,16 +466,6 @@ export class Checkout implements OnInit {
   qrCodeData: string | null = null;
   upiVpa = 'demo@upi';   // demo VPA for project demo — replace with your real UPI ID in production
 
-  // NEW: Spin & Win state
-  canSpin = true;
-  spinMessage = '';
-
-  // NEW: Coupon state
-  couponCode = '';
-  couponValid = false;
-  couponDiscount = 0;
-  couponMessage = '';
-
   // UPI page state
   upiTab: 'APP' | 'QR' = 'APP';
   upiApp = 'gpay';
@@ -512,7 +501,7 @@ export class Checkout implements OnInit {
   validatingCoupon = false;
   availableCoupons: any[] = [];
 
-  constructor(private shop: Shop, private auth: Auth, private router: Router, private toast: Toast, private spin: Spin) { }
+  constructor(private shop: Shop, private auth: Auth, private router: Router, private toast: Toast) { }
 
   ngOnInit(): void {
     this.shop.cart(this.auth.userId()).subscribe((c: any) => (this.cart = c));

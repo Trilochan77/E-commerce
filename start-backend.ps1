@@ -93,8 +93,8 @@ foreach ($svc in $services) {
 
     if ($Mode -eq "jar" -and (Test-Path $jarFull)) {
         Write-Host ("  [STARTING JAR]    {0,-25} (port {1})..." -f $name, $port)
-        $cmdArgs = "/c start /b `"`" cmd /c `"set JWT_SECRET=$env:JWT_SECRET&& java -Xmx256m -jar `"$jarFull`" > `"$logFile`" 2>&1`"`""
-        Start-Process -FilePath "cmd.exe" -ArgumentList $cmdArgs -WorkingDirectory (Split-Path $jarFull) -WindowStyle Hidden
+        $errLog = Join-Path $logsDir "$name.err.log"
+        Start-Process -FilePath "java" -ArgumentList "-Xmx256m", "-jar", "`"$jarFull`"" -WorkingDirectory (Split-Path $jarFull) -RedirectStandardOutput $logFile -RedirectStandardError $errLog -WindowStyle Hidden
     } else {
         Write-Host ("  [STARTING MAVEN]  {0,-25} (port {1})..." -f $name, $port)
         $cmdArgs = "/c start /b `"`" cmd /c `"set JWT_SECRET=$env:JWT_SECRET&& mvn -q -pl $name -am spring-boot:run > `"$logFile`" 2>&1`"`""

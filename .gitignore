@@ -12,7 +12,8 @@ target/
 mvnw
 mvnw.cmd
 
-# Spring Boot
+# Logs
+logs/
 *.log
 spring-shell.log
 
@@ -50,3 +51,4 @@ data/
 # Misc
 *.tmp
 *.bak
+*.zip

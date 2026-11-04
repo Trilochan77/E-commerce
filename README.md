@@ -77,8 +77,9 @@ graph TB
         SearchSvc["🔍 search-service (:8083)<br/>• ES Full-Text & Filters"]
         RecSvc["🧠 recommendation-svc (:8084)<br/>• Behavioral Scoring & Cold Start"]
         CartSvc["🛒 cart-service (:8085)<br/>• Cart & Reward Previews"]
-        OrderSvc["💳 order-service (:8086)<br/>• Checkout, Stock Delta, Mock Pay"]
-        ReturnSvc["🔄 return-reward-svc (:8087)<br/>• Condition Eval & Wallet Ledger"]
+        OrderSvc["💳 order-service (:8086)<br/>• Checkout, Stock Delta, Mock Pay, Tracking"]
+        ReturnSvc["🔄 return-reward-svc (:8087)<br/>• Spin & Win, Coupons, Returns & Wallet"]
+        WishlistSvc["💖 wishlist-service (:8088)<br/>• Wishlist, Price Tracking & Notifications"]
     end
 
     subgraph DataLayer ["Data & Search Persistence"]
@@ -97,7 +98,8 @@ graph TB
     Gateway -->|/api/recommendations| RecSvc
     Gateway -->|/api/cart| CartSvc
     Gateway -->|/api/orders| OrderSvc
-    Gateway -->|/api/returns & /api/wallet| ReturnSvc
+    Gateway -->|/api/returns & /api/rewards| ReturnSvc
+    Gateway -->|/api/wishlist & /api/notifications| WishlistSvc
 
     UserSvc --> Mongo
     ProdSvc --> Mongo
@@ -107,6 +109,7 @@ graph TB
     CartSvc --> Mongo
     OrderSvc --> Mongo
     ReturnSvc --> Mongo
+    WishlistSvc --> Mongo
 ```
 
 ---

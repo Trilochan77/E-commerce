@@ -17,18 +17,18 @@ public class MongoIndexConfig {
   @Bean
   ApplicationRunner spinAndCouponIndexes(MongoTemplate mongo) {
     return args -> {
-      mongo.indexOps(Coupon.class).ensureIndex(
+      mongo.indexOps(Coupon.class).createIndex(
           new Index().on("code", Sort.Direction.ASC).unique().named("uniq_coupon_code"));
-      mongo.indexOps(SpinResult.class).ensureIndex(
+      mongo.indexOps(SpinResult.class).createIndex(
           new Index().on("userId", Sort.Direction.ASC)
               .on("spinDate", Sort.Direction.ASC)
               .unique().named("uniq_spin_user_day"));
-      mongo.indexOps(CouponRedemption.class).ensureIndex(
+      mongo.indexOps(CouponRedemption.class).createIndex(
           new Index().on("couponId", Sort.Direction.ASC)
               .on("userId", Sort.Direction.ASC)
               .on("status", Sort.Direction.ASC)
               .named("coupon_user_status"));
-      mongo.indexOps(CouponRedemption.class).ensureIndex(
+      mongo.indexOps(CouponRedemption.class).createIndex(
           new Index().on("status", Sort.Direction.ASC)
               .on("expiresAt", Sort.Direction.ASC)
               .named("reservation_sweep"));
