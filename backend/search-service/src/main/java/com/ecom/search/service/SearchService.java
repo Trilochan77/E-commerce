@@ -81,6 +81,77 @@ public class SearchService {
     return "Other";
   }
 
+  public int calculateRelevance(ProductDoc p, String query) {
+    if (query == null || query.isBlank()) return 100;
+    String q = query.trim().toLowerCase();
+    String name = (p.getName() != null ? p.getName() : "").toLowerCase();
+    String brand = effectiveBrand(p).toLowerCase();
+    String desc = (p.getDescription() != null ? p.getDescription() : "").toLowerCase();
+    String catName = (p.getCategoryId() != null ? CATEGORY_NAMES.getOrDefault(p.getCategoryId(), p.getCategoryId()) : "").toLowerCase();
+
+    // Context filter: If user searches "wireless", "wired", "bluetooth", or "tws":
+    // Do NOT match mobile phones, laptops, tablets, or home appliances where "wireless" is only mentioned
+    // in accessory capability (like "wireless charging", "wireless display", "wireless wi-fi")
+    if (q.equals("wireless") || q.equals("bluetooth") || q.equals("wired") || q.equals("tws")) {
+      boolean isPhoneOrLaptopOrAppliance = name.contains("phone") || name.contains("5g") || name.contains("galaxy s")
+          || name.contains("iphone") || name.contains("pixel") || name.contains("redmi") || name.contains("gt 6")
+          || name.contains("laptop") || name.contains("macbook") || name.contains("thinkpad")
+          || name.contains("ideapad") || name.contains("predator") || name.contains("cookware")
+          || name.contains("book") || name.contains("fryer") || name.contains("heater") || name.contains("lamp");
+      if (isPhoneOrLaptopOrAppliance && !name.contains(q)) {
+        return 0; // Exclude phones, laptops, appliances from generic wireless audio searches!
+      }
+    }
+
+    int score = 0;
+    // Exact or phrase matches in title have top priority
+    if (name.equals(q)) {
+      score += 600;
+    } else if (name.contains(q)) {
+      score += 300;
+    }
+
+    // Brand match
+    if (brand.equals(q)) {
+      score += 250;
+    } else if (brand.contains(q)) {
+      score += 120;
+    }
+
+    // Category match
+    if (catName.equalsIgnoreCase(q)) {
+      score += 150;
+    } else if (catName.contains(q)) {
+      score += 50;
+    }
+
+    // Individual token matching
+    String[] tokens = q.split("\\s+");
+    int tokensMatched = 0;
+    for (String token : tokens) {
+      if (token.isBlank()) continue;
+      if (name.contains(token)) {
+        score += 80;
+        tokensMatched++;
+      } else if (brand.contains(token)) {
+        score += 50;
+        tokensMatched++;
+      } else if (catName.contains(token)) {
+        score += 30;
+        tokensMatched++;
+      } else if (desc.contains(token)) {
+        score += 15;
+        tokensMatched++;
+      }
+    }
+
+    if (tokens.length > 1 && tokensMatched == 0) {
+      return 0;
+    }
+
+    return score;
+  }
+
   public Map<String, Object> search(String q, String category, String brand, Double minPrice, Double maxPrice,
       Double minRating, String sort, int page, int size, String userId) {
     // Fire-and-forget activity log for recommendations
@@ -163,11 +234,7 @@ public class SearchService {
       List<ProductDoc> filtered = all.stream()
           .filter(p -> {
             if (queryLower == null) return true;
-            String text = ((p.getName() != null ? p.getName() : "") + " "
-                + (p.getDescription() != null ? p.getDescription() : "") + " "
-                + effectiveBrand(p) + " "
-                + (p.getCategoryId() != null ? CATEGORY_NAMES.getOrDefault(p.getCategoryId(), p.getCategoryId()) : "")).toLowerCase();
-            return text.contains(queryLower);
+            return calculateRelevance(p, queryLower) > 0;
           })
           .filter(p -> {
             if (catFilter == null || "All".equalsIgnoreCase(catFilter)) return true;
@@ -196,6 +263,10 @@ public class SearchService {
             .thenComparing(Comparator.comparingInt(ProductDoc::getReviewCount).reversed()));
       } else if ("popular".equalsIgnoreCase(sort)) {
         filtered.sort(Comparator.comparingInt(ProductDoc::getReviewCount).reversed()
+            .thenComparing(Comparator.comparingDouble(ProductDoc::getAverageRating).reversed()));
+      } else if (queryLower != null) {
+        // Default relevance sort: Highest relevance score first!
+        filtered.sort(Comparator.comparingInt((ProductDoc p) -> calculateRelevance(p, queryLower)).reversed()
             .thenComparing(Comparator.comparingDouble(ProductDoc::getAverageRating).reversed()));
       }
 

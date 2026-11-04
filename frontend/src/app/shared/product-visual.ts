@@ -79,7 +79,7 @@ export class ProductVisual implements OnChanges {
     ];
     for (const c of cands) {
       if (typeof c === 'string' && c.trim() &&
-        (/^https?:\/\//i.test(c.trim()) || /^data:image\//i.test(c.trim()))) {
+        (/^https?:\/\//i.test(c.trim()) || /^data:image\//i.test(c.trim()) || /^\/?assets\//i.test(c.trim()))) {
         return c.trim();
       }
     }
